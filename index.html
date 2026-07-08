@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZEAI &mdash; Sign In</title>
+  <meta name="description" content="Sign in to ZEAI &mdash; the AI-powered virtual laboratory platform." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.1.0/dist/iconify-icon.min.js"></script>
+  <style>
+    :root{--background:#ffffff;--foreground:#0f172a;--card:#ffffff;--primary:#2b4ed6;--primary-foreground:#ffffff;--secondary:#f1f5f9;--muted:#f8fafc;--muted-foreground:#64748b;--border:#e2e8f0;--destructive:#ef4444;--radius-lg:8px;--radius-md:6px;--radius-sm:4px;--font-family-body:"Inter",system-ui,-apple-system,sans-serif;}
+    [data-theme="dark"]{--background:#0f172a;--foreground:#e2e8f0;--card:#1e293b;--primary:#818cf8;--primary-foreground:#ffffff;--secondary:#1e293b;--muted:#1e293b;--muted-foreground:#94a3b8;--border:#334155;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html,body{height:100%;font-family:var(--font-family-body);background:var(--background);color:var(--foreground);}
+    [data-theme="dark"] *{transition:background-color 0.2s ease,color 0.2s ease,border-color 0.2s ease;}
+    body{transition:background-color 0.2s ease,color 0.2s ease;}
+    ::-webkit-scrollbar{width:6px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:100px;}
+    .lp{opacity:0;transform:translateX(-16px);transition:opacity 0.55s,transform 0.55s;}
+    .lp.in{opacity:1;transform:translateX(0);}
+    .rp{opacity:0;transform:translateY(12px);transition:opacity 0.5s 0.07s,transform 0.5s 0.07s;}
+    .rp.in{opacity:1;transform:translateY(0);}
+    .fp{opacity:0;transform:translateY(6px);transition:opacity 0.36s,transform 0.36s;}
+    .fp.in{opacity:1;transform:translateY(0);}
+    .role-btn{all:unset;display:flex;align-items:center;gap:11px;padding:12px 14px;border-radius:11px;cursor:pointer;width:100%;border:1.5px solid var(--border);background:var(--card);transition:border-color 0.17s,box-shadow 0.17s,transform 0.17s,background 0.17s;}
+    .role-btn:hover{border-color:var(--c);transform:translateX(3px);box-shadow:-3px 0 0 0 var(--c) inset,0 3px 14px rgba(0,0,0,0.07);background:var(--c-bg);}
+    .role-btn:active{transform:translateX(1px) scale(0.99);}
+    .role-btn.selected{border-color:var(--c);background:var(--c-bg);box-shadow:-4px 0 0 0 var(--c) inset,0 4px 18px rgba(0,0,0,0.08);}
+    [data-theme="dark"] .role-btn{background:#1e293b;}
+    .oauth-btn{width:100%;padding:11px 20px;background:var(--card);color:var(--foreground);border:1px solid var(--border);border-radius:var(--radius-md);font-size:13px;font-weight:500;font-family:var(--font-family-body);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;}
+    .oauth-btn:hover{background:var(--secondary);border-color:var(--muted-foreground);}
+    .feature-pill{display:flex;align-items:center;gap:6px;padding:6px 13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:100px;font-size:12px;color:#94a3b8;backdrop-filter:blur(8px);}
+    .theme-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#94a3b8;cursor:pointer;padding:8px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+    .theme-btn:hover{background:rgba(255,255,255,0.13);color:#e2e8f0;}
+    .theme-btn-right{background:var(--secondary);border:1px solid var(--border);color:var(--muted-foreground);cursor:pointer;padding:8px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+    .theme-btn-right:hover{background:var(--border);color:var(--foreground);}
+    .divider{display:flex;align-items:center;gap:12px;margin:18px 0;}
+    .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border);}
+    .ai-badge{background:linear-gradient(135deg,#4f46e5 0%,#9333ea 100%);color:white;font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700;display:inline-flex;align-items:center;gap:3px;letter-spacing:0.02em;}
+    .hero-stat-num{font-size:26px;font-weight:700;color:#fff;letter-spacing:-0.5px;line-height:1;}
+    .hero-stat-label{font-size:11px;color:#94a3b8;margin-top:2px;}
+    @keyframes ping{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.6);opacity:0;}}
+    .ping-dot::after{content:'';position:absolute;inset:0;border-radius:50%;background:inherit;animation:ping 2s ease-in-out infinite;}
+    @keyframes float{0%,100%{transform:translateY(0px);}50%{transform:translateY(-8px);}}
+    .float-card{animation:float 5s ease-in-out infinite;}
+    .float-card-delayed{animation:float 6.5s 1.5s ease-in-out infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    @media (max-width:840px){.left-col{display:none !important;}.right-col{width:100% !important;}.theme-btn-right-wrap{display:block !important;}}
+  </style>
+</head>
+<body>
+<div id="root" style="display:flex;height:100vh;overflow:hidden;">
+
+  <!-- LEFT COLUMN -->
+  <div class="left-col lp" style="width:52%;background:linear-gradient(145deg,#0f172a 0%,#1e1b4b 40%,#1e3a8a 100%);display:flex;flex-direction:column;padding:40px 48px;position:relative;overflow:hidden;flex-shrink:0;">
+    <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.6;pointer-events:none;" aria-hidden="true">
+      <defs>
+        <radialGradient id="ga" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#6366f1" stop-opacity="0.15"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+        <radialGradient id="gb" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#818cf8" stop-opacity="0.1"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+      </defs>
+      <ellipse cx="70%" cy="20%" rx="280" ry="200" fill="url(#ga)"/>
+      <ellipse cx="20%" cy="80%" rx="220" ry="180" fill="url(#gb)"/>
+      <circle cx="8%" cy="15%" r="1.5" fill="#818cf8"><animate attributeName="opacity" values="0.2;0.9;0.2" dur="4.5s" repeatCount="indefinite"/></circle>
+      <circle cx="22%" cy="8%" r="1" fill="#a5b4fc"><animate attributeName="opacity" values="0.1;0.7;0.1" dur="5.2s" repeatCount="indefinite"/></circle>
+      <circle cx="45%" cy="5%" r="2" fill="#6366f1"><animate attributeName="opacity" values="0.15;0.65;0.15" dur="3.8s" repeatCount="indefinite"/></circle>
+      <circle cx="68%" cy="12%" r="1.2" fill="#818cf8"><animate attributeName="opacity" values="0.3;0.85;0.3" dur="6.1s" repeatCount="indefinite"/></circle>
+      <circle cx="85%" cy="22%" r="1.5" fill="#c7d2fe"><animate attributeName="opacity" values="0.1;0.6;0.1" dur="4.2s" repeatCount="indefinite"/></circle>
+      <circle cx="92%" cy="45%" r="1" fill="#6366f1"><animate attributeName="opacity" values="0.2;0.7;0.2" dur="5.7s" repeatCount="indefinite"/></circle>
+      <circle cx="78%" cy="60%" r="1.8" fill="#818cf8"><animate attributeName="opacity" values="0.1;0.55;0.1" dur="7s" repeatCount="indefinite"/></circle>
+      <circle cx="55%" cy="72%" r="1" fill="#a5b4fc"><animate attributeName="opacity" values="0.2;0.8;0.2" dur="3.9s" repeatCount="indefinite"/></circle>
+      <circle cx="30%" cy="65%" r="2" fill="#6366f1"><animate attributeName="opacity" values="0.1;0.5;0.1" dur="5.5s" repeatCount="indefinite"/></circle>
+      <circle cx="15%" cy="80%" r="1.3" fill="#818cf8"><animate attributeName="opacity" values="0.15;0.65;0.15" dur="4.8s" repeatCount="indefinite"/></circle>
+      <circle cx="5%" cy="52%" r="1" fill="#c7d2fe"><animate attributeName="opacity" values="0.3;0.9;0.3" dur="6.3s" repeatCount="indefinite"/></circle>
+      <circle cx="37%" cy="92%" r="1.5" fill="#6366f1"><animate attributeName="opacity" values="0.1;0.6;0.1" dur="4.1s" repeatCount="indefinite"/></circle>
+      <circle cx="72%" cy="88%" r="1" fill="#818cf8"><animate attributeName="opacity" values="0.2;0.7;0.2" dur="5s" repeatCount="indefinite"/></circle>
+      <circle cx="88%" cy="78%" r="1.2" fill="#a5b4fc"><animate attributeName="opacity" values="0.1;0.55;0.1" dur="7.5s" repeatCount="indefinite"/></circle>
+      <circle cx="60%" cy="38%" r="1.4" fill="#6366f1"><animate attributeName="opacity" values="0.2;0.75;0.2" dur="3.5s" repeatCount="indefinite"/></circle>
+      <circle cx="18%" cy="42%" r="1" fill="#c7d2fe"><animate attributeName="opacity" values="0.1;0.6;0.1" dur="6.8s" repeatCount="indefinite"/></circle>
+      <line x1="8%" y1="15%" x2="22%" y2="8%" stroke="#818cf8" stroke-width="0.3" opacity="0.25"/>
+      <line x1="22%" y1="8%" x2="45%" y2="5%" stroke="#818cf8" stroke-width="0.3" opacity="0.2"/>
+      <line x1="45%" y1="5%" x2="68%" y2="12%" stroke="#818cf8" stroke-width="0.3" opacity="0.25"/>
+      <line x1="68%" y1="12%" x2="85%" y2="22%" stroke="#818cf8" stroke-width="0.3" opacity="0.2"/>
+      <line x1="30%" y1="65%" x2="55%" y2="72%" stroke="#6366f1" stroke-width="0.3" opacity="0.2"/>
+      <line x1="55%" y1="72%" x2="78%" y2="60%" stroke="#6366f1" stroke-width="0.3" opacity="0.2"/>
+    </svg>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2;margin-bottom:48px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:36px;height:36px;background:linear-gradient(135deg,#6366f1,#2b4ed6);border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(99,102,241,0.36);">
+          <iconify-icon icon="lucide:atom" style="font-size:18px;color:white;"></iconify-icon>
+        </div>
+        <div>
+          <span style="font-size:18px;font-weight:700;color:#fff;letter-spacing:-0.02em;">ZEAI</span>
+          <span class="ai-badge" style="margin-left:8px;vertical-align:middle;"><iconify-icon icon="lucide:zap" style="font-size:9px;"></iconify-icon>AI</span>
+        </div>
+      </div>
+      <button class="theme-btn" id="themeToggleLeft" aria-label="Toggle theme">
+        <iconify-icon icon="lucide:sun" id="themeIconLeft" style="font-size:18px;"></iconify-icon>
+      </button>
+    </div>
+
+    <div style="position:relative;z-index:2;flex:1;">
+      <div style="margin-bottom:28px;">
+        <p style="font-size:12px;font-weight:600;color:#818cf8;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;">AI-Powered Virtual Laboratory</p>
+        <h1 style="font-size:clamp(28px,3vw,42px);font-weight:900;color:#fff;line-height:1.08;letter-spacing:-0.03em;margin-bottom:16px;">
+          One lab.<br/>
+          <span style="background:linear-gradient(90deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Every experiment.<br/></span>
+          Zero limits.
+        </h1>
+        <p style="font-size:15px;color:#94a3b8;line-height:1.65;max-width:360px;">From guided virtual experiments to institution-wide analytics &mdash; ZEAI brings AI-powered laboratories to every classroom.</p>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:36px;">
+        <div class="feature-pill fp" style="transition-delay:0.26s;"><iconify-icon icon="lucide:brain" style="font-size:12px;color:#818cf8;"></iconify-icon>AI Mentor</div>
+        <div class="feature-pill fp" style="transition-delay:0.32s;"><iconify-icon icon="lucide:flask-conical" style="font-size:12px;color:#818cf8;"></iconify-icon>Live Simulations</div>
+        <div class="feature-pill fp" style="transition-delay:0.38s;"><iconify-icon icon="lucide:book-open" style="font-size:12px;color:#818cf8;"></iconify-icon>Lab Notebook</div>
+        <div class="feature-pill fp" style="transition-delay:0.44s;"><iconify-icon icon="lucide:trophy" style="font-size:12px;color:#818cf8;"></iconify-icon>Gamification</div>
+        <div class="feature-pill fp" style="transition-delay:0.50s;"><iconify-icon icon="lucide:bar-chart-3" style="font-size:12px;color:#818cf8;"></iconify-icon>Faculty Insights</div>
+        <div class="feature-pill fp" style="transition-delay:0.56s;"><iconify-icon icon="lucide:shield-check" style="font-size:12px;color:#818cf8;"></iconify-icon>Role-Based Access</div>
+      </div>
+
+      <div style="display:flex;gap:32px;margin-bottom:36px;" class="fp">
+        <div><div class="hero-stat-num">50K+</div><div class="hero-stat-label">Experiments Run</div></div>
+        <div style="width:1px;background:rgba(255,255,255,0.08);"></div>
+        <div><div class="hero-stat-num">340+</div><div class="hero-stat-label">Institutions</div></div>
+        <div style="width:1px;background:rgba(255,255,255,0.08);"></div>
+        <div><div class="hero-stat-num">98%</div><div class="hero-stat-label">AI Accuracy</div></div>
+      </div>
+
+      <div style="position:relative;height:155px;">
+        <div class="float-card" style="position:absolute;left:0;top:0;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:14px 18px;backdrop-filter:blur(12px);min-width:195px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <div style="width:28px;height:28px;border-radius:8px;background:rgba(99,102,241,0.25);display:flex;align-items:center;justify-content:center;"><iconify-icon icon="lucide:cpu" style="font-size:14px;color:#818cf8;"></iconify-icon></div>
+            <span style="font-size:12px;font-weight:600;color:#e2e8f0;">Simulation Activity</span>
+          </div>
+          <div style="display:flex;gap:3px;align-items:flex-end;height:36px;">
+            <div style="width:8px;height:20px;background:rgba(99,102,241,0.4);border-radius:3px 3px 0 0;"></div>
+            <div style="width:8px;height:28px;background:rgba(99,102,241,0.5);border-radius:3px 3px 0 0;"></div>
+            <div style="width:8px;height:16px;background:rgba(99,102,241,0.35);border-radius:3px 3px 0 0;"></div>
+            <div style="width:8px;height:34px;background:#6366f1;border-radius:3px 3px 0 0;"></div>
+            <div style="width:8px;height:24px;background:rgba(99,102,241,0.5);border-radius:3px 3px 0 0;"></div>
+            <div style="width:8px;height:30px;background:rgba(99,102,241,0.45);border-radius:3px 3px 0 0;"></div>
+            <div style="width:8px;height:36px;background:#818cf8;border-radius:3px 3px 0 0;"></div>
+          </div>
+          <div style="font-size:10px;color:#64748b;margin-top:6px;">+18.4% this month</div>
+        </div>
+        <div class="float-card-delayed" style="position:absolute;right:0;top:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;backdrop-filter:blur(12px);min-width:155px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            <div style="position:relative;width:8px;height:8px;"><div class="ping-dot" style="width:8px;height:8px;background:#22c55e;border-radius:50%;position:relative;"></div></div>
+            <span style="font-size:11px;color:#94a3b8;">Live Learners</span>
+          </div>
+          <div style="font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.5px;">2,841</div>
+          <div style="display:flex;align-items:center;gap:4px;margin-top:4px;">
+            <iconify-icon icon="lucide:arrow-up-right" style="font-size:11px;color:#22c55e;"></iconify-icon>
+            <span style="font-size:10px;color:#22c55e;font-weight:600;">+142 today</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="position:relative;z-index:2;margin-top:24px;">
+      <p style="font-size:11px;color:#475569;line-height:1.6;">
+        &copy; 2026 ZEAI. All rights reserved. &nbsp;&middot;&nbsp;
+        <a href="#" style="color:#6366f1;text-decoration:none;">Privacy</a> &nbsp;&middot;&nbsp;
+        <a href="#" style="color:#6366f1;text-decoration:none;">Terms</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="right-col rp" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;background:var(--muted);overflow-y:auto;position:relative;">
+    <div class="theme-btn-right-wrap" style="position:absolute;top:24px;right:24px;z-index:10;display:none;">
+      <button class="theme-btn-right" id="themeToggleRight" aria-label="Toggle theme">
+        <iconify-icon icon="lucide:sun" id="themeIconRight" style="font-size:18px;"></iconify-icon>
+      </button>
+    </div>
+
+    <div style="width:100%;max-width:420px;">
+      <div style="margin-bottom:28px;text-align:center;">
+        <div style="width:48px;height:48px;background:linear-gradient(135deg,#6366f1,#2b4ed6);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 6px 18px rgba(99,102,241,0.36);">
+          <iconify-icon icon="lucide:atom" style="font-size:24px;color:white;"></iconify-icon>
+        </div>
+        <h2 style="font-size:22px;font-weight:700;color:var(--foreground);margin-bottom:6px;">Welcome to ZEAI</h2>
+        <p style="font-size:13px;color:var(--muted-foreground);">Choose your role to enter the virtual lab</p>
+      </div>
+
+      <!-- STEP 1: Role Selection (selecting a role signs you in immediately) -->
+      <div id="step-role">
+        <p style="font-size:11px;font-weight:700;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px;">I am a&hellip;</p>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+
+          <button class="role-btn" id="role-student" style="--c:#2b4ed6;--c-bg:#eff6ff;" onclick="selectRole('student')" aria-pressed="false">
+            <div style="width:40px;height:40px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <iconify-icon icon="lucide:flask-conical" style="font-size:20px;color:#2b4ed6;"></iconify-icon>
+            </div>
+            <div style="flex:1;text-align:left;">
+              <div style="font-size:14px;font-weight:600;color:var(--foreground);margin-bottom:2px;">Student</div>
+              <div style="font-size:11px;color:var(--muted-foreground);">Run experiments, track XP &amp; badges</div>
+            </div>
+            <iconify-icon icon="lucide:chevron-right" id="check-student" style="font-size:16px;color:#94a3b8;transition:color 0.2s;flex-shrink:0;"></iconify-icon>
+          </button>
+
+          <button class="role-btn" id="role-faculty" style="--c:#7c3aed;--c-bg:#f3e8ff;" onclick="selectRole('faculty')" aria-pressed="false">
+            <div style="width:40px;height:40px;border-radius:10px;background:#f3e8ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <iconify-icon icon="lucide:user-check" style="font-size:20px;color:#7c3aed;"></iconify-icon>
+            </div>
+            <div style="flex:1;text-align:left;">
+              <div style="font-size:14px;font-weight:600;color:var(--foreground);margin-bottom:2px;">Faculty</div>
+              <div style="font-size:11px;color:var(--muted-foreground);">Manage students, experiments &amp; reports</div>
+            </div>
+            <iconify-icon icon="lucide:chevron-right" id="check-faculty" style="font-size:16px;color:#94a3b8;transition:color 0.2s;flex-shrink:0;"></iconify-icon>
+          </button>
+
+          <button class="role-btn" id="role-admin" style="--c:#0891b2;--c-bg:#ecfeff;" onclick="selectRole('admin')" aria-pressed="false">
+            <div style="width:40px;height:40px;border-radius:10px;background:#ecfeff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <iconify-icon icon="lucide:building-2" style="font-size:20px;color:#0891b2;"></iconify-icon>
+            </div>
+            <div style="flex:1;text-align:left;">
+              <div style="font-size:14px;font-weight:600;color:var(--foreground);margin-bottom:2px;">College Admin</div>
+              <div style="font-size:11px;color:var(--muted-foreground);">Oversee institution labs &amp; departments</div>
+            </div>
+            <iconify-icon icon="lucide:chevron-right" id="check-admin" style="font-size:16px;color:#94a3b8;transition:color 0.2s;flex-shrink:0;"></iconify-icon>
+          </button>
+
+          <button class="role-btn" id="role-superadmin" style="--c:#b45309;--c-bg:#fef3c7;" onclick="selectRole('superadmin')" aria-pressed="false">
+            <div style="width:40px;height:40px;border-radius:10px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <iconify-icon icon="lucide:shield-check" style="font-size:20px;color:#b45309;"></iconify-icon>
+            </div>
+            <div style="flex:1;text-align:left;">
+              <div style="font-size:14px;font-weight:600;color:var(--foreground);margin-bottom:2px;">Super Admin</div>
+              <div style="font-size:11px;color:var(--muted-foreground);">Platform-wide control &amp; system config</div>
+            </div>
+            <iconify-icon icon="lucide:chevron-right" id="check-superadmin" style="font-size:16px;color:#94a3b8;transition:color 0.2s;flex-shrink:0;"></iconify-icon>
+          </button>
+        </div>
+
+        <div class="divider"><span style="font-size:12px;color:var(--muted-foreground);">or</span></div>
+        <button class="oauth-btn" onclick="alert('GitHub OAuth flow would start here.')">
+          <iconify-icon icon="mdi:github" style="font-size:18px;"></iconify-icon>Continue with GitHub
+        </button>
+      </div>
+
+      <!-- STEP 2: Success (shown immediately after a role is picked) -->
+      <div id="step-success" style="display:none;text-align:center;">
+        <div style="width:64px;height:64px;background:linear-gradient(135deg,#16a34a,#22c55e);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 24px rgba(34,197,94,0.3);">
+          <iconify-icon icon="lucide:check" style="font-size:32px;color:white;"></iconify-icon>
+        </div>
+        <h3 style="font-size:20px;font-weight:700;color:var(--foreground);margin-bottom:8px;">All set!</h3>
+        <p style="font-size:13px;color:var(--muted-foreground);margin-bottom:24px;" id="successMsg">Redirecting to your dashboard&hellip;</p>
+        <div style="height:4px;background:var(--secondary);border-radius:2px;overflow:hidden;margin-bottom:24px;">
+          <div id="progressFill" style="height:100%;width:0%;background:linear-gradient(90deg,#6366f1,#22c55e);border-radius:2px;transition:width 1.1s cubic-bezier(0.4,0,0.2,1);"></div>
+        </div>
+        <div id="redirectRoleBadge"></div>
+      </div>
+
+      <p style="font-size:12px;color:var(--muted-foreground);text-align:center;margin-top:24px;line-height:1.7;" id="bottomNote">
+        Don&apos;t see your role? <a href="#" style="color:var(--primary);text-decoration:none;font-weight:500;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Contact your institution admin</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  var isDark=false;
+  var ROLES={
+    student:{label:"Student",color:"#2b4ed6",bg:"#eff6ff",icon:"lucide:flask-conical",page:"student-dashboard.html"},
+    faculty:{label:"Faculty",color:"#7c3aed",bg:"#f3e8ff",icon:"lucide:user-check",page:"faculty-dashboard.html"},
+    admin:{label:"College Admin",color:"#0891b2",bg:"#ecfeff",icon:"lucide:building-2",page:"admin-dashboard.html"},
+    superadmin:{label:"Super Admin",color:"#b45309",bg:"#fef3c7",icon:"lucide:shield-check",page:"superadmin-dashboard.html"}
+  };
+  setTimeout(function(){document.querySelectorAll(".lp,.rp,.fp").forEach(function(el){el.classList.add("in");});},60);
+
+  // Clicking a role card selects it and immediately signs the user in — no email/password step.
+  function selectRole(role){
+    var r=ROLES[role];
+    Object.keys(ROLES).forEach(function(k){
+      var btn=document.getElementById("role-"+k);
+      var icon=document.getElementById("check-"+k);
+      if(k===role){btn.classList.add("selected");btn.setAttribute("aria-pressed","true");icon.setAttribute("icon","lucide:loader");icon.style.color=ROLES[k].color;icon.style.animation="spin 0.8s linear infinite";}
+      else{btn.classList.remove("selected");btn.setAttribute("aria-pressed","false");}
+      btn.style.pointerEvents="none";
+    });
+    setTimeout(function(){ showSuccess(role); }, 350);
+  }
+
+  function showSuccess(role){
+    var r=ROLES[role];
+    document.getElementById("step-role").style.display="none";
+    document.getElementById("step-success").style.display="block";
+    document.getElementById("bottomNote").style.display="none";
+    document.getElementById("successMsg").textContent="Redirecting to "+r.label+" dashboard...";
+    document.getElementById("redirectRoleBadge").innerHTML='<span style="display:inline-flex;align-items:center;gap:8px;background:'+r.bg+';color:'+r.color+';padding:8px 18px;border-radius:100px;font-size:13px;font-weight:600;border:1px solid '+r.color+'30;"><iconify-icon icon="'+r.icon+'" style="font-size:15px;"></iconify-icon>'+r.label+' Portal</span>';
+    setTimeout(function(){document.getElementById("progressFill").style.width="100%";},80);
+    setTimeout(function(){ if(r.page) window.location.href=r.page; }, 1300);
+  }
+
+  function applyTheme(dark){
+    isDark=dark;
+    document.documentElement.setAttribute("data-theme",dark?"dark":"light");
+    var ic=dark?"lucide:moon":"lucide:sun";
+    document.getElementById("themeIconLeft").setAttribute("icon",ic);
+    var ri=document.getElementById("themeIconRight");if(ri)ri.setAttribute("icon",ic);
+    localStorage.setItem("zeai_theme",dark?"dark":"light");
+  }
+  var savedTheme=localStorage.getItem("zeai_theme");
+  if(savedTheme==="dark")applyTheme(true);
+  document.getElementById("themeToggleLeft").addEventListener("click",function(){applyTheme(!isDark);});
+  var rBtn=document.getElementById("themeToggleRight");if(rBtn)rBtn.addEventListener("click",function(){applyTheme(!isDark);});
+</script>
+</body>
+</html>
