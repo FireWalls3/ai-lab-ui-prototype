@@ -536,6 +536,10 @@ select.form-control { cursor:pointer; }
         </div>
       </div>
       <div class="form-group">
+        <label for="expTheory">Theory & Learning Objectives</label>
+        <textarea id="expTheory" class="form-control" style="height: 60px; resize: none;" placeholder="Describe the physical formulas, concepts and goals..."></textarea>
+      </div>
+      <div class="form-group">
         <label for="expStatus">Publish Status</label>
         <select id="expStatus" class="form-control">
           <option value="Published">Published</option>
@@ -557,14 +561,14 @@ select.form-control { cursor:pointer; }
 <script>
 // Seed default experiments
 const defaultExperiments = [
-  { id: 'exp-1', title: "Ohm's Law Simulator", dept: 'Physics', level: 3, attempts: 1240, score: 88, status: 'Published' },
-  { id: 'exp-2', title: 'Acid-Base Titration Configuration', dept: 'Chemistry', level: 4, attempts: 980, score: 82, status: 'Published' },
-  { id: 'exp-3', title: 'Cellular Mitosis Observation', dept: 'Biology', level: 2, attempts: 1530, score: 91, status: 'Published' },
-  { id: 'exp-4', title: 'RLC Circuit Frequency Response', dept: 'Electronics', level: 5, attempts: 710, score: 74, status: 'Published' },
-  { id: 'exp-5', title: 'Bubble & Merge Sort Performance', dept: 'CS Labs', level: 4, attempts: 2450, score: 85, status: 'Published' },
-  { id: 'exp-6', title: 'Crank-Nicolson PDE Solver', dept: 'CS Labs', level: 6, attempts: 420, score: 71, status: 'Published' },
-  { id: 'exp-7', title: 'Heat Exchanger Efficiency Ratio', dept: 'Mechanical', level: 5, attempts: 320, score: 68, status: 'Draft' },
-  { id: 'exp-8', title: 'Double Pendulum Chaotic Dynamics', dept: 'Physics', level: 5, attempts: 0, score: 0, status: 'Draft' }
+  { id: 'exp-1', title: "Ohm's Law Simulator", dept: 'Physics', level: 3, attempts: 1240, score: 88, status: 'Published', theory: "Explore the laws governing circuit response, voltage drops and mathematical modeling of resistance." },
+  { id: 'exp-2', title: 'Acid-Base Titration Configuration', dept: 'Chemistry', level: 4, attempts: 980, score: 82, status: 'Published', theory: "Conduct virtual acid-base titration tasks, determine pH values, and audit color changes using phenolphthalein markers." },
+  { id: 'exp-3', title: 'Cellular Mitosis Observation', dept: 'Biology', level: 2, attempts: 1530, score: 91, status: 'Published', theory: "Identify cell division stages including prophase, metaphase, anaphase, and telophase under simulated microscopes." },
+  { id: 'exp-4', title: 'RLC Circuit Frequency Response', dept: 'Electronics', level: 5, attempts: 710, score: 74, status: 'Published', theory: "Configure inductor, capacitor, and resistor series circuits to find resonant frequencies and phase angles." },
+  { id: 'exp-5', title: 'Bubble & Merge Sort Performance', dept: 'CS Labs', level: 4, attempts: 2450, score: 85, status: 'Published', theory: "Observe computational complexity differences in sorting systems by measuring execution operations." },
+  { id: 'exp-6', title: 'Crank-Nicolson PDE Solver', dept: 'CS Labs', level: 6, attempts: 420, score: 71, status: 'Published', theory: "Apply finite difference schemes to approximate heat equation scenarios using numerical matrix models." },
+  { id: 'exp-7', title: 'Heat Exchanger Efficiency Ratio', dept: 'Mechanical', level: 5, attempts: 320, score: 68, status: 'Draft', theory: "Assess parallel vs counterflow fluid paths, calculating thermal coefficient transfers." },
+  { id: 'exp-8', title: 'Double Pendulum Chaotic Dynamics', dept: 'Physics', level: 5, attempts: 0, score: 0, status: 'Draft', theory: "Analyze chaotic trajectory dynamics in double-hinged pendulum setups and plot state-space projections." }
 ];
 
 let experiments = [];
@@ -737,6 +741,7 @@ function openEditModal(expId) {
   document.getElementById('expAttempts').value = exp.attempts;
   document.getElementById('expScore').value = exp.score;
   document.getElementById('expStatus').value = exp.status;
+  document.getElementById('expTheory').value = exp.theory || '';
 
   const modal = document.getElementById('expModal');
   modal.style.display = 'flex';
@@ -761,11 +766,12 @@ function handleFormSubmit(event) {
   const attempts = parseInt(document.getElementById('expAttempts').value);
   const score = parseInt(document.getElementById('expScore').value);
   const status = document.getElementById('expStatus').value;
+  const theory = document.getElementById('expTheory').value.trim();
 
   if (mode === 'add') {
     const newExp = {
       id: 'exp-' + Date.now(),
-      title, dept, level, attempts, score, status
+      title, dept, level, attempts, score, status, theory
     };
     experiments.push(newExp);
     showToast(`Simulation "${title}" added successfully.`, 'success');
@@ -774,7 +780,7 @@ function handleFormSubmit(event) {
     if (idx !== -1) {
       experiments[idx] = { 
         ...experiments[idx],
-        title, dept, level, attempts, score, status 
+        title, dept, level, attempts, score, status, theory 
       };
       showToast(`Experiment template parameters updated.`, 'success');
     }
