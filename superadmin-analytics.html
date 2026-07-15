@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Platform Analytics · Super Admin · ZEAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg:#ffffff; --fg:#0f172a; --muted:#f8fafc; --border:#e2e8f0;
+  --primary:#2b4ed6; --primary-light:#eff6ff;
+  --muted-fg:#64748b; --radius:8px;
+  --font:"Inter", system-ui, sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--font);background:var(--muted);color:var(--fg);-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:6px}
+a{text-decoration:none;color:inherit}
+button{font-family:var(--font);cursor:pointer}
+input,select{font-family:var(--font)}
+
+/* ── Layout ── */
+.shell{display:flex;height:100vh;overflow:hidden}
+
+/* ── Sidebar ── */
+.sidebar{width:252px;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;height:100vh}
+.sb-logo{height:60px;padding:0 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.sb-logo .icon{width:28px;height:28px;border-radius:7px;background:var(--primary);display:flex;align-items:center;justify-content:center}
+.sb-logo .wordmark{font-size:19px;font-weight:800;color:var(--primary);letter-spacing:-0.5px}
+.sb-nav{flex:1;overflow-y:auto;padding:14px 10px;display:flex;flex-direction:column;gap:2px}
+.sb-section{font-size:10.5px;text-transform:uppercase;letter-spacing:0.7px;color:#94a3b8;font-weight:700;padding:14px 10px 6px}
+.sb-section:first-child{padding-top:4px}
+.sb-link{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;font-size:13.5px;font-weight:500;color:#334155;transition:all 0.15s;position:relative}
+.sb-link svg{width:15px;height:15px;flex-shrink:0;stroke:currentColor}
+.sb-link:hover{background:#f1f5f9;color:#1e293b}
+.sb-link.active{background:#eff6ff;color:var(--primary);font-weight:600}
+.sb-link .badge-count{margin-left:auto;background:#fef2f2;color:#dc2626;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px}
+.sb-footer{padding:14px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.sb-user{display:flex;align-items:center;gap:9px}
+.sb-user img{width:32px;height:32px;border-radius:50%}
+.sb-user .name{font-size:13px;font-weight:600;color:#1e293b}
+.sb-user .role{font-size:11px;color:#94a3b8}
+.logout-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:8px;border:1px solid var(--border);border-radius:7px;background:white;font-size:12.5px;color:#475569;transition:all 0.15s}
+.logout-btn:hover{background:#fef2f2;color:#dc2626;border-color:#fca5a5}
+
+/* ── Main ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:60px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.breadcrumb{font-size:13px;color:#94a3b8;display:flex;align-items:center;gap:6px}
+.breadcrumb span{color:#1e293b;font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.search-wrap{position:relative;width:280px}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:#94a3b8;pointer-events:none}
+.search-wrap input{width:100%;height:34px;padding:0 12px 0 32px;border:1px solid var(--border);border-radius:7px;font-size:13px;background:#f8fafc;outline:none;color:#0f172a}
+.icon-btn{background:none;border:none;padding:6px;border-radius:7px;display:flex;color:#94a3b8;cursor:pointer;transition:0.15s;position:relative}
+.icon-btn:hover{background:#f1f5f9;color:#475569}
+.notif-dot{position:absolute;top:3px;right:3px;width:7px;height:7px;background:#ef4444;border-radius:50%;border:2px solid white}
+.period-select{height:34px;padding:0 10px;border:1px solid var(--border);border-radius:7px;font-size:12.5px;background:white;color:#334155;outline:none;cursor:pointer;font-family:var(--font)}
+
+.content{flex:1;overflow-y:auto;padding:28px 32px}
+
+/* ── Page Header ── */
+.ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;gap:16px;flex-wrap:wrap}
+.ph h1{font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;margin-bottom:4px}
+.ph p{font-size:13.5px;color:#64748b}
+.ph-actions{display:flex;gap:10px;align-items:center;flex-shrink:0}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all 0.15s}
+.btn svg{width:14px;height:14px;stroke:currentColor}
+.btn-primary{background:var(--primary);color:white}
+.btn-primary:hover{background:#2340b8}
+.btn-ghost{background:white;color:#475569;border:1px solid var(--border)}
+.btn-ghost:hover{background:#f8fafc}
+
+/* ── KPI Grid ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px}
+.kpi{background:white;border:1px solid var(--border);border-radius:12px;padding:18px 18px 16px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0}
+.kpi.blue::before{background:var(--primary)}
+.kpi.green::before{background:#16a34a}
+.kpi.purple::before{background:#7c3aed}
+.kpi.amber::before{background:#d97706}
+.kpi.cyan::before{background:#0891b2}
+.kpi-label{font-size:11.5px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px}
+.kpi-value{font-size:26px;font-weight:800;color:#0f172a;letter-spacing:-1px;margin-bottom:4px}
+.kpi-sub{font-size:11.5px;color:#94a3b8;display:flex;align-items:center;gap:4px}
+.kpi-trend{font-weight:700}
+.kpi-trend.up{color:#16a34a}
+.kpi-trend.down{color:#dc2626}
+
+/* ── Section layout ── */
+.grid-2fr1fr{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:20px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px}
+
+/* ── Card ── */
+.card{background:white;border:1px solid var(--border);border-radius:14px;padding:22px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.card-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.card-hd h3{font-size:14px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:7px}
+.card-hd h3 svg{width:15px;height:15px}
+.card-hd .link{font-size:12px;color:var(--primary);font-weight:500;cursor:pointer}
+
+/* ── Charts (CSS-only) ── */
+/* Bar chart */
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:160px;padding-top:10px}
+.bar-grp{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1}
+.bar-stack{display:flex;flex-direction:column;align-items:center;width:100%;justify-content:flex-end;height:130px;gap:0}
+.bar-seg{width:100%;border-radius:3px 3px 0 0;transition:opacity 0.2s}
+.bar-seg:hover{opacity:0.85}
+.bar-seg + .bar-seg{border-radius:0;margin-top:1px}
+.bar-x{font-size:11px;color:#94a3b8;white-space:nowrap}
+
+/* Donut */
+.donut-wrap{display:flex;align-items:center;gap:24px}
+.donut{position:relative;width:110px;height:110px;flex-shrink:0}
+.donut svg{transform:rotate(-90deg)}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut-center .dv{font-size:20px;font-weight:800;color:#0f172a}
+.donut-center .dl{font-size:10px;color:#94a3b8;font-weight:500}
+.donut-legend{display:flex;flex-direction:column;gap:10px;flex:1}
+.legend-item{display:flex;align-items:center;gap:8px}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.legend-label{font-size:12.5px;color:#475569;flex:1}
+.legend-val{font-size:12.5px;font-weight:700;color:#1e293b}
+.legend-pct{font-size:11px;color:#94a3b8;margin-left:3px}
+
+/* Heatmap */
+.heatmap{display:grid;grid-template-columns:40px repeat(24,1fr);gap:3px;align-items:center}
+.hm-label{font-size:10px;color:#94a3b8;text-align:right;padding-right:6px}
+.hm-cell{height:22px;border-radius:3px;cursor:pointer;transition:transform 0.1s}
+.hm-cell:hover{transform:scale(1.15);z-index:2}
+.hm-hour{font-size:9px;color:#94a3b8;text-align:center}
+.hm-0{background:#f1f5f9}
+.hm-1{background:#dbeafe}
+.hm-2{background:#93c5fd}
+.hm-3{background:#3b82f6}
+.hm-4{background:#1d4ed8}
+.hm-5{background:#1e3a8a}
+
+/* Line chart (sparkline) */
+.sparkline{display:flex;align-items:flex-end;gap:3px;height:50px}
+.spark-bar{flex:1;border-radius:2px;background:var(--primary);opacity:0.7;transition:opacity 0.2s}
+.spark-bar:hover{opacity:1}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-green{background:#dcfce7;color:#15803d}
+.badge-blue{background:#dbeafe;color:#1d4ed8}
+.badge-amber{background:#fef3c7;color:#b45309}
+.badge-red{background:#fef2f2;color:#dc2626}
+.badge-slate{background:#f1f5f9;color:#475569}
+.badge-purple{background:#f3e8ff;color:#7c3aed}
+.badge-cyan{background:#cffafe;color:#0e7490}
+
+/* Horizontal bar */
+.h-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.h-bar-row:last-child{margin-bottom:0}
+.h-bar-label{font-size:12.5px;color:#475569;width:120px;flex-shrink:0;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.h-bar-track{flex:1;height:7px;background:#f1f5f9;border-radius:4px;overflow:hidden}
+.h-bar-fill{height:100%;border-radius:4px;transition:width 0.6s}
+.h-bar-val{font-size:12px;font-weight:700;color:#1e293b;width:42px;text-align:right;flex-shrink:0}
+
+/* Table */
+table.dt{width:100%;border-collapse:collapse}
+table.dt th{text-align:left;padding:9px 12px;font-size:11px;font-weight:700;color:#94a3b8;border-bottom:1px solid #f1f5f9;text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap}
+table.dt td{padding:12px 12px;font-size:13px;color:#334155;border-bottom:1px solid #f8fafc;vertical-align:middle}
+table.dt tr:last-child td{border-bottom:none}
+table.dt tr:hover td{background:#fafafa}
+
+/* Progress ring for sessions */
+.mini-ring{width:36px;height:36px;flex-shrink:0}
+
+/* Tooltip tag */
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;background:#f1f5f9;color:#475569}
+
+/* Stat in card */
+.inline-stat{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f8fafc}
+.inline-stat:last-child{border-bottom:none;padding-bottom:0}
+.inline-stat .is-label{font-size:13px;color:#64748b}
+.inline-stat .is-val{font-size:13px;font-weight:700;color:#0f172a}
+
+/* Pulse dot */
+.pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:#16a34a;box-shadow:0 0 0 0 rgba(22,163,74,0.4);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(22,163,74,0.4)}70%{box-shadow:0 0 0 8px rgba(22,163,74,0)}100%{box-shadow:0 0 0 0 rgba(22,163,74,0)}}
+
+/* Period tabs */
+.ptabs{display:flex;gap:2px;background:#f1f5f9;border-radius:8px;padding:3px}
+.ptab{padding:5px 14px;border-radius:6px;border:none;font-size:12.5px;font-weight:500;color:#64748b;cursor:pointer;transition:all 0.15s;background:none}
+.ptab.active{background:white;color:#1e293b;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+
+/* Metric chip */
+.mchip{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center}
+.mchip .mv{font-size:18px;font-weight:800;color:#0f172a;letter-spacing:-0.5px}
+.mchip .ml{font-size:11px;color:#94a3b8;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5a2 2 0 0 1-.4 1.2L5 17.5A2 2 0 0 0 6.6 21h10.8a2 2 0 0 0 1.6-3.5l-4.6-6.8A2 2 0 0 1 14 9.5V3"/></svg></div>
+    <div class="wordmark">ZEAI</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Platform</div>
+    <a class="sb-link" href="superadmin-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
+    <a class="sb-link" href="superadmin-organizations.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M9 6h1M14 6h1M9 10h1M14 10h1M9 14h1M14 14h1"/></svg>Organizations</a>
+    <a class="sb-link" href="superadmin-billing.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Billing &amp; Revenue</a>
+    <a class="sb-link active" href="superadmin-analytics.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>Analytics</a>
+    <a class="sb-link" href="superadmin-ai-models.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/><path d="M7.5 14h.01M16.5 14h.01M10 17h4"/></svg>AI Models</a>
+    <a class="sb-link" href="superadmin-infrastructure.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="7" rx="1"/><rect x="2" y="14" width="20" height="7" rx="1"/><path d="M6 6.5h.01M6 17.5h.01"/></svg>Infrastructure</a>
+    <div class="sb-section">Management</div>
+    <a class="sb-link" href="superadmin-support.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="m4.9 4.9 4.2 4.2M14.9 14.9l4.2 4.2M14.9 9.1l4.2-4.2M4.9 19.1l4.2-4.2"/></svg>Support Tickets<span class="badge-count">5</span></a>
+    <a class="sb-link" href="superadmin-features.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.3.2a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.4a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.3.2a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.3-.2a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.4a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.3-.2a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>Feature Flags</a>
+    <a class="sb-link" href="superadmin-audit-logs.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>Audit Logs</a>
+    <a class="sb-link" href="superadmin-announcements.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>Announcements</a>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-user">
+      <img src="https://api.dicebear.com/9.x/thumbs/svg?seed=Aditya&backgroundColor=b6e3f4" />
+      <div><div class="name">Aditya Verma</div><div class="role">Super Admin</div></div>
+    </div>
+    <button class="logout-btn"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg> Log Out</button>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="breadcrumb">ZEAI <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg> <span>Analytics</span></div>
+      <div style="display:flex;align-items:center;gap:6px;margin-left:14px;padding-left:14px;border-left:1px solid #e2e8f0">
+        <span class="pulse"></span>
+        <span style="font-size:12px;color:#16a34a;font-weight:600">Live Data</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="ptabs" id="ptabs">
+        <button class="ptab active" onclick="setPeriod(this,'7d')">7D</button>
+        <button class="ptab" onclick="setPeriod(this,'30d')">30D</button>
+        <button class="ptab" onclick="setPeriod(this,'90d')">90D</button>
+        <button class="ptab" onclick="setPeriod(this,'1y')">1Y</button>
+      </div>
+      <button class="btn btn-ghost" style="height:34px;font-size:12.5px;padding:0 12px"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export</button>
+      <button class="icon-btn"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="notif-dot"></span></button>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="ph">
+      <div>
+        <h1>Platform Analytics</h1>
+        <p>Cross-tenant usage, experiment adoption, AI consumption and learning outcomes</p>
+      </div>
+    </div>
+
+    <!-- KPI Row -->
+    <div class="kpi-grid">
+      <div class="kpi blue">
+        <div class="kpi-label">Total Sessions</div>
+        <div class="kpi-value">1.84M</div>
+        <div class="kpi-sub"><span class="kpi-trend up">↑ +18.4%</span> vs last period</div>
+      </div>
+      <div class="kpi green">
+        <div class="kpi-label">Active Users</div>
+        <div class="kpi-value">38,210</div>
+        <div class="kpi-sub"><span class="kpi-trend up">↑ +12.1%</span> vs last period</div>
+      </div>
+      <div class="kpi purple">
+        <div class="kpi-label">Experiments Run</div>
+        <div class="kpi-value">284K</div>
+        <div class="kpi-sub"><span class="kpi-trend up">↑ +22.7%</span> vs last period</div>
+      </div>
+      <div class="kpi amber">
+        <div class="kpi-label">AI Interactions</div>
+        <div class="kpi-value">4.2M</div>
+        <div class="kpi-sub"><span class="kpi-trend up">↑ +41.3%</span> AI usage rising fast</div>
+      </div>
+      <div class="kpi cyan">
+        <div class="kpi-label">Avg Completion</div>
+        <div class="kpi-value">74.8%</div>
+        <div class="kpi-sub"><span class="kpi-trend up">↑ +3.2pts</span> vs last period</div>
+      </div>
+    </div>
+
+    <!-- Sessions Chart + Donut -->
+    <div class="grid-2fr1fr">
+      <div class="card">
+        <div class="card-hd">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="#2b4ed6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg> Daily Sessions by Subject</h3>
+          <div style="display:flex;gap:14px;font-size:11.5px">
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#2b4ed6;display:inline-block"></span>Physics</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#16a34a;display:inline-block"></span>Chemistry</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#7c3aed;display:inline-block"></span>Biology</span>
+          </div>
+        </div>
+        <div class="bar-chart">
+          <div class="bar-grp"><div class="bar-stack"><div class="bar-seg" style="height:55px;background:#2b4ed6"></div><div class="bar-seg" style="height:30px;background:#16a34a"></div><div class="bar-seg" style="height:18px;background:#7c3aed"></div></div><div class="bar-x">Mon</div></div>
+          <div class="bar-grp"><div class="bar-stack"><div class="bar-seg" style="height:70px;background:#2b4ed6"></div><div class="bar-seg" style="height:38px;background:#16a34a"></div><div class="bar-seg" style="height:22px;background:#7c3aed"></div></div><div class="bar-x">Tue</div></div>
+          <div class="bar-grp"><div class="bar-stack"><div class="bar-seg" style="height:62px;background:#2b4ed6"></div><div class="bar-seg" style="height:42px;background:#16a34a"></div><div class="bar-seg" style="height:19px;background:#7c3aed"></div></div><div class="bar-x">Wed</div></div>
+          <div class="bar-grp"><div class="bar-stack"><div class="bar-seg" style="height:80px;background:#2b4ed6"></div><div class="bar-seg" style="height:35px;background:#16a34a"></div><div class="bar-seg" style="height:14px;background:#7c3aed"></div></div><div class="bar-x">Thu</div></div>
+          <div class="bar-grp"><div class="bar-stack"><div class="bar-seg" style="height:90px;background:#2b4ed6"></div><div class="bar-seg" style="height:40px;background:#16a34a"></div><div class="bar-seg" style="height:20px;background:#7c3aed"></div></div><div class="bar-x">Fri</div></div>
+          <div class="bar-grp"><div class="bar-stack"><div class="bar-seg" style="height:45px;background:#2b4ed6"></div><div class="bar-seg" style="height:22px;background:#16a34a"></div><div class="bar-seg" style="height:10px;background:#7c3aed"></div></div><div class="bar-x">Sat</div></div>
+          <div class="bar-grp"><div class="bar-stack"><div class="bar-seg" style="height:28px;background:#2b4ed6"></div><div class="bar-seg" style="height:14px;background:#16a34a"></div><div class="bar-seg" style="height:8px;background:#7c3aed"></div></div><div class="bar-x">Sun</div></div>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:14px;padding-top:14px;border-top:1px solid #f8fafc">
+          <div class="mchip"><div class="mv">18,240</div><div class="ml">Peak Day (Fri)</div></div>
+          <div class="mchip"><div class="mv">8.4 min</div><div class="ml">Avg Session</div></div>
+          <div class="mchip"><div class="mv">2.3</div><div class="ml">Experiments/User</div></div>
+          <div class="mchip"><div class="mv">94%</div><div class="ml">Uptime SLA</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><h3>Usage by Subject</h3></div>
+        <div class="donut-wrap">
+          <div class="donut">
+            <svg viewBox="0 0 36 36" width="110" height="110">
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f1f5f9" stroke-width="4"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#2b4ed6" stroke-width="4" stroke-dasharray="38 62" stroke-dashoffset="0"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#16a34a" stroke-width="4" stroke-dasharray="27 73" stroke-dashoffset="-38"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#7c3aed" stroke-width="4" stroke-dasharray="18 82" stroke-dashoffset="-65"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#d97706" stroke-width="4" stroke-dasharray="10 90" stroke-dashoffset="-83"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#0891b2" stroke-width="4" stroke-dasharray="7 93" stroke-dashoffset="-93"/>
+            </svg>
+            <div class="donut-center"><div class="dv">284K</div><div class="dl">Total</div></div>
+          </div>
+          <div class="donut-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#2b4ed6"></div><div class="legend-label">Physics</div><div class="legend-val">38%</div></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div><div class="legend-label">Chemistry</div><div class="legend-val">27%</div></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div><div class="legend-label">Biology</div><div class="legend-val">18%</div></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div><div class="legend-label">Electronics</div><div class="legend-val">10%</div></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#0891b2"></div><div class="legend-label">CS Labs</div><div class="legend-val">7%</div></div>
+          </div>
+        </div>
+        <div style="margin-top:18px;padding-top:16px;border-top:1px solid #f8fafc">
+          <div class="inline-stat"><span class="is-label">Top Experiment</span><span class="is-val">Ohm's Law</span></div>
+          <div class="inline-stat"><span class="is-label">New Labs Added</span><span class="is-val">+34 this month</span></div>
+          <div class="inline-stat"><span class="is-label">Repeat Usage</span><span class="is-val">68% students</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Heatmap -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hd">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Activity Heatmap — Lab Sessions by Hour (IST)</h3>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:#94a3b8">
+          <span>Low</span>
+          <div style="display:flex;gap:3px">
+            <div style="width:14px;height:14px;border-radius:3px;background:#f1f5f9"></div>
+            <div style="width:14px;height:14px;border-radius:3px;background:#dbeafe"></div>
+            <div style="width:14px;height:14px;border-radius:3px;background:#93c5fd"></div>
+            <div style="width:14px;height:14px;border-radius:3px;background:#3b82f6"></div>
+            <div style="width:14px;height:14px;border-radius:3px;background:#1d4ed8"></div>
+            <div style="width:14px;height:14px;border-radius:3px;background:#1e3a8a"></div>
+          </div>
+          <span>High</span>
+        </div>
+      </div>
+      <div class="heatmap" id="heatmap"></div>
+    </div>
+
+    <!-- Top Orgs + Top Experiments + AI Usage -->
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-hd"><h3>Top Organizations by Usage</h3><span class="link">All →</span></div>
+        <div class="h-bar-row"><div class="h-bar-label">SRM Institute</div><div class="h-bar-track"><div class="h-bar-fill" style="width:92%;background:#2b4ed6"></div></div><div class="h-bar-val">92%</div></div>
+        <div class="h-bar-row"><div class="h-bar-label">VIT Chennai</div><div class="h-bar-track"><div class="h-bar-fill" style="width:78%;background:#4f6fe8"></div></div><div class="h-bar-val">78%</div></div>
+        <div class="h-bar-row"><div class="h-bar-label">Anna University</div><div class="h-bar-track"><div class="h-bar-fill" style="width:65%;background:#7c3aed"></div></div><div class="h-bar-val">65%</div></div>
+        <div class="h-bar-row"><div class="h-bar-label">Sastra University</div><div class="h-bar-track"><div class="h-bar-fill" style="width:58%;background:#0891b2"></div></div><div class="h-bar-val">58%</div></div>
+        <div class="h-bar-row"><div class="h-bar-label">PSG College</div><div class="h-bar-track"><div class="h-bar-fill" style="width:44%;background:#16a34a"></div></div><div class="h-bar-val">44%</div></div>
+        <div class="h-bar-row"><div class="h-bar-label">Karunya Inst.</div><div class="h-bar-track"><div class="h-bar-fill" style="width:31%;background:#d97706"></div></div><div class="h-bar-val">31%</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><h3>🔬 Top Experiments</h3></div>
+        <table class="dt">
+          <thead><tr><th>#</th><th>Experiment</th><th>Runs</th></tr></thead>
+          <tbody>
+            <tr><td style="color:#94a3b8;font-weight:700">1</td><td>Ohm's Law</td><td><span style="font-weight:700;color:#2b4ed6">18.4K</span></td></tr>
+            <tr><td style="color:#94a3b8;font-weight:700">2</td><td>Acid-Base Titration</td><td><span style="font-weight:700;color:#2b4ed6">14.2K</span></td></tr>
+            <tr><td style="color:#94a3b8;font-weight:700">3</td><td>Projectile Motion</td><td><span style="font-weight:700;color:#2b4ed6">12.8K</span></td></tr>
+            <tr><td style="color:#94a3b8;font-weight:700">4</td><td>Mitosis Simulation</td><td><span style="font-weight:700;color:#2b4ed6">11.1K</span></td></tr>
+            <tr><td style="color:#94a3b8;font-weight:700">5</td><td>RC Circuit Builder</td><td><span style="font-weight:700;color:#2b4ed6">9.7K</span></td></tr>
+            <tr><td style="color:#94a3b8;font-weight:700">6</td><td>Wave Interference</td><td><span style="font-weight:700;color:#2b4ed6">8.4K</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-hd"><h3>🤖 AI Usage Breakdown</h3></div>
+        <div style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:5px"><span>AI Lab Tutor</span><span style="font-weight:700;color:#1e293b">2.1M queries</span></div>
+          <div style="height:6px;background:#f1f5f9;border-radius:3px;overflow:hidden"><div style="height:100%;width:50%;background:linear-gradient(90deg,#2b4ed6,#7c3aed);border-radius:3px"></div></div>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:5px"><span>Auto-Grading</span><span style="font-weight:700;color:#1e293b">840K grades</span></div>
+          <div style="height:6px;background:#f1f5f9;border-radius:3px;overflow:hidden"><div style="height:100%;width:20%;background:#7c3aed;border-radius:3px"></div></div>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:5px"><span>Content Gen.</span><span style="font-weight:700;color:#1e293b">620K tokens</span></div>
+          <div style="height:6px;background:#f1f5f9;border-radius:3px;overflow:hidden"><div style="height:100%;width:15%;background:#16a34a;border-radius:3px"></div></div>
+        </div>
+        <div style="margin-bottom:0">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:5px"><span>Recommendations</span><span style="font-weight:700;color:#1e293b">640K calls</span></div>
+          <div style="height:6px;background:#f1f5f9;border-radius:3px;overflow:hidden"><div style="height:100%;width:15%;background:#d97706;border-radius:3px"></div></div>
+        </div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid #f8fafc">
+          <div class="inline-stat"><span class="is-label">Total AI Cost</span><span class="is-val" style="color:#7c3aed">₹6.8L / mo</span></div>
+          <div class="inline-stat"><span class="is-label">Cost per Session</span><span class="is-val">₹3.69</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student outcomes table -->
+    <div class="card">
+      <div class="card-hd">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> Learning Outcome Summary — By Organization</h3>
+        <button class="btn btn-ghost" style="height:30px;font-size:12px;padding:0 10px">Download CSV</button>
+      </div>
+      <table class="dt">
+        <thead><tr><th>Organization</th><th>Active Students</th><th>Avg Score</th><th>Completion Rate</th><th>AI Assist Used</th><th>Top Subject</th><th>Trend</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight:600">SRM Institute</td><td>4,820</td><td><span style="font-weight:700;color:#16a34a">82%</span></td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:60px;height:5px;background:#f1f5f9;border-radius:3px"><div style="width:84%;height:100%;background:#16a34a;border-radius:3px"></div></div><span style="font-size:12px">84%</span></div></td><td>76%</td><td><span class="badge badge-blue">Physics</span></td><td><span style="color:#16a34a;font-weight:600;font-size:12px">↑ +4.2%</span></td></tr>
+          <tr><td style="font-weight:600">VIT Chennai</td><td>3,910</td><td><span style="font-weight:700;color:#16a34a">79%</span></td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:60px;height:5px;background:#f1f5f9;border-radius:3px"><div style="width:78%;height:100%;background:#2b4ed6;border-radius:3px"></div></div><span style="font-size:12px">78%</span></div></td><td>68%</td><td><span class="badge badge-purple">Biology</span></td><td><span style="color:#16a34a;font-weight:600;font-size:12px">↑ +2.8%</span></td></tr>
+          <tr><td style="font-weight:600">Anna University</td><td>2,140</td><td><span style="font-weight:700;color:#d97706">71%</span></td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:60px;height:5px;background:#f1f5f9;border-radius:3px"><div style="width:69%;height:100%;background:#d97706;border-radius:3px"></div></div><span style="font-size:12px">69%</span></div></td><td>52%</td><td><span class="badge badge-green">Chemistry</span></td><td><span style="color:#dc2626;font-weight:600;font-size:12px">↓ -1.1%</span></td></tr>
+          <tr><td style="font-weight:600">Sastra University</td><td>2,300</td><td><span style="font-weight:700;color:#16a34a">77%</span></td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:60px;height:5px;background:#f1f5f9;border-radius:3px"><div style="width:75%;height:100%;background:#16a34a;border-radius:3px"></div></div><span style="font-size:12px">75%</span></div></td><td>63%</td><td><span class="badge badge-blue">Physics</span></td><td><span style="color:#16a34a;font-weight:600;font-size:12px">↑ +3.5%</span></td></tr>
+          <tr><td style="font-weight:600">PSG College</td><td>1,780</td><td><span style="font-weight:700;color:#d97706">68%</span></td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:60px;height:5px;background:#f1f5f9;border-radius:3px"><div style="width:65%;height:100%;background:#d97706;border-radius:3px"></div></div><span style="font-size:12px">65%</span></div></td><td>48%</td><td><span class="badge badge-cyan">Electronics</span></td><td><span style="color:#16a34a;font-weight:600;font-size:12px">↑ +1.2%</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// Generate heatmap
+const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const hm = document.getElementById('heatmap');
+const data = [
+  [0,0,0,0,1,1,2,3,4,5,5,4,4,3,4,5,5,4,3,2,1,1,0,0],
+  [0,0,0,0,1,2,3,4,5,5,5,4,4,4,4,5,5,5,3,2,1,1,0,0],
+  [0,0,0,0,1,2,3,4,5,5,4,3,4,5,5,5,4,3,3,2,1,0,0,0],
+  [0,0,0,0,1,2,3,4,4,5,5,4,3,4,5,5,5,4,3,2,1,1,0,0],
+  [0,0,0,0,2,3,4,5,5,5,5,4,4,4,5,5,5,5,4,3,2,1,0,0],
+  [0,0,0,1,2,3,3,3,3,2,2,2,2,2,2,2,2,2,1,1,0,0,0,0],
+  [0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0],
+];
+// Header row hours
+const headerRow = document.createElement('div'); headerRow.style.gridColumn='1';
+hm.appendChild(headerRow);
+for(let h=0;h<24;h++){
+  const c=document.createElement('div');
+  c.className='hm-hour';
+  c.textContent=h%4===0?h+'h':'';
+  hm.appendChild(c);
+}
+days.forEach((day,di)=>{
+  const lbl=document.createElement('div');
+  lbl.className='hm-label';
+  lbl.textContent=day;
+  hm.appendChild(lbl);
+  data[di].forEach(v=>{
+    const cell=document.createElement('div');
+    cell.className=`hm-cell hm-${v}`;
+    cell.title=`${day}: intensity ${v}`;
+    hm.appendChild(cell);
+  });
+});
+
+function setPeriod(el){
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

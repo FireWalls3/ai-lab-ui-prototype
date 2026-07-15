@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Organizations · Super Admin · ZEAI</title>
+<style>
+:root {
+  --background:#ffffff; --foreground:#0f172a; --card:#ffffff; --card-foreground:#0f172a;
+  --primary:#2b4ed6; --primary-foreground:#ffffff; --secondary:#f1f5f9; --secondary-foreground:#0f172a;
+  --muted:#f8fafc; --muted-foreground:#64748b; --accent:#f1f5f9; --accent-foreground:#0f172a;
+  --destructive:#ef4444; --border:#e2e8f0;
+  --radius-lg:8px; --radius-md:6px; --radius-sm:4px;
+  --font-family-body:"Inter", system-ui, -apple-system, sans-serif;
+}
+* { box-sizing:border-box; }
+html,body { margin:0; padding:0; height:100%; }
+body { font-family:var(--font-family-body); background:var(--muted); color:var(--foreground); -webkit-font-smoothing:antialiased; }
+::-webkit-scrollbar { width:8px; height:8px; }
+::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:999px; }
+::-webkit-scrollbar-track { background:transparent; }
+a { text-decoration:none; color:inherit; }
+button { font-family:var(--font-family-body); cursor:pointer; }
+input, select, textarea { font-family:var(--font-family-body); }
+
+.shell { display:flex; height:100vh; overflow:hidden; background:var(--muted); }
+.sidebar { width:260px; background:var(--background); border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; height:100vh; position:sticky; top:0; }
+.sidebar-logo { height:60px; padding:0 24px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border); }
+.sidebar-logo .box { width:24px; height:24px; border-radius:6px; background:var(--primary); display:flex; align-items:center; justify-content:center; }
+.sidebar-logo .box svg { width:16px; height:16px; stroke:white; }
+.sidebar-logo .name { font-size:18px; font-weight:700; color:var(--primary); }
+.sidebar-nav { flex:1; overflow-y:auto; padding:16px 12px; display:flex; flex-direction:column; gap:4px; }
+.nav-label { font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted-foreground); font-weight:600; padding:16px 12px 8px; }
+.nav-label:first-child { padding-top:4px; }
+.nav-link { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:var(--radius-md); font-size:14px; font-weight:500; color:var(--foreground); transition:all 0.2s; }
+.nav-link svg { width:16px; height:16px; flex-shrink:0; stroke:currentColor; }
+.nav-link:hover { background:var(--secondary); }
+.nav-link.active { color:var(--primary); background:var(--secondary); }
+.sidebar-footer { padding:16px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:10px; }
+.sidebar-footer .user-row { display:flex; align-items:center; gap:10px; }
+.sidebar-footer img { width:32px; height:32px; border-radius:50%; }
+.sidebar-footer .uname { font-size:13px; font-weight:500; color:var(--foreground); }
+.sidebar-footer .urole { font-size:11px; color:var(--muted-foreground); }
+.logout-btn { width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-md); background:var(--background); font-size:13px; color:var(--foreground); transition:all 0.2s; }
+.logout-btn:hover { background:#fef2f2; color:#dc2626; border-color:#fecaca; }
+.logout-btn svg { width:14px; height:14px; stroke:currentColor; }
+
+.main-col { flex:1; display:flex; flex-direction:column; overflow:hidden; background:var(--muted); }
+.navbar { height:60px; background:var(--background); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 24px; flex-shrink:0; position:sticky; top:0; z-index:30; }
+.inst-switch { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:500; padding:6px 10px; border:1px solid var(--border); border-radius:var(--radius-md); }
+.inst-switch svg { width:16px; height:16px; stroke:var(--muted-foreground); }
+.navbar-search { position:relative; width:320px; }
+.navbar-search svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); width:16px; height:16px; stroke:var(--muted-foreground); pointer-events:none; }
+.navbar-search input { width:100%; height:36px; padding-left:36px; padding-right:12px; border:1px solid var(--border); border-radius:var(--radius-md); font-size:13px; background:var(--muted); color:var(--foreground); outline:none; }
+.navbar-actions { display:flex; align-items:center; gap:16px; }
+.icon-btn { position:relative; background:none; border:none; padding:6px; border-radius:var(--radius-md); display:flex; color:var(--muted-foreground); transition:all 0.2s; }
+.icon-btn svg { width:20px; height:20px; stroke:currentColor; }
+.icon-btn:hover { background:var(--muted); color:var(--foreground); }
+.notif-dot { position:absolute; top:2px; right:2px; width:8px; height:8px; background:var(--destructive); border-radius:50%; border:2px solid var(--background); }
+
+main.content { flex:1; overflow-y:auto; }
+.page-wrap-admin { padding:24px 32px; max-width:1400px; margin:0 auto; }
+.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; gap:16px; flex-wrap:wrap; }
+.page-header h1 { font-size:26px; font-weight:700; margin:0 0 8px 0; color:#1e293b; }
+.page-header p { font-size:14px; color:#64748b; margin:0; }
+.header-actions { display:flex; align-items:center; gap:12px; }
+.btn { display:flex; align-items:center; gap:8px; padding:10px 18px; border-radius:8px; font-size:13px; font-weight:600; border:none; transition:all 0.2s; cursor:pointer; }
+.btn svg { width:16px; height:16px; stroke:currentColor; }
+.btn-primary { background:var(--primary); color:white; }
+.btn-primary:hover { background:#2340b8; }
+.btn-secondary { background:white; color:#334155; border:1px solid var(--border); }
+.btn-secondary:hover { background:#f8fafc; }
+.card { background:white; border-radius:12px; padding:20px; border:1px solid #e2e8f0; box-shadow:0 1px 2px rgba(0,0,0,0.03); }
+.card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.card-header h3 { font-size:15px; font-weight:600; color:#1e293b; margin:0; display:flex; align-items:center; gap:8px; }
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px; }
+.stat-card { display:flex; align-items:flex-start; gap:14px; }
+.stat-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.stat-icon svg { width:22px; height:22px; }
+.stat-label { font-size:12px; color:#64748b; font-weight:500; margin-bottom:4px; }
+.stat-value { font-size:24px; font-weight:700; color:#1e293b; margin-bottom:2px; letter-spacing:-0.5px; }
+.stat-sub { font-size:12px; color:#94a3b8; }
+.badge { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; text-transform:capitalize; }
+.badge-green { background:#dcfce7; color:#15803d; }
+.badge-amber { background:#fef3c7; color:#b45309; }
+.badge-red { background:#fef2f2; color:#dc2626; }
+.badge-blue { background:#dbeafe; color:#1d4ed8; }
+.badge-slate { background:#f1f5f9; color:#475569; }
+.badge-purple { background:#f3e8ff; color:#7c3aed; }
+
+/* Sub Navigation Tabs */
+.sub-tabs { display:flex; gap:6px; background:#f1f5f9; border-radius:8px; padding:4px; margin-bottom:20px; width:fit-content; }
+.sub-tab-btn { padding:8px 18px; border-radius:6px; border:none; background:none; font-size:13.5px; font-weight:500; color:#64748b; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px; }
+.sub-tab-btn svg { width:15px; height:15px; stroke:currentColor; stroke-width:2; fill:none; }
+.sub-tab-btn.active { background:white; color:#1e293b; font-weight:600; box-shadow:0 2px 4px rgba(0,0,0,0.05); }
+
+/* Toolbar */
+.toolbar { display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+.search-box { position:relative; flex:1; min-width:200px; max-width:360px; }
+.search-box svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); width:15px; height:15px; stroke:#94a3b8; pointer-events:none; }
+.search-box input { width:100%; height:36px; padding-left:34px; padding-right:12px; border:1px solid var(--border); border-radius:var(--radius-md); font-size:13px; background:white; outline:none; color:#0f172a; }
+.search-box input:focus { border-color:#2b4ed6; }
+.filter-select { height:36px; padding:0 12px; border:1px solid var(--border); border-radius:var(--radius-md); font-size:13px; background:white; color:#0f172a; outline:none; cursor:pointer; }
+.filter-select:focus { border-color:#2b4ed6; }
+
+/* Tables */
+table.data-table { width:100%; border-collapse:collapse; }
+table.data-table th { text-align:left; padding:10px 14px; font-weight:600; font-size:12px; color:#64748b; border-bottom:1px solid #e2e8f0; text-transform:uppercase; letter-spacing:0.3px; white-space:nowrap; }
+table.data-table td { padding:14px 14px; border-bottom:1px solid #f1f5f9; font-size:13px; color:#1e293b; vertical-align:middle; }
+table.data-table tr:last-child td { border-bottom:none; }
+table.data-table tr:hover td { background:#f8fafc; }
+.org-cell { display:flex; align-items:center; gap:10px; }
+.org-avatar { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:white; flex-shrink:0; }
+.org-name { font-weight:600; color:#1e293b; font-size:13px; }
+.org-domain { font-size:11px; color:#94a3b8; margin-top:1px; }
+.action-btn { background:none; border:1px solid var(--border); border-radius:6px; padding:5px 10px; font-size:12px; color:#475569; cursor:pointer; transition:all 0.15s; }
+.action-btn:hover { background:#f1f5f9; border-color:#cbd5e1; }
+.action-btn.danger:hover { background:#fef2f2; border-color:#fca5a5; color:#dc2626; }
+.progress-track { height:5px; background:#f1f5f9; border-radius:3px; overflow:hidden; width:80px; }
+.progress-fill { height:100%; background:var(--primary); border-radius:3px; }
+
+/* Dynamic configuration elements */
+.slider-input { width: 100%; max-width: 140px; accent-color: var(--primary); }
+.ssl-status { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; }
+.ssl-valid { color: #16a34a; }
+.ssl-expired { color: #dc2626; }
+
+/* Grid views for trials */
+.trials-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:16px; }
+.trial-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px; transition: transform 0.2s, box-shadow 0.2s; }
+.trial-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+/* Modal */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.5); z-index:100; align-items:center; justify-content:center; backdrop-filter:blur(2px); }
+.modal-overlay.open { display:flex; }
+.modal { background:white; border-radius:16px; padding:28px; width:100%; max-width:480px; box-shadow:0 20px 60px rgba(0,0,0,0.15); animation: modalEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes modalEnter { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.modal h2 { font-size:18px; font-weight:700; color:#1e293b; margin:0 0 20px; }
+.form-group { margin-bottom:16px; }
+.form-group label { display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.3px; }
+.form-group input, .form-group select { width:100%; height:38px; padding:0 12px; border:1px solid var(--border); border-radius:var(--radius-md); font-size:13px; color:#0f172a; outline:none; }
+.form-group input:focus, .form-group select:focus { border-color:#2b4ed6; box-shadow:0 0 0 3px rgba(43,78,214,0.08); }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:24px; }
+
+/* Toast Notifications */
+.toast-container { position:fixed; bottom:24px; right:24px; display:flex; flex-direction:column; gap:10px; z-index:999; }
+.toast { background:white; border:1px solid var(--border); border-left:4px solid var(--primary); padding:16px 20px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.08); font-size:13px; font-weight:500; color:var(--foreground); display:flex; align-items:center; gap:10px; animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); min-width:300px; justify-content:space-between; }
+@keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.toast-close { border:none; background:none; font-size:16px; color:var(--muted-foreground); font-weight:700; }
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<div class="sidebar-logo"><div class="box"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5a2 2 0 0 1-.4 1.2L5 17.5A2 2 0 0 0 6.6 21h10.8a2 2 0 0 0 1.6-3.5l-4.6-6.8A2 2 0 0 1 14 9.5V3"/></svg></div><div class="name">ZEAI</div></div>
+<nav class="sidebar-nav">
+<div class="nav-label">PLATFORM</div>
+<a class="nav-link" href="superadmin-dashboard.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>
+<a class="nav-link active" href="superadmin-organizations.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M9 6h1M14 6h1M9 10h1M14 10h1M9 14h1M14 14h1"/></svg><span>Organizations</span></a>
+<a class="nav-link" href="superadmin-billing.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Billing &amp; Revenue</span></a>
+<a class="nav-link" href="superadmin-analytics.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg><span>Analytics</span></a>
+<a class="nav-link" href="superadmin-ai-models.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg><span>AI Models</span></a>
+<a class="nav-link" href="superadmin-infrastructure.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="7" rx="1"/><rect x="2" y="14" width="20" height="7" rx="1"/><path d="M6 6.5h.01M6 17.5h.01"/></svg><span>Infrastructure</span></a>
+<a class="nav-link" href="superadmin-support.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="m4.9 4.9 4.2 4.2M14.9 14.9l4.2 4.2M14.9 9.1l4.2-4.2M4.9 19.1l4.2-4.2"/></svg><span>Support Tickets</span></a>
+<a class="nav-link" href="superadmin-features.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.3.2a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.4a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.3.2a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.3-.2a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.4a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.3-.2a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span>Feature Flags</span></a>
+<div class="nav-label">SUPPORT</div>
+<a class="nav-link" href="superadmin-audit-logs.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8"/></svg><span>Audit Logs</span></a>
+<a class="nav-link" href="superadmin-announcements.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg><span>Announcements</span></a>
+</nav>
+<div class="sidebar-footer">
+  <div class="user-row">
+    <img src="https://api.dicebear.com/9.x/thumbs/svg?seed=Aditya&backgroundColor=b6e3f4" />
+    <div><div class="uname">Aditya Verma</div><div class="urole">Super Admin</div></div>
+  </div>
+  <button class="logout-btn"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg> Log Out</button>
+</div>
+</aside>
+<div class="main-col">
+<header class="navbar">
+  <div class="inst-switch"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--muted-foreground)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M9 6h1M14 6h1M9 10h1M14 10h1M9 14h1M14 14h1"/></svg><span>ZEAI Platform — All Organizations</span></div>
+  <div class="navbar-search"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search organizations..." id="topSearch" oninput="syncAndFilter(this.value)" /></div>
+  <div class="navbar-actions">
+    <button class="icon-btn"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+    <button class="icon-btn"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="notif-dot"></span></button>
+  </div>
+</header>
+<main class="content">
+<div class="page-wrap-admin">
+  <div class="page-header">
+    <div><h1>Organizations</h1><p>Manage all tenant institutions on the ZEAI platform</p></div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" onclick="exportData()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export</button>
+      <button class="btn btn-primary" onclick="openAddModal()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> Add Organization</button>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid-4">
+    <div class="card stat-card">
+      <div class="stat-icon" style="background:#eff6ff">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1e3a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M9 6h1M14 6h1M9 10h1M14 10h1M9 14h1M14 14h1"/></svg>
+      </div>
+      <div style="flex:1">
+        <div class="stat-label">Total Orgs</div>
+        <div class="stat-value" id="stat-total">86</div>
+        <div class="stat-sub" id="stat-total-sub">12 onboarded this month</div>
+      </div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-icon" style="background:#dcfce7">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+      </div>
+      <div style="flex:1">
+        <div class="stat-label">Active</div>
+        <div class="stat-value" id="stat-active">72</div>
+        <div class="stat-sub">Fully operational</div>
+      </div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-icon" style="background:#dbeafe">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1d4ed8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="10"/></svg>
+      </div>
+      <div style="flex:1">
+        <div class="stat-label">Trial</div>
+        <div class="stat-value" id="stat-trial">7</div>
+        <div class="stat-sub">Expires within 30 days</div>
+      </div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-icon" style="background:#fef3c7">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+      </div>
+      <div style="flex:1">
+        <div class="stat-label">Pending Approval</div>
+        <div class="stat-value" id="stat-pending">9</div>
+        <div class="stat-sub">Awaiting review</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sub Navigation Tabs for Organization Management -->
+  <div class="sub-tabs">
+    <button class="sub-tab-btn active" id="tabBtn-institutions" onclick="switchSubTab('institutions')">
+      <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      Institutions List
+    </button>
+    <button class="sub-tab-btn" id="tabBtn-trials" onclick="switchSubTab('trials')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>
+      Trials &amp; Approvals
+    </button>
+    <button class="sub-tab-btn" id="tabBtn-quotas" onclick="switchSubTab('quotas')">
+      <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      AI Quotas &amp; GPU Limit
+    </button>
+    <button class="sub-tab-btn" id="tabBtn-domains" onclick="switchSubTab('domains')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10M12 2a15.3 15.3 0 0 0-4 10 15.3 15.3 0 0 0 4 10M2 12h20"/></svg>
+      Subdomains &amp; SSL Settings
+    </button>
+  </div>
+
+  <!-- TAB CONTENT 1: INSTITUTIONS LIST -->
+  <div id="content-institutions" class="tab-content-panel">
+    <div class="card">
+      <div class="card-header">
+        <h3>All Registered Institutions</h3>
+      </div>
+      <div class="toolbar">
+        <div class="search-box"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search by name, domain..." id="orgSearch" oninput="filterTable()" /></div>
+        <select class="filter-select" id="planFilter" onchange="filterTable()">
+          <option value="">All Plans</option>
+          <option value="enterprise">Enterprise</option>
+          <option value="pro">Pro</option>
+          <option value="starter">Starter</option>
+        </select>
+        <select class="filter-select" id="statusFilter" onchange="filterTable()">
+          <option value="">All Statuses</option>
+          <option value="active">Active</option>
+          <option value="trial">Trial</option>
+          <option value="pending">Pending</option>
+          <option value="suspended">Suspended</option>
+        </select>
+      </div>
+      <table class="data-table">
+        <thead><tr>
+          <th>Organization</th>
+          <th>Plan</th>
+          <th>Users</th>
+          <th>Storage Space</th>
+          <th>Joined</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr></thead>
+        <tbody id="orgTableBody">
+          <!-- Dynamically Injected -->
+        </tbody>
+      </table>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:16px;border-top:1px solid #f1f5f9">
+        <span style="font-size:13px;color:#64748b" id="pagination-text">Showing 7 of 86 organizations</span>
+        <div style="display:flex;gap:6px">
+          <button class="action-btn">← Prev</button>
+          <button class="action-btn" style="background:#eff6ff;color:#2b4ed6;border-color:#bfdbfe">1</button>
+          <button class="action-btn">2</button>
+          <button class="action-btn">3</button>
+          <button class="action-btn">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB CONTENT 2: TRIALS & APPROVALS -->
+  <div id="content-trials" class="tab-content-panel" style="display:none;">
+    <div class="trials-grid" id="trialsGridContainer">
+      <!-- Cards dynamically injected -->
+    </div>
+  </div>
+
+  <!-- TAB CONTENT 3: AI QUOTAS & GPU -->
+  <div id="content-quotas" class="tab-content-panel" style="display:none;">
+    <div class="card">
+      <div class="card-header">
+        <h3>AI Tokens &amp; Compute Allocation</h3>
+        <span style="font-size: 12px; color: var(--muted-foreground)">Manage daily compute caps &amp; model access</span>
+      </div>
+      <table class="data-table">
+        <thead><tr>
+          <th>Organization</th>
+          <th>Plan</th>
+          <th>Daily AI Token Cap</th>
+          <th>Max GPU Sessions</th>
+          <th>Dedicated GPU Node</th>
+          <th>Actions</th>
+        </tr></thead>
+        <tbody id="quotaTableBody">
+          <!-- Dynamically Injected -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB CONTENT 4: SUBDOMAINS & SSL -->
+  <div id="content-domains" class="tab-content-panel" style="display:none;">
+    <div class="card">
+      <div class="card-header">
+        <h3>Custom Subdomain &amp; SSL Certificate Status</h3>
+      </div>
+      <table class="data-table">
+        <thead><tr>
+          <th>Organization</th>
+          <th>Branded Domain</th>
+          <th>SSL Certificate</th>
+          <th>OAuth Provider</th>
+          <th>Brand Accent</th>
+          <th>Actions</th>
+        </tr></thead>
+        <tbody id="domainTableBody">
+          <!-- Dynamically Injected -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</main>
+</div>
+</div>
+
+<!-- Add/Edit Org Modal -->
+<div class="modal-overlay" id="addOrgModal">
+  <div class="modal">
+    <h2 id="modalTitle">Add New Organization</h2>
+    <input type="hidden" id="editIndex" value="" />
+    <div class="form-row">
+      <div class="form-group"><label>Institution Name</label><input type="text" id="orgName" placeholder="e.g. Anna University" required /></div>
+      <div class="form-group"><label>Short Code</label><input type="text" id="orgCode" placeholder="e.g. AU" required /></div>
+    </div>
+    <div class="form-group"><label>Domain</label><input type="text" id="orgDomain" placeholder="e.g. annauniv.edu" required /></div>
+    <div class="form-row">
+      <div class="form-group"><label>Plan</label><select id="orgPlan"><option value="starter">Starter</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></div>
+      <div class="form-group"><label>Initial Status</label><select id="orgStatus"><option value="pending">Pending</option><option value="trial">Trial</option><option value="active">Active</option></select></div>
+    </div>
+    <div class="form-group"><label>Admin Contact Email</label><input type="email" id="orgEmail" placeholder="admin@institution.edu" required /></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveOrganization()" id="saveBtn">Create Organization</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// Mock Database
+let organizations = [
+  { name: "SRM Institute of Science & Technology", domain: "srmist.edu.in", code: "SR", plan: "enterprise", users: 4820, storage: 72, joined: "Jan 2025", status: "active", tokenCap: "5,000,000", maxGpu: 32, dedicatedGpu: "Yes", customSub: "srm.zeai.app", sslStatus: "valid", ssoProvider: "Google SSO", brandColor: "#2b4ed6" },
+  { name: "VIT Chennai", domain: "vit.ac.in", code: "VI", plan: "enterprise", users: 3910, storage: 61, joined: "Mar 2025", status: "active", tokenCap: "5,000,000", maxGpu: 32, dedicatedGpu: "Yes", customSub: "vit.zeai.app", sslStatus: "valid", ssoProvider: "Microsoft AD", brandColor: "#7c3aed" },
+  { name: "Anna University", domain: "annauniv.edu", code: "AN", plan: "pro", users: 2140, storage: 44, joined: "Jun 2025", status: "trial", tokenCap: "1,000,000", maxGpu: 16, dedicatedGpu: "No", customSub: "annauniv.zeai.app", sslStatus: "valid", ssoProvider: "None (Email)", brandColor: "#0891b2" },
+  { name: "PSG College of Technology", domain: "psgtech.ac.in", code: "PS", plan: "pro", users: 1780, storage: 38, joined: "May 2025", status: "active", tokenCap: "1,000,000", maxGpu: 16, dedicatedGpu: "No", customSub: "psgtech.zeai.app", sslStatus: "valid", ssoProvider: "None (Email)", brandColor: "#16a34a" },
+  { name: "Bannari Amman Institute", domain: "bitsathy.ac.in", code: "BA", plan: "starter", users: 640, storage: 18, joined: "Jul 2025", status: "pending", tokenCap: "250,000", maxGpu: 8, dedicatedGpu: "No", customSub: "bitsathy.zeai.app", sslStatus: "expired", ssoProvider: "None (Email)", brandColor: "#d97706" },
+  { name: "Sastra University", domain: "sastra.edu", code: "SA", plan: "pro", users: 2300, storage: 52, joined: "Feb 2025", status: "active", tokenCap: "1,000,000", maxGpu: 16, dedicatedGpu: "No", customSub: "sastra.zeai.app", sslStatus: "valid", ssoProvider: "Google SSO", brandColor: "#dc2626" },
+  { name: "Karunya Institute of Technology", domain: "karunya.edu", code: "KA", plan: "starter", users: 820, storage: 24, joined: "Jun 2025", status: "suspended", tokenCap: "250,000", maxGpu: 8, dedicatedGpu: "No", customSub: "karunya.zeai.app", sslStatus: "expired", ssoProvider: "None (Email)", brandColor: "#475569" }
+];
+
+const avatarColors = {
+  "SR": "#2b4ed6", "VI": "#7c3aed", "AN": "#0891b2", "PS": "#16a34a", "BA": "#d97706", "SA": "#dc2626", "KA": "#475569"
+};
+
+function getAvatarColor(code) {
+  return avatarColors[code] || "#3b82f6";
+}
+
+function showToast(message, type = "success") {
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  if (type === "error") toast.style.borderLeftColor = "var(--destructive)";
+  
+  toast.innerHTML = `
+    <span>${message}</span>
+    <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+function renderAll() {
+  renderTable();
+  renderTrials();
+  renderQuotas();
+  renderDomains();
+}
+
+function renderTable() {
+  const body = document.getElementById("orgTableBody");
+  body.innerHTML = "";
+  
+  const searchVal = document.getElementById("orgSearch").value.toLowerCase();
+  const planVal = document.getElementById("planFilter").value;
+  const statusVal = document.getElementById("statusFilter").value;
+  
+  let visibleCount = 0;
+  
+  organizations.forEach((org, index) => {
+    const matchesSearch = org.name.toLowerCase().includes(searchVal) || org.domain.toLowerCase().includes(searchVal);
+    const matchesPlan = !planVal || org.plan === planVal;
+    const matchesStatus = !statusVal || org.status === statusVal;
+    
+    if (matchesSearch && matchesPlan && matchesStatus) {
+      visibleCount++;
+      const tr = document.createElement("tr");
+      
+      let badgeClass = "badge-slate";
+      if (org.status === "active") badgeClass = "badge-green";
+      else if (org.status === "trial") badgeClass = "badge-blue";
+      else if (org.status === "pending") badgeClass = "badge-amber";
+      else if (org.status === "suspended") badgeClass = "badge-red";
+      
+      let planClass = "badge-slate";
+      if (org.plan === "enterprise") planClass = "badge-purple";
+      else if (org.plan === "pro") planClass = "badge-blue";
+      
+      let actionButtons = `<button class="action-btn" onclick="editOrg(${index})">Edit</button>`;
+      
+      if (org.status === "pending") {
+        actionButtons += `
+          <button class="action-btn" style="background:#dcfce7;color:#15803d;border-color:#bbf7d0" onclick="updateStatus(${index}, 'active')">Approve</button>
+          <button class="action-btn danger" onclick="updateStatus(${index}, 'suspended')">Reject</button>
+        `;
+      } else if (org.status === "suspended") {
+        actionButtons += `
+          <button class="action-btn" style="background:#dcfce7;color:#15803d;border-color:#bbf7d0" onclick="updateStatus(${index}, 'active')">Reactivate</button>
+          <button class="action-btn danger" onclick="deleteOrg(${index})">Delete</button>
+        `;
+      } else {
+        actionButtons += `
+          <button class="action-btn danger" onclick="updateStatus(${index}, 'suspended')">Suspend</button>
+        `;
+      }
+      
+      tr.innerHTML = `
+        <td>
+          <div class="org-cell">
+            <div class="org-avatar" style="background:${getAvatarColor(org.code)}">${org.code}</div>
+            <div>
+              <div class="org-name">${org.name}</div>
+              <div class="org-domain">${org.domain}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge ${planClass}">${org.plan}</span></td>
+        <td>${org.users.toLocaleString()}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="progress-track"><div class="progress-fill" style="width:${org.storage}%"></div></div>
+            <span style="font-size:12px;color:#64748b">${org.storage}%</span>
+          </div>
+        </td>
+        <td style="color:#64748b">${org.joined}</td>
+        <td><span class="badge ${badgeClass}">${org.status}</span></td>
+        <td><div style="display:flex;gap:6px">${actionButtons}</div></td>
+      `;
+      body.appendChild(tr);
+    }
+  });
+  
+  document.getElementById("pagination-text").textContent = `Showing ${visibleCount} of ${organizations.length} organizations`;
+  updateStats();
+}
+
+function renderTrials() {
+  const container = document.getElementById("trialsGridContainer");
+  container.innerHTML = "";
+  
+  const pendingTrials = organizations.filter(o => o.status === "pending" || o.status === "trial");
+  
+  if (pendingTrials.length === 0) {
+    container.innerHTML = `<div class="card" style="grid-column: 1/-1; text-align: center; color: var(--muted-foreground)">No pending trial signups.</div>`;
+    return;
+  }
+  
+  pendingTrials.forEach(org => {
+    const card = document.createElement("div");
+    card.className = "trial-card";
+    
+    let isPending = org.status === "pending";
+    
+    card.innerHTML = `
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
+        <span class="badge ${isPending ? 'badge-amber' : 'badge-blue'}">${org.status}</span>
+        <span style="font-size:12px; color:var(--muted-foreground)">Requested on ${org.joined}</span>
+      </div>
+      <h3 style="font-size:15px; font-weight:700; margin-bottom:6px; color:#1e293b">${org.name}</h3>
+      <p style="font-size:12.5px; color:#64748b; margin-bottom:12px">Domain: <strong>${org.domain}</strong></p>
+      <div style="background:var(--muted); padding:10px; border-radius:8px; font-size:12px; color:#334155; margin-bottom:16px">
+        <span>Admin: admin@${org.domain}</span>
+      </div>
+      <div style="display:flex; gap:8px">
+        <button class="btn btn-primary" style="padding:6px 12px; font-size:12px; flex:1; justify-content:center" onclick="approveTrial('${org.name}')">Approve Access</button>
+        <button class="btn btn-secondary" style="padding:6px 12px; font-size:12px; justify-content:center" onclick="contactAdmin('${org.domain}')">Contact</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function renderQuotas() {
+  const body = document.getElementById("quotaTableBody");
+  body.innerHTML = "";
+  
+  organizations.forEach((org, index) => {
+    const tr = document.createElement("tr");
+    
+    tr.innerHTML = `
+      <td>
+        <div class="org-cell">
+          <div class="org-avatar" style="background:${getAvatarColor(org.code)}">${org.code}</div>
+          <div class="org-name">${org.name}</div>
+        </div>
+      </td>
+      <td><span class="badge badge-purple">${org.plan}</span></td>
+      <td>
+        <div style="display:flex; align-items:center; gap:8px">
+          <input type="text" value="${org.tokenCap}" style="width: 100px; padding: 4px 8px; border:1px solid var(--border); border-radius: 4px; font-size:12.5px" onchange="updateTokenCap(${index}, this.value)" />
+        </div>
+      </td>
+      <td>
+        <div style="display:flex; align-items:center; gap:8px">
+          <input type="range" class="slider-input" min="4" max="64" value="${org.maxGpu}" oninput="this.nextElementSibling.textContent = this.value" onchange="updateGpuLimit(${index}, this.value)" />
+          <span style="font-size:12px; font-weight:700; width:20px">${org.maxGpu}</span>
+        </div>
+      </td>
+      <td>
+        <select style="padding: 4px; border:1px solid var(--border); border-radius:4px; font-size:12px" onchange="updateDedicatedGpu(${index}, this.value)">
+          <option value="Yes" ${org.dedicatedGpu === 'Yes' ? 'selected' : ''}>Yes</option>
+          <option value="No" ${org.dedicatedGpu === 'No' ? 'selected' : ''}>No</option>
+        </select>
+      </td>
+      <td>
+        <button class="action-btn" onclick="saveQuotaChanges(${index})">Apply</button>
+      </td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+function renderDomains() {
+  const body = document.getElementById("domainTableBody");
+  body.innerHTML = "";
+  
+  organizations.forEach((org, index) => {
+    const tr = document.createElement("tr");
+    
+    let sslClass = org.sslStatus === 'valid' ? 'ssl-valid' : 'ssl-expired';
+    let sslSymbol = org.sslStatus === 'valid' ? '🔒 Valid' : '⚠️ Expired / Error';
+    
+    tr.innerHTML = `
+      <td>
+        <div class="org-cell">
+          <div class="org-avatar" style="background:${getAvatarColor(org.code)}">${org.code}</div>
+          <div class="org-name">${org.name}</div>
+        </div>
+      </td>
+      <td>
+        <input type="text" value="${org.customSub}" style="padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; font-size:12.5px" onchange="updateSubdomain(${index}, this.value)" />
+      </td>
+      <td>
+        <span class="ssl-status ${sslClass}">${sslSymbol}</span>
+      </td>
+      <td>
+        <select style="padding: 4px; border: 1px solid var(--border); border-radius: 4px; font-size:12px" onchange="updateSso(${index}, this.value)">
+          <option value="Google SSO" ${org.ssoProvider === 'Google SSO' ? 'selected' : ''}>Google SSO</option>
+          <option value="Microsoft AD" ${org.ssoProvider === 'Microsoft AD' ? 'selected' : ''}>Microsoft AD</option>
+          <option value="None (Email)" ${org.ssoProvider === 'None (Email)' ? 'selected' : ''}>None (Email)</option>
+        </select>
+      </td>
+      <td>
+        <div style="display:flex; align-items:center; gap:6px">
+          <input type="color" value="${org.brandColor}" style="width:28px; height:24px; border:none; border-radius:4px; padding:0; cursor:pointer" onchange="updateBrandColor(${index}, this.value)" />
+          <span style="font-family:monospace; font-size:11px">${org.brandColor}</span>
+        </div>
+      </td>
+      <td>
+        <button class="action-btn" onclick="renewSsl(${index})">Renew SSL</button>
+      </td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+function switchSubTab(tab) {
+  document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content-panel').forEach(panel => panel.style.display = 'none');
+  
+  document.getElementById(`tabBtn-${tab}`).classList.add('active');
+  document.getElementById(`content-${tab}`).style.display = 'block';
+}
+
+// Interactivity handlers
+function updateTokenCap(index, val) {
+  organizations[index].tokenCap = val;
+}
+function updateGpuLimit(index, val) {
+  organizations[index].maxGpu = parseInt(val);
+}
+function updateDedicatedGpu(index, val) {
+  organizations[index].dedicatedGpu = val;
+}
+function saveQuotaChanges(index) {
+  showToast(`Quota and resource allocation settings updated for ${organizations[index].name}.`);
+}
+
+function updateSubdomain(index, val) {
+  organizations[index].customSub = val;
+}
+function updateSso(index, val) {
+  organizations[index].ssoProvider = val;
+}
+function updateBrandColor(index, val) {
+  organizations[index].brandColor = val;
+  renderDomains();
+}
+function renewSsl(index) {
+  organizations[index].sslStatus = 'valid';
+  showToast(`SSL certificate renewed successfully for ${organizations[index].customSub}.`);
+  renderDomains();
+}
+
+function approveTrial(name) {
+  const org = organizations.find(o => o.name === name);
+  if (org) {
+    org.status = 'active';
+    showToast(`Trial signup approved for ${name}! Account is now active.`);
+    renderAll();
+  }
+}
+
+function contactAdmin(domain) {
+  showToast(`Sent contact email draft to admin@${domain}.`);
+}
+
+function updateStats() {
+  const total = organizations.length;
+  const active = organizations.filter(o => o.status === "active").length;
+  const trial = organizations.filter(o => o.status === "trial").length;
+  const pending = organizations.filter(o => o.status === "pending").length;
+  
+  document.getElementById("stat-total").textContent = total;
+  document.getElementById("stat-active").textContent = active;
+  document.getElementById("stat-trial").textContent = trial;
+  document.getElementById("stat-pending").textContent = pending;
+}
+
+function syncAndFilter(val) {
+  document.getElementById("orgSearch").value = val;
+  renderTable();
+}
+
+function filterTable() {
+  renderTable();
+}
+
+function openAddModal() {
+  document.getElementById("modalTitle").textContent = "Add New Organization";
+  document.getElementById("editIndex").value = "";
+  document.getElementById("orgName").value = "";
+  document.getElementById("orgCode").value = "";
+  document.getElementById("orgDomain").value = "";
+  document.getElementById("orgPlan").value = "starter";
+  document.getElementById("orgStatus").value = "pending";
+  document.getElementById("orgEmail").value = "";
+  document.getElementById("saveBtn").textContent = "Create Organization";
+  document.getElementById("addOrgModal").classList.add("open");
+}
+
+function closeAddModal() {
+  document.getElementById("addOrgModal").classList.remove("open");
+}
+
+function editOrg(index) {
+  const org = organizations[index];
+  document.getElementById("modalTitle").textContent = "Edit Organization";
+  document.getElementById("editIndex").value = index;
+  document.getElementById("orgName").value = org.name;
+  document.getElementById("orgCode").value = org.code;
+  document.getElementById("orgDomain").value = org.domain;
+  document.getElementById("orgPlan").value = org.plan;
+  document.getElementById("orgStatus").value = org.status;
+  document.getElementById("orgEmail").value = "admin@" + org.domain;
+  document.getElementById("saveBtn").textContent = "Save Changes";
+  document.getElementById("addOrgModal").classList.add("open");
+}
+
+function saveOrganization() {
+  const index = document.getElementById("editIndex").value;
+  const name = document.getElementById("orgName").value.trim();
+  const code = document.getElementById("orgCode").value.trim().toUpperCase();
+  const domain = document.getElementById("orgDomain").value.trim();
+  const plan = document.getElementById("orgPlan").value;
+  const status = document.getElementById("orgStatus").value;
+  
+  if (!name || !code || !domain) {
+    showToast("Please fill out all required fields.", "error");
+    return;
+  }
+  
+  if (index === "") {
+    // Add New
+    organizations.push({
+      name, domain, code, plan, status,
+      users: Math.floor(Math.random() * 500) + 10,
+      storage: Math.floor(Math.random() * 80) + 5,
+      joined: new Date().toLocaleString('default', { month: 'short', year: 'numeric' }),
+      tokenCap: "250,000", maxGpu: 8, dedicatedGpu: "No",
+      customSub: code.toLowerCase() + ".zeai.app", sslStatus: "valid", ssoProvider: "None (Email)", brandColor: "#3b82f6"
+    });
+    showToast(`${name} has been added successfully!`);
+  } else {
+    // Edit Existing
+    organizations[index].name = name;
+    organizations[index].code = code;
+    organizations[index].domain = domain;
+    organizations[index].plan = plan;
+    organizations[index].status = status;
+    showToast(`Changes to ${name} have been saved.`);
+  }
+  
+  closeAddModal();
+  renderAll();
+}
+
+function updateStatus(index, newStatus) {
+  const org = organizations[index];
+  org.status = newStatus;
+  showToast(`Status of ${org.name} set to ${newStatus}.`);
+  renderAll();
+}
+
+function deleteOrg(index) {
+  const org = organizations[index];
+  if (confirm(`Are you sure you want to permanently delete ${org.name}?`)) {
+    organizations.splice(index, 1);
+    showToast(`${org.name} has been deleted.`, "error");
+    renderAll();
+  }
+}
+
+function exportData() {
+  showToast("Organizations list exported to CSV successfully.");
+}
+
+// Initial Render
+renderAll();
+
+document.getElementById('addOrgModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+</script>
+</body>
+</html>
