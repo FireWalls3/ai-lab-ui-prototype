@@ -81,12 +81,12 @@ main.content { flex:1; overflow-y:auto; }
 .page-wrap-student { padding:24px; }
 .page-wrap-admin { padding:24px 32px; max-width:1400px; margin:0 auto; }
 
-.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; gap:16px; flex-wrap:wrap; }
+.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; gap:16px; flex-wrap:wrap; }
 .page-header h1 { font-size:26px; font-weight:700; margin:0 0 8px 0; color:var(--foreground); }
 .page-header p { font-size:14px; color:var(--muted-foreground); margin:0; }
 .header-actions { display:flex; align-items:center; gap:12px; }
 
-.btn { display:flex; align-items:center; gap:8px; padding:10px 18px; border-radius:8px; font-size:13px; font-weight:600; border:none; transition:all 0.2s; }
+.btn { display:flex; align-items:center; gap:8px; padding:10px 18px; border-radius:8px; font-size:13px; font-weight:600; border:none; transition:all 0.2s; text-decoration:none; }
 .btn svg { width:16px; height:16px; stroke:currentColor; }
 .btn-primary { background:var(--primary); color:white; }
 .btn-primary:hover { background:#2340b8; }
@@ -98,7 +98,15 @@ main.content { flex:1; overflow-y:auto; }
 .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
 .grid-2 { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
 .grid-2fr1fr { display:grid; grid-template-columns:2fr 1fr; gap:20px; }
-.grid-2fr1fr1fr { display:grid; grid-template-columns:2fr 1fr 1fr; gap:24px; }
+@media (max-width:1024px) {
+  .grid-4 { grid-template-columns:repeat(2,1fr); }
+  .grid-2fr1fr { grid-template-columns:1fr; }
+  .grid-3 { grid-template-columns:repeat(2,1fr); }
+}
+@media (max-width:640px) {
+  .grid-4 { grid-template-columns:1fr; }
+  .grid-3 { grid-template-columns:1fr; }
+}
 
 .card { background:var(--card); border-radius:12px; padding:20px; border:1px solid var(--border); box-shadow:0 1px 2px rgba(0,0,0,0.03); color:var(--foreground); }
 .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
@@ -106,39 +114,60 @@ main.content { flex:1; overflow-y:auto; }
 .card-header h3 svg { width:16px; height:16px; }
 .view-all { font-size:12px; color:var(--primary); font-weight: 500; }
 
-.stat-card { display:flex; align-items:flex-start; gap:14px; }
+.stat-card { display:flex; align-items:center; justify-content:space-between; gap:14px; position:relative; }
 .stat-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .stat-icon svg { width:22px; height:22px; }
 .stat-label { font-size:12px; color:var(--muted-foreground); font-weight:500; margin-bottom:4px; }
 .stat-value { font-size:24px; font-weight:700; color:var(--foreground); margin-bottom:2px; letter-spacing:-0.5px; }
 .stat-sub { font-size:12px; color:var(--muted-foreground); display:flex; align-items:center; gap:4px; }
-.stat-trend { font-size:12px; color:#16a34a; font-weight:600; display:flex; align-items:center; gap:4px; }
+
+.sparkline-svg { width:80px; height:34px; overflow:visible; flex-shrink:0; }
+.sparkline-path { fill:none; stroke:var(--primary); stroke-width:2.5; stroke-linecap:round; }
+
+/* AI Insights Banner */
+.ai-banner { background:linear-gradient(135deg, rgba(79, 70, 229, 0.08) 0%, rgba(147, 51, 234, 0.08) 100%); border:1px solid rgba(147, 51, 234, 0.2); border-radius:12px; padding:16px 20px; margin-bottom:24px; }
+.ai-banner-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.ai-banner h4 { margin:0; font-size:14px; font-weight:700; color:#4f46e5; display:flex; align-items:center; gap:8px; }
+[data-theme="dark"] .ai-banner h4 { color:#a5b4fc; }
+.ai-banner-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:700; color:white; background:linear-gradient(135deg,#4f46e5,#9333ea); }
+.ai-banner p { margin:0; font-size:13px; color:var(--foreground); line-height:1.5; }
 
 .badge { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; }
 .badge-green { background:#dcfce7; color:#15803d; }
+[data-theme="dark"] .badge-green { background:#16a34a20; color:#4ade80; }
 .badge-amber { background:#fef3c7; color:#b45309; }
+[data-theme="dark"] .badge-amber { background:#d9770620; color:#fbbf24; }
 .badge-red { background:#fef2f2; color:#dc2626; }
+[data-theme="dark"] .badge-red { background:#ef444420; color:#f87171; }
 .badge-blue { background:#dbeafe; color:#1d4ed8; }
+[data-theme="dark"] .badge-blue { background:#2563eb20; color:#60a5fa; }
 .badge-slate { background:#f1f5f9; color:#475569; }
-.badge-ai { background:linear-gradient(135deg,#4f46e5 0%, #9333ea 100%); color:white; font-size:10px; padding:2px 8px; }
-.badge-ai svg { width:11px; height:11px; stroke:white; }
 
 .progress-track { height:6px; background:var(--secondary); border-radius:3px; overflow:hidden; }
 .progress-fill { height:100%; background:var(--primary); border-radius:3px; }
 
-.quick-action { display:flex; flex-direction:column; gap:10px; padding:18px; border-radius:12px; border:1.5px solid var(--border); background:var(--card); transition:all 0.2s; color:var(--foreground); text-decoration:none; }
-.quick-action:hover { box-shadow:0 4px 12px rgba(43,78,214,0.10); }
-.quick-action .qa-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; }
-.quick-action .qa-icon svg { width:20px; height:20px; }
-.quick-action .qa-title { font-size:14px; font-weight:600; color:var(--foreground); }
-.quick-action .qa-desc { font-size:12px; color:var(--muted-foreground); }
+.quick-action { display:flex; flex-direction:column; gap:8px; padding:16px; border-radius:10px; border:1px solid var(--border); background:var(--card); transition:all 0.2s; color:var(--foreground); text-decoration:none; }
+.quick-action:hover { box-shadow:0 4px 12px rgba(43,78,214,0.10); border-color:var(--primary); }
+.quick-action .qa-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; }
+.quick-action .qa-icon svg { width:18px; height:18px; }
+.quick-action .qa-title { font-size:13px; font-weight:600; color:var(--foreground); }
+.quick-action .qa-desc { font-size:11.5px; color:var(--muted-foreground); }
 
 table.data-table { width:100%; border-collapse:collapse; }
-table.data-table th { text-align:left; padding:10px 14px; font-weight:600; font-size:12px; color:var(--muted-foreground); border-bottom:1px solid var(--border); text-transform:uppercase; letter-spacing:0.3px; }
+table.data-table th { text-align:left; padding:10px 14px; font-weight:600; font-size:11.5px; color:var(--muted-foreground); border-bottom:1px solid var(--border); text-transform:uppercase; letter-spacing:0.3px; }
 table.data-table td { padding:12px 14px; border-bottom:1px solid var(--border); font-size:13px; color:var(--foreground); }
 table.data-table tr:hover td { background:var(--secondary); }
 
-.section-title { font-size:16px; font-weight:600; color:var(--foreground); margin:0 0 14px 0; display:flex; align-items:center; gap:8px; }
+.filter-select { padding:8px 12px; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--foreground); font-size:13px; font-weight:500; outline:none; cursor:pointer; }
+
+.chart-container { display:flex; flex-direction:column; height:200px; position:relative; justify-content:flex-end; padding-top:10px; }
+.chart-y-axis { position:absolute; left:0; top:10px; bottom:24px; display:flex; flex-direction:column; justify-content:space-between; font-size:10px; color:var(--muted-foreground); text-align:right; width:28px; }
+.chart-body { flex:1; margin-left:36px; margin-bottom:24px; border-left:1px solid var(--border); border-bottom:1px solid var(--border); position:relative; }
+.chart-x-axis { margin-left:36px; height:24px; display:flex; justify-content:space-between; padding:4px 10px 0; font-size:10px; color:var(--muted-foreground); }
+
+svg.area-chart { width:100%; height:100%; overflow:visible; }
+svg.area-chart path.line { fill:none; stroke:var(--primary); stroke-width:3; stroke-linecap:round; transition: d 0.5s ease; }
+svg.area-chart path.area { fill:url(#area-gradient); transition: d 0.5s ease; }
 
 .avatar { width:32px; height:32px; border-radius:50%; object-fit:cover; }
 </style>
@@ -181,97 +210,234 @@ table.data-table tr:hover td { background:var(--secondary); }
 
 <div class="page-wrap-admin">
   <div class="page-header">
-    <div><h1>College Admin Dashboard</h1><p>SRM Institute of Science & Technology · Fall Semester 2026</p></div>
-    <div class="header-actions"><button class="btn btn-primary"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> Assign Faculty</button></div>
-  </div>
-  <div class="grid-3" style="margin-bottom:20px">
-    <div class="card stat-card">
-      <div class="stat-icon" style="background:#eff6ff"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1e3a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-      <div style="flex:1">
-        <div class="stat-label">Total Students</div>
-        <div class="stat-value" id="dash-total-students">4,820</div>
-        <div class="stat-sub" id="dash-total-students-sub">Across 6 departments</div>
-      </div>
+    <div>
+      <h1>College Admin Dashboard</h1>
+      <p>SRM Institute of Science & Technology · Overview Panel</p>
     </div>
-    <div class="card stat-card">
-      <div class="stat-icon" style="background:#f3e8ff"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-      <div style="flex:1">
-        <div class="stat-label">Faculty</div>
-        <div class="stat-value" id="dash-total-faculty">186</div>
-        <div class="stat-sub">12 new this term</div>
-      </div>
-    </div>
-    <div class="card stat-card">
-      <div class="stat-icon" style="background:#dcfce7"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 12.18-8.58 3.9a2 2 0 0 1-1.66 0L3.18 12.18"/><path d="m22 17.18-8.58 3.9a2 2 0 0 1-1.66 0L3.18 17.18"/></svg></div>
-      <div style="flex:1">
-        <div class="stat-label">Departments</div>
-        <div class="stat-value" id="dash-total-depts">6</div>
-        <div class="stat-sub">Fully onboarded</div>
-      </div>
-    </div>
-    <div class="card stat-card">
-      <div class="stat-icon" style="background:#ecfeff"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0891b2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5a2 2 0 0 1-.4 1.2L5 17.5A2 2 0 0 0 6.6 21h10.8a2 2 0 0 0 1.6-3.5l-4.6-6.8A2 2 0 0 1 14 9.5V3"/></svg></div>
-      <div style="flex:1">
-        <div class="stat-label">Active Labs</div>
-        <div class="stat-value">312</div>
-        <div class="stat-sub">48 in progress now</div>
-      </div>
-    </div>
-    <div class="card stat-card">
-      <div class="stat-icon" style="background:#fef3c7"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
-      <div style="flex:1">
-        <div class="stat-label">Experiment Usage</div>
-        <div class="stat-value">18,240</div>
-        <div class="stat-sub">Sessions this month</div>
-      </div>
-    </div>
-    <div class="card stat-card">
-      <div class="stat-icon" style="background:#f0fdf4"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 7 13.5 15.5 8.5 10.5 2 17"/><path d="M16 7h6v6"/></svg></div>
-      <div style="flex:1">
-        <div class="stat-label">Infra. Savings</div>
-        <div class="stat-value">₹42.6L</div>
-        <div class="stat-sub">vs physical lab cost</div>
-      </div>
+    <div class="header-actions">
+      <select id="dashPeriodSelect" class="filter-select" onchange="handlePeriodChange()">
+        <option value="semester">This Semester (Fall 2026)</option>
+        <option value="month">Last 30 Days</option>
+        <option value="year">Full Academic Year</option>
+      </select>
     </div>
   </div>
+
+  <!-- Live AI Insights Banner -->
+  <div class="ai-banner">
+    <div class="ai-banner-header">
+      <h4>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        AI Observational Insights
+      </h4>
+      <span class="ai-banner-badge"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> REAL-TIME</span>
+    </div>
+    <p id="aiObservationText">Loading observation metrics...</p>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid-4" style="margin-bottom:20px">
+    <div class="card stat-card">
+      <div style="display:flex; align-items:center; gap:12px">
+        <div class="stat-icon" style="background:#eff6ff"><svg viewBox="0 0 24 24" fill="none" stroke="#1e3a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div>
+          <div class="stat-label">Students</div>
+          <div class="stat-value" id="dash-total-students">7</div>
+          <div class="stat-sub" id="dash-total-students-sub">Total active seats</div>
+        </div>
+      </div>
+      <svg class="sparkline-svg">
+        <path class="sparkline-path" id="spark-students" d="M 0 25 L 20 23 L 40 24 L 60 18 L 80 12 L 100 8" />
+      </svg>
+    </div>
+
+    <div class="card stat-card">
+      <div style="display:flex; align-items:center; gap:12px">
+        <div class="stat-icon" style="background:#f3e8ff"><svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div>
+          <div class="stat-label">Faculty Advisors</div>
+          <div class="stat-value" id="dash-total-faculty">6</div>
+          <div class="stat-sub" id="dash-total-faculty-sub">Allocated instructors</div>
+        </div>
+      </div>
+      <svg class="sparkline-svg">
+        <path class="sparkline-path" id="spark-faculty" d="M 0 28 L 20 28 L 40 20 L 60 22 L 80 15 L 100 12" style="stroke: #7c3aed;" />
+      </svg>
+    </div>
+
+    <div class="card stat-card">
+      <div style="display:flex; align-items:center; gap:12px">
+        <div class="stat-icon" style="background:#dcfce7"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+        <div>
+          <div class="stat-label">Simulators</div>
+          <div class="stat-value" id="dash-total-experiments">8</div>
+          <div class="stat-sub">Syllabus modules</div>
+        </div>
+      </div>
+      <svg class="sparkline-svg">
+        <path class="sparkline-path" id="spark-simulators" d="M 0 20 L 20 18 L 40 18 L 60 14 L 80 10 L 100 5" style="stroke: #16a34a;" />
+      </svg>
+    </div>
+
+    <div class="card stat-card">
+      <div style="display:flex; align-items:center; gap:12px">
+        <div class="stat-icon" style="background:#ecfeff"><svg viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></div>
+        <div>
+          <div class="stat-label">Mapping Coverage</div>
+          <div class="stat-value" id="dash-mapping-coverage">85%</div>
+          <div class="stat-sub" id="dash-mapping-sub">6 of 7 assigned</div>
+        </div>
+      </div>
+      <svg class="sparkline-svg">
+        <path class="sparkline-path" id="spark-mapping" d="M 0 30 L 20 25 L 40 28 L 60 18 L 80 15 L 100 8" style="stroke: #0891b2;" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- Secondary Metrics Workspace -->
   <div class="grid-2fr1fr" style="margin-bottom:20px">
     <div>
-      <div class="card" style="margin-bottom:20px">
-        <div class="card-header">
+      <!-- Departmental Table list -->
+      <div class="card" style="margin-bottom:20px; padding:0; overflow:hidden">
+        <div class="card-header" style="padding:20px 20px 0 20px">
           <h3>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#1e3a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg> 
-            Department Performance
+            <svg viewBox="0 0 24 24" fill="none" stroke="#1e3a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 12.18-8.58 3.9a2 2 0 0 1-1.66 0L3.18 12.18"/><path d="m22 17.18-8.58 3.9a2 2 0 0 1-1.66 0L3.18 17.18"/></svg> 
+            Departmental Allocations Overview
           </h3>
           <a class="view-all" href="admin-departments.html">Manage All</a>
         </div>
-        <div id="dash-performance-list">
-          <!-- Dynamically syncs with localStorage departments -->
-          <div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:12px;color:#475569;margin-bottom:6px"><span style="font-weight:500;color:#1e293b">Physics</span><span>88%</span></div><div class="progress-track"><div class="progress-fill" style="width:88%;background:#2b4ed6"></div></div></div>
-          <div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:12px;color:#475569;margin-bottom:6px"><span style="font-weight:500;color:#1e293b">Chemistry</span><span>79%</span></div><div class="progress-track"><div class="progress-fill" style="width:79%;background:#16a34a"></div></div></div>
-          <div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:12px;color:#475569;margin-bottom:6px"><span style="font-weight:500;color:#1e293b">Biology</span><span>91%</span></div><div class="progress-track"><div class="progress-fill" style="width:91%;background:#7c3aed"></div></div></div>
-          <div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:12px;color:#475569;margin-bottom:6px"><span style="font-weight:500;color:#1e293b">Electronics</span><span>74%</span></div><div class="progress-track"><div class="progress-fill" style="width:74%;background:#d97706"></div></div></div>
-          <div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:12px;color:#475569;margin-bottom:6px"><span style="font-weight:500;color:#1e293b">CS Labs</span><span>85%</span></div><div class="progress-track"><div class="progress-fill" style="width:85%;background:#0891b2"></div></div></div>
-          <div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:12px;color:#475569;margin-bottom:6px"><span style="font-weight:500;color:#1e293b">Mechanical</span><span>68%</span></div><div class="progress-track"><div class="progress-fill" style="width:68%;background:#dc2626"></div></div></div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Department</th>
+                <th>Head of Department</th>
+                <th>Instructors</th>
+                <th>Student Roster</th>
+                <th>Syllabus Completion</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="dashDeptTableBody">
+              <!-- Dynamically populated from zeai_departments -->
+            </tbody>
+          </table>
         </div>
       </div>
-      <div class="card"><div class="card-header"><h3>Quick Actions</h3></div><div class="grid-3"><div class="quick-action" style="cursor:default"><div class="qa-icon" style="background:#eff6ff"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#1e3a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="qa-title">Assign Faculty</div><div class="qa-desc">Allocate faculty to sections</div></div><div class="quick-action" style="cursor:default"><div class="qa-icon" style="background:#dcfce7"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="qa-title">Assign Students</div><div class="qa-desc">Bulk enroll students</div></div><a class="quick-action" href="admin-departments.html?action=new"><div class="qa-icon" style="background:#f3e8ff"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 12.18-8.58 3.9a2 2 0 0 1-1.66 0L3.18 12.18"/><path d="m22 17.18-8.58 3.9a2 2 0 0 1-1.66 0L3.18 17.18"/></svg></div><div class="qa-title">Create Department</div><div class="qa-desc">Set up a new department</div></a><div class="quick-action" style="cursor:default"><div class="qa-icon" style="background:#fef3c7"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div><div class="qa-title">Manage Courses</div><div class="qa-desc">Configure course catalogue</div></div><div class="quick-action" style="cursor:default"><div class="qa-icon" style="background:#ecfeff"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0891b2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5M8 13h8M8 17h8M8 9h2"/></svg></div><div class="qa-title">Reports</div><div class="qa-desc">Institutional performance reports</div></div><div class="quick-action" style="cursor:default"><div class="qa-icon" style="background:#eef2ff"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg></div><div class="qa-title">AI Insights</div><div class="qa-desc">Platform-wide learning trends</div></div></div></div>
+
+      <!-- Simulator Traffic dynamic Chart -->
+      <div class="card">
+        <div class="card-header">
+          <h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+            Syllabus Simulation Runs (Weekly Traffic)
+          </h3>
+          <span style="font-size:11px; font-weight:600; color:var(--muted-foreground)">ATTEMPT LOADS</span>
+        </div>
+        <div class="chart-container">
+          <div class="chart-y-axis">
+            <span id="chartYMax">3,000</span>
+            <span id="chartYMid">1,500</span>
+            <span>0</span>
+          </div>
+          <div class="chart-body">
+            <svg class="area-chart">
+              <defs>
+                <linearGradient id="area-gradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.3"/>
+                  <stop offset="100%" stop-color="var(--primary)" stop-opacity="0.0"/>
+                </linearGradient>
+              </defs>
+              <path class="area" id="dashChartArea" d="M 0 150 L 0 150 Z" />
+              <path class="line" id="dashChartLine" d="M 0 150" />
+            </svg>
+          </div>
+          <div class="chart-x-axis" id="dashChartXAxis">
+            <span>Wk 1</span><span>Wk 2</span><span>Wk 3</span><span>Wk 4</span><span>Wk 5</span><span>Wk 6</span><span>Wk 7</span>
+          </div>
+        </div>
+      </div>
     </div>
+
     <div>
-      <div class="card" style="margin-bottom:20px"><div class="card-header"><h3><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/></svg> Top Faculty</h3></div><table class="data-table"><thead><tr><th>Name</th><th>Dept</th><th>Score</th></tr></thead><tbody><tr><td>Prof. Rakesh Rao</td><td>Physics</td><td style="font-weight:700;color:#16a34a">94%</td></tr><tr><td>Dr. Lakshmi Nair</td><td>Chemistry</td><td style="font-weight:700;color:#16a34a">91%</td></tr><tr><td>Prof. Suresh Iyer</td><td>Biology</td><td style="font-weight:700;color:#16a34a">89%</td></tr><tr><td>Dr. Kavya Menon</td><td>Electronics</td><td style="font-weight:700;color:#16a34a">85%</td></tr></tbody></table></div>
-      <div class="card"><div class="card-header"><h3><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg> Weak Subjects</h3></div><div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-size:12.5px;color:var(--foreground)">Thermodynamics</span><span class="badge badge-red">44% struggle rate</span></div><div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-size:12.5px;color:var(--foreground)">Organic Synthesis</span><span class="badge badge-red">39% struggle rate</span></div><div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-size:12.5px;color:var(--foreground)">Circuit Design</span><span class="badge badge-red">35% struggle rate</span></div></div>
+      <!-- Leaderboard (Top Faculty) -->
+      <div class="card" style="margin-bottom:20px; padding:0; overflow:hidden">
+        <div class="card-header" style="padding:20px 20px 0 20px">
+          <h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/></svg>
+            Active Instructors Ratings
+          </h3>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Instructor</th>
+              <th>Department</th>
+              <th>Rating</th>
+            </tr>
+          </thead>
+          <tbody id="dashLeaderboardBody">
+            <!-- Dynamically populated from zeai_faculty -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Alerts / Critical Items -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header">
+          <h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+            Struggling Modules
+          </h3>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border)">
+          <span style="font-size:12.5px; color:var(--foreground)">Thermodynamics (Mech)</span>
+          <span class="badge badge-red">44% struggle</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border)">
+          <span style="font-size:12.5px; color:var(--foreground)">Organic Synthesis (Chem)</span>
+          <span class="badge badge-red">39% struggle</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:10px 0;">
+          <span style="font-size:12.5px; color:var(--foreground)">Circuit Design (Elec)</span>
+          <span class="badge badge-amber">35% struggle</span>
+        </div>
+      </div>
+
+      <!-- Quick Actions Grid -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Quick Links</h3>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+          <a class="quick-action" href="admin-faculty.html">
+            <div class="qa-title" style="font-size:12px">Faculty</div>
+            <div class="qa-desc" style="font-size:10px">Manage list</div>
+          </a>
+          <a class="quick-action" href="admin-students.html">
+            <div class="qa-title" style="font-size:12px">Students</div>
+            <div class="qa-desc" style="font-size:10px">Manage roster</div>
+          </a>
+          <a class="quick-action" href="admin-mapping.html">
+            <div class="qa-title" style="font-size:12px">Mapping</div>
+            <div class="qa-desc" style="font-size:10px">Allocate seat</div>
+          </a>
+          <a class="quick-action" href="admin-experiments.html">
+            <div class="qa-title" style="font-size:12px">Simulators</div>
+            <div class="qa-desc" style="font-size:10px">Edit modules</div>
+          </a>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="card" style="background:linear-gradient(135deg,rgba(238,242,255,0.4),rgba(243,232,255,0.4))">
-    <div class="card-header"><h3><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg> AI Insights Panel</h3></div>
-    <p style="margin:0;font-size:12.5px;color:var(--foreground)">Overall student engagement is up 14% this term. Electronics department shows the steepest completion drop-off — consider reviewing lab difficulty pacing for Sem 4 sections.</p>
   </div>
 </div>
 </main>
 </div>
 </div>
 <script>
+// Mock datasets to read or fallback
 const defaultDepartments = [
-  { id: 'dept-1', name: 'Physics', hod: 'Dr. Rakesh Rao', faculty: 24, students: 780, labs: 45, performance: 88, status: 'Active', seed: 'Rakesh', avatarBg: 'b6e3f4' },
+  { id: 'dept-1', name: 'Physics', hod: 'Prof. Rakesh Rao', faculty: 24, students: 780, labs: 45, performance: 88, status: 'Active', seed: 'Rakesh', avatarBg: 'b6e3f4' },
   { id: 'dept-2', name: 'Chemistry', hod: 'Dr. Lakshmi Nair', faculty: 20, students: 690, labs: 38, performance: 79, status: 'Active', seed: 'Lakshmi', avatarBg: 'ffd5dc' },
   { id: 'dept-3', name: 'Biology', hod: 'Prof. Suresh Iyer', faculty: 32, students: 850, labs: 52, performance: 91, status: 'Active', seed: 'Suresh', avatarBg: 'c0aede' },
   { id: 'dept-4', name: 'Electronics', hod: 'Dr. Kavya Menon', faculty: 28, students: 710, labs: 40, performance: 74, status: 'Warning', seed: 'Kavya', avatarBg: 'ffd5dc' },
@@ -279,7 +445,59 @@ const defaultDepartments = [
   { id: 'dept-6', name: 'Mechanical', hod: 'Dr. S. K. Gupta', faculty: 18, students: 540, labs: 30, performance: 68, status: 'Warning', seed: 'Gupta', avatarBg: 'c0aede' }
 ];
 
-function initDashboardData() {
+const periodData = {
+  semester: {
+    studentsCount: '4,820',
+    facultyCount: '186',
+    simulatorsCount: '32',
+    coveragePct: '85%',
+    coverageSub: '6 of 7 assigned',
+    aiObservation: 'Syllabus simulator traffic peaked in Week 6 during Mid-Term preparation. Mechanical Engineering and Electronics departments present learning drop-offs around module 4. An additional tutoring schedule for Circuit Design is highly recommended.',
+    yMax: '3,000',
+    yMid: '1,500',
+    chartLine: 'M 0 120 L 60 110 L 120 130 L 180 80 L 240 60 L 300 40 L 360 20 L 400 10',
+    chartArea: 'M 0 120 L 60 110 L 120 130 L 180 80 L 240 60 L 300 40 L 360 20 L 400 10 L 400 150 L 0 150 Z',
+    sparkStudents: 'M 0 25 L 20 23 L 40 24 L 60 18 L 80 12 L 100 8',
+    sparkFaculty: 'M 0 28 L 20 28 L 40 20 L 60 22 L 80 15 L 100 12',
+    sparkSimulators: 'M 0 20 L 20 18 L 40 18 L 60 14 L 80 10 L 100 5',
+    sparkMapping: 'M 0 30 L 20 25 L 40 28 L 60 18 L 80 15 L 100 8'
+  },
+  month: {
+    studentsCount: '7',
+    facultyCount: '6',
+    simulatorsCount: '8',
+    coveragePct: '85%',
+    coverageSub: '6 of 7 assigned',
+    aiObservation: 'Active simulation traffic has grown 12% over the last 30 days. Dev Deepak (CS Labs) and Sneha Reddy (Electronics) show high daily completion rates. Mappings verification shows 1 student awaiting supervisor allocation in Chemistry.',
+    yMax: '500',
+    yMid: '250',
+    chartLine: 'M 0 140 L 60 100 L 120 110 L 180 90 L 240 70 L 300 50 L 360 30 L 400 15',
+    chartArea: 'M 0 140 L 60 100 L 120 110 L 180 90 L 240 70 L 300 50 L 360 30 L 400 15 L 400 150 L 0 150 Z',
+    sparkStudents: 'M 0 28 L 20 28 L 40 28 L 60 28 L 80 25 L 100 25',
+    sparkFaculty: 'M 0 20 L 20 20 L 40 20 L 60 20 L 80 20 L 100 20',
+    sparkSimulators: 'M 0 15 L 20 15 L 40 15 L 60 15 L 80 15 L 100 15',
+    sparkMapping: 'M 0 30 L 20 22 L 40 25 L 60 25 L 80 12 L 100 12'
+  },
+  year: {
+    studentsCount: '5,120',
+    facultyCount: '194',
+    simulatorsCount: '42',
+    coveragePct: '94%',
+    coverageSub: '142 of 151 assigned',
+    aiObservation: 'Yearly metrics indicate high curriculum alignment. Cost savings generated by migrating physical experiments to virtual simulation layouts reached ₹1.44 Crore, representing a 35% efficiency gain over projected equipment maintenance costs.',
+    yMax: '15,000',
+    yMid: '7,500',
+    chartLine: 'M 0 130 L 60 120 L 120 90 L 180 70 L 240 50 L 300 30 L 360 15 L 400 5',
+    chartArea: 'M 0 130 L 60 120 L 120 90 L 180 70 L 240 50 L 300 30 L 360 15 L 400 5 L 400 150 L 0 150 Z',
+    sparkStudents: 'M 0 30 L 20 26 L 40 24 L 60 15 L 80 10 L 100 3',
+    sparkFaculty: 'M 0 28 L 20 25 L 40 22 L 60 18 L 80 12 L 100 8',
+    sparkSimulators: 'M 0 25 L 20 20 L 40 18 L 60 15 L 80 12 L 100 6',
+    sparkMapping: 'M 0 30 L 20 28 L 40 20 L 60 14 L 80 8 L 100 4'
+  }
+};
+
+function loadDashboardData() {
+  // Query actual data from local storage where available
   let depts = [];
   const savedDepts = localStorage.getItem('zeai_departments');
   if (savedDepts) {
@@ -289,46 +507,146 @@ function initDashboardData() {
     localStorage.setItem('zeai_departments', JSON.stringify(depts));
   }
 
-  // Update KPI Stats
-  const totalDepts = depts.length;
-  const totalFaculty = depts.reduce((sum, d) => sum + parseInt(d.faculty), 0);
-  const totalStudents = depts.reduce((sum, d) => sum + parseInt(d.students), 0);
+  // Render Department Overview Table
+  const tbody = document.getElementById('dashDeptTableBody');
+  if (tbody) {
+    tbody.innerHTML = '';
+    depts.forEach(d => {
+      let badgeClass = 'badge-green';
+      if (d.status === 'Warning') badgeClass = 'badge-amber';
+      else if (d.status === 'Inactive') badgeClass = 'badge-red';
 
-  document.getElementById('dash-total-depts').textContent = totalDepts;
-  document.getElementById('dash-total-faculty').textContent = totalFaculty.toLocaleString();
-  document.getElementById('dash-total-students').textContent = totalStudents.toLocaleString();
-  document.getElementById('dash-total-students-sub').textContent = `Across ${totalDepts} departments`;
-
-  // Update Department Performance list
-  const performanceContainer = document.getElementById('dash-performance-list');
-  if (performanceContainer) {
-    performanceContainer.innerHTML = '';
-    // Sort departments by performance descending
-    const sortedDepts = [...depts].sort((a, b) => b.performance - a.performance);
-    sortedDepts.forEach(dept => {
-      let progressColor = '#2b4ed6'; // primary blue
-      if (dept.performance >= 90) progressColor = '#7c3aed'; // purple
-      else if (dept.performance >= 80) progressColor = '#16a34a'; // green
-      else if (dept.performance >= 70) progressColor = '#d97706'; // warning yellow
-      else progressColor = '#dc2626'; // danger red
-
-      const itemDiv = document.createElement('div');
-      itemDiv.style.marginBottom = '14px';
-      itemDiv.innerHTML = `
-        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted-foreground);margin-bottom:6px">
-          <span style="font-weight:500;color:var(--foreground)">${dept.name}</span>
-          <span>${dept.performance}%</span>
-        </div>
-        <div class="progress-track">
-          <div class="progress-fill" style="width:${dept.performance}%;background:${progressColor}"></div>
-        </div>
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:600; color:var(--foreground)">${escapeHTML(d.name)}</td>
+        <td>${escapeHTML(d.hod)}</td>
+        <td>${d.faculty} faculty</td>
+        <td>${d.students.toLocaleString()} students</td>
+        <td>
+          <div style="display:flex; align-items:center; gap:8px">
+            <span style="font-weight:600; font-size:12px">${d.performance}%</span>
+            <div class="progress-track" style="width:60px">
+              <div class="progress-fill" style="width:${d.performance}%"></div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge ${badgeClass}">${d.status}</span></td>
       `;
-      performanceContainer.appendChild(itemDiv);
+      tbody.appendChild(tr);
     });
   }
+
+  // Populate leaderboard (Top Faculty)
+  let facultyList = [];
+  const savedFaculty = localStorage.getItem('zeai_faculty');
+  if (savedFaculty) {
+    facultyList = JSON.parse(savedFaculty);
+  } else {
+    facultyList = [
+      { id: 'fac-1', name: 'Prof. Rakesh Rao', dept: 'Physics', rating: 9.4, seed: 'Rakesh' },
+      { id: 'fac-2', name: 'Dr. Lakshmi Nair', dept: 'Chemistry', rating: 9.1, seed: 'Lakshmi' },
+      { id: 'fac-3', name: 'Prof. Suresh Iyer', dept: 'Biology', rating: 8.9, seed: 'Suresh' },
+      { id: 'fac-4', name: 'Dr. Kavya Menon', dept: 'Electronics', rating: 8.5, seed: 'Kavya' }
+    ];
+  }
+
+  const leaderBody = document.getElementById('dashLeaderboardBody');
+  if (leaderBody) {
+    leaderBody.innerHTML = '';
+    // Sort faculty by rating descending
+    const sortedFac = [...facultyList].sort((a, b) => b.rating - a.rating).slice(0, 4);
+    sortedFac.forEach(fac => {
+      const ratingPct = Math.round(fac.rating * 10);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <div style="display:flex; align-items:center; gap:8px">
+            <img class="avatar" src="https://api.dicebear.com/9.x/thumbs/svg?seed=${fac.seed || 'avatar'}&backgroundColor=b6e3f4" alt="${escapeHTML(fac.name)}" />
+            <span style="font-weight:600">${escapeHTML(fac.name)}</span>
+          </div>
+        </td>
+        <td>${escapeHTML(fac.dept)}</td>
+        <td><span style="font-weight:700; color:#16a34a">${ratingPct}%</span></td>
+      `;
+      leaderBody.appendChild(tr);
+    });
+  }
+
+  // Set the values based on selected period
+  updateDashPeriod();
 }
 
-// Theme Management
+function updateDashPeriod() {
+  const period = document.getElementById('dashPeriodSelect').value;
+  const data = periodData[period];
+
+  // Try to load dynamic student mapping stats from local storage for "Last 30 Days" / active state
+  if (period === 'month') {
+    const savedStud = localStorage.getItem('zeai_students');
+    const savedMappings = localStorage.getItem('zeai_mappings');
+    if (savedStud && savedMappings) {
+      const studentsList = JSON.parse(savedStud);
+      const mappingsList = JSON.parse(savedMappings);
+      
+      const totalStudents = studentsList.length;
+      const assignedCount = new Set(mappingsList.map(m => m.studentId)).size;
+      const pct = totalStudents > 0 ? Math.round((assignedCount / totalStudents) * 100) : 0;
+      
+      document.getElementById('dash-total-students').textContent = totalStudents;
+      document.getElementById('dash-mapping-coverage').textContent = pct + '%';
+      document.getElementById('dash-mapping-sub').textContent = `${assignedCount} of ${totalStudents} mapped`;
+    } else {
+      document.getElementById('dash-total-students').textContent = data.studentsCount;
+      document.getElementById('dash-mapping-coverage').textContent = data.coveragePct;
+      document.getElementById('dash-mapping-sub').textContent = data.coverageSub;
+    }
+    
+    // Total faculty from local storage
+    const savedFac = localStorage.getItem('zeai_faculty');
+    if (savedFac) {
+      document.getElementById('dash-total-faculty').textContent = JSON.parse(savedFac).length;
+    } else {
+      document.getElementById('dash-total-faculty').textContent = data.facultyCount;
+    }
+
+    // Total experiments from local storage
+    const savedExps = localStorage.getItem('zeai_experiments');
+    if (savedExps) {
+      document.getElementById('dash-total-experiments').textContent = JSON.parse(savedExps).length;
+    } else {
+      document.getElementById('dash-total-experiments').textContent = data.simulatorsCount;
+    }
+  } else {
+    // Falls back to global school metrics for entire Semester/Year
+    document.getElementById('dash-total-students').textContent = data.studentsCount;
+    document.getElementById('dash-total-faculty').textContent = data.facultyCount;
+    document.getElementById('dash-total-experiments').textContent = data.simulatorsCount;
+    document.getElementById('dash-mapping-coverage').textContent = data.coveragePct;
+    document.getElementById('dash-mapping-sub').textContent = data.coverageSub;
+  }
+
+  // Update Y-Axis metrics text
+  document.getElementById('chartYMax').textContent = data.yMax;
+  document.getElementById('chartYMid').textContent = data.yMid;
+
+  // Render Charts
+  document.getElementById('dashChartLine').setAttribute('d', data.chartLine);
+  document.getElementById('dashChartArea').setAttribute('d', data.chartArea);
+
+  // Update Sparklines
+  document.getElementById('spark-students').setAttribute('d', data.sparkStudents);
+  document.getElementById('spark-faculty').setAttribute('d', data.sparkFaculty);
+  document.getElementById('spark-simulators').setAttribute('d', data.sparkSimulators);
+  document.getElementById('spark-mapping').setAttribute('d', data.sparkMapping);
+
+  // Update AI Observations Text
+  document.getElementById('aiObservationText').textContent = data.aiObservation;
+}
+
+function handlePeriodChange() {
+  updateDashPeriod();
+}
+
 let isDark = false;
 function applyTheme(dark) {
   isDark = dark;
@@ -342,14 +660,15 @@ function applyTheme(dark) {
   localStorage.setItem("zeai_theme", dark ? "dark" : "light");
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  initDashboardData();
+function escapeHTML(str) {
+  return str.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag] || tag));
+}
 
-  // Load Saved Theme
+window.addEventListener('DOMContentLoaded', () => {
+  loadDashboardData();
   const savedTheme = localStorage.getItem("zeai_theme");
   applyTheme(savedTheme === "dark");
 
-  // Hook Theme Toggle Click
   document.getElementById("themeToggle").addEventListener("click", () => {
     applyTheme(!isDark);
   });
