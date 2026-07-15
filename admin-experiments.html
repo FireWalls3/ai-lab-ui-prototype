@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Students Roster · ZEAI</title>
+<title>Experiments Analytics · ZEAI</title>
 <style>
 :root {
   --background:#ffffff; --foreground:#0f172a; --card:#ffffff; --card-foreground:#0f172a;
@@ -95,7 +95,11 @@ main.content { flex:1; overflow-y:auto; }
 .btn-secondary:hover { background:var(--secondary); }
 
 .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
-@media (max-width:1024px) { .grid-4 { grid-template-columns:repeat(2,1fr); } }
+.grid-2 { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; }
+@media (max-width:1024px) { 
+  .grid-4 { grid-template-columns:repeat(2,1fr); }
+  .grid-2 { grid-template-columns:1fr; }
+}
 @media (max-width:640px) { .grid-4 { grid-template-columns:1fr; } }
 
 .card { background:var(--card); border-radius:12px; padding:20px; border:1px solid var(--border); box-shadow:0 1px 2px rgba(0,0,0,0.03); }
@@ -119,14 +123,13 @@ main.content { flex:1; overflow-y:auto; }
 .badge-blue { background:#dbeafe; color:#1d4ed8; }
 [data-theme="dark"] .badge-blue { background:#2563eb20; color:#60a5fa; }
 
+.progress-track { height:6px; background:var(--secondary); border-radius:3px; overflow:hidden; }
+.progress-fill { height:100%; background:var(--primary); border-radius:3px; }
+
 table.data-table { width:100%; border-collapse:collapse; }
 table.data-table th { text-align:left; padding:12px 14px; font-weight:600; font-size:12px; color:var(--muted-foreground); border-bottom:1px solid var(--border); text-transform:uppercase; letter-spacing:0.3px; }
 table.data-table td { padding:14px 14px; border-bottom:1px solid var(--border); font-size:13.5px; color:var(--foreground); vertical-align:middle; }
 table.data-table tr:hover td { background:var(--secondary); }
-
-.avatar { width:32px; height:32px; border-radius:50%; object-fit:cover; }
-.name-cell { display:flex; align-items:center; gap:10px; }
-.name-cell .sub { font-size:11.5px; color:var(--muted-foreground); margin-top:2px; }
 
 .action-row { display:flex; gap:16px; margin-bottom:20px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
 .filter-group { display:flex; gap:8px; align-items:center; }
@@ -135,7 +138,7 @@ table.data-table tr:hover td { background:var(--secondary); }
 .search-control input { width:100%; height:36px; padding-left:36px; padding-right:12px; border:1px solid var(--border); border-radius:var(--radius-md); font-size:13px; background:var(--card); color:var(--foreground); outline:none; }
 .filter-btn { padding:6px 12px; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--muted-foreground); font-size:12px; font-weight:500; transition:all 0.2s; }
 .filter-btn.active { background:var(--primary); color:var(--primary-foreground); border-color:var(--primary); }
-.filter-select { padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--foreground); font-size:12px; font-weight:500; outline:none; }
+.filter-select { padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--foreground); font-size:12px; font-weight:500; outline:none; cursor:pointer; }
 
 .action-btns { display:flex; gap:6px; }
 .action-icon-btn { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--muted-foreground); transition:all 0.2s; cursor:pointer; }
@@ -143,6 +146,19 @@ table.data-table tr:hover td { background:var(--secondary); }
 .action-icon-btn:hover { background:var(--secondary); color:var(--foreground); }
 .action-icon-btn.delete-btn:hover { background:#fef2f2; color:#dc2626; border-color:#fecaca; }
 [data-theme="dark"] .action-icon-btn.delete-btn:hover { background:#ef444420; color:#f87171; border-color:#ef444440; }
+
+/* SVG Chart Elements */
+.chart-container { display:flex; flex-direction:column; height:220px; position:relative; justify-content:flex-end; padding-top:10px; }
+.chart-y-axis { position:absolute; left:0; top:10px; bottom:24px; display:flex; flex-direction:column; justify-content:space-between; font-size:10px; color:var(--muted-foreground); text-align:right; width:28px; }
+.chart-body { flex:1; margin-left:36px; margin-bottom:24px; border-left:1px solid var(--border); border-bottom:1px solid var(--border); position:relative; }
+.chart-x-axis { margin-left:36px; height:24px; display:flex; justify-content:space-between; padding:4px 10px 0; font-size:10px; color:var(--muted-foreground); }
+
+svg.area-chart { width:100%; height:100%; overflow:visible; }
+svg.area-chart path.line { fill:none; stroke:var(--primary); stroke-width:3; stroke-linecap:round; }
+svg.area-chart path.area { fill:url(#area-gradient); }
+
+svg.bar-chart { width:100%; height:100%; overflow:visible; }
+svg.bar-chart rect.bar { fill:#7c3aed; rx:4; transition: height 0.5s ease, y 0.5s ease; }
 
 /* Modal Styling */
 .modal-overlay { position:fixed; inset:0; background:rgba(15, 23, 42, 0.4); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:1000; padding:16px; }
@@ -159,7 +175,6 @@ table.data-table tr:hover td { background:var(--secondary); }
 .form-control { width:100%; height:38px; padding:0 12px; border:1px solid var(--border); border-radius:var(--radius-md); background:var(--muted); color:var(--foreground); font-size:13px; outline:none; transition:border-color 0.2s; }
 .form-control:focus { border-color:var(--primary); }
 select.form-control { cursor:pointer; }
-.error-msg { font-size:11px; color:var(--destructive); margin-top:4px; display:none; }
 
 /* Toast Notifications */
 .toast-container { position:fixed; bottom:24px; right:24px; display:flex; flex-direction:column; gap:8px; z-index:2000; }
@@ -207,14 +222,14 @@ select.form-control { cursor:pointer; }
       </svg>
       <span>Faculty</span>
     </a>
-    <a class="nav-link active" href="admin-students.html">
+    <a class="nav-link" href="admin-students.html">
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
         <path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
       </svg>
       <span>Students</span>
     </a>
-    <a class="nav-link" href="admin-experiments.html">
+    <a class="nav-link active" href="admin-experiments.html">
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
       </svg>
@@ -287,15 +302,15 @@ select.form-control { cursor:pointer; }
     <div class="page-wrap-admin">
       <div class="page-header">
         <div>
-          <h1>Student Directory</h1>
-          <p>Inspect student execution levels, check gamification metrics, and manage enrolled seat licenses.</p>
+          <h1>Experiments Analytics</h1>
+          <p>Monitor simulation load metrics, track syllabus submission totals, and audit average experiment scores.</p>
         </div>
         <div class="header-actions">
           <button class="btn btn-primary" onclick="openAddModal()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
-            Enroll Student
+            Create Experiment
           </button>
         </div>
       </div>
@@ -304,50 +319,113 @@ select.form-control { cursor:pointer; }
       <div class="grid-4" style="margin-bottom:24px">
         <div class="card stat-card">
           <div class="stat-icon" style="background:#eff6ff">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#1e3a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#1e3a8a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
             </svg>
           </div>
           <div style="flex:1">
-            <div class="stat-label">Total Enrolled</div>
-            <div class="stat-value" id="kpi-total-students">4,820</div>
-            <div class="stat-sub">SRM Campus</div>
+            <div class="stat-label">Total Experiments</div>
+            <div class="stat-value" id="kpi-total-exps">32</div>
+            <div class="stat-sub">Virtual templates</div>
+          </div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-icon" style="background:#f3e8ff">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+            </svg>
+          </div>
+          <div style="flex:1">
+            <div class="stat-label">Total Attempts</div>
+            <div class="stat-value" id="kpi-total-attempts">14.2K</div>
+            <div class="stat-sub">Simulator sessions</div>
           </div>
         </div>
         <div class="card stat-card">
           <div class="stat-icon" style="background:#ecfeff">
             <svg viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
             </svg>
           </div>
           <div style="flex:1">
-            <div class="stat-label">Active Today</div>
-            <div class="stat-value" id="kpi-active-students">2,841</div>
-            <div class="stat-sub">Live in simulators</div>
+            <div class="stat-label">Avg Session Time</div>
+            <div class="stat-value" id="kpi-avg-time">42m</div>
+            <div class="stat-sub">Per submission</div>
           </div>
         </div>
         <div class="card stat-card">
           <div class="stat-icon" style="background:#dcfce7">
             <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+              <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
             </svg>
           </div>
           <div style="flex:1">
-            <div class="stat-label">Avg. Progress</div>
-            <div class="stat-value" id="kpi-avg-progress">84%</div>
-            <div class="stat-sub">Lab completion rate</div>
+            <div class="stat-label">Success Rate</div>
+            <div class="stat-value" id="kpi-success-rate">88%</div>
+            <div class="stat-sub">Avg workbook score</div>
           </div>
         </div>
-        <div class="card stat-card">
-          <div class="stat-icon" style="background:#fef2f2">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="grid-2" style="margin-bottom:24px">
+        <!-- SVG Area Chart: Weekly Submission Load -->
+        <div class="card">
+          <div class="card-header">
+            <h3>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+              Weekly Simulator Traffic
+            </h3>
+            <span style="font-size:11px; font-weight:600; color:var(--muted-foreground)">Attempt Count</span>
           </div>
-          <div style="flex:1">
-            <div class="stat-label">Struggling Students</div>
-            <div class="stat-value" id="kpi-struggling">2</div>
-            <div class="stat-sub" style="color:var(--destructive)">Syllabus alerts</div>
+          <div class="chart-container">
+            <div class="chart-y-axis">
+              <span>3K</span><span>1.5K</span><span>0</span>
+            </div>
+            <div class="chart-body">
+              <svg class="area-chart">
+                <defs>
+                  <linearGradient id="area-gradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="var(--primary)" stop-opacity="0.0"/>
+                  </linearGradient>
+                </defs>
+                <path class="area" d="M 0 150 L 60 120 L 120 140 L 180 80 L 240 60 L 300 40 L 360 20 L 400 150 Z" />
+                <path class="line" d="M 0 150 L 60 120 L 120 140 L 180 80 L 240 60 L 300 40 L 360 20" />
+              </svg>
+            </div>
+            <div class="chart-x-axis">
+              <span>Wk 1</span><span>Wk 2</span><span>Wk 3</span><span>Wk 4</span><span>Wk 5</span><span>Wk 6</span><span>Wk 7</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SVG Bar Chart: Success Rate by Department -->
+        <div class="card">
+          <div class="card-header">
+            <h3>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+              Success Rate per Department
+            </h3>
+            <span style="font-size:11px; font-weight:600; color:var(--muted-foreground)">Workbook Score</span>
+          </div>
+          <div class="chart-container">
+            <div class="chart-y-axis">
+              <span>100%</span><span>50%</span><span>0%</span>
+            </div>
+            <div class="chart-body">
+              <svg class="bar-chart" id="successRateBarChart">
+                <!-- Injected dynamically by JS -->
+              </svg>
+            </div>
+            <div class="chart-x-axis">
+              <span style="width:16%; text-align:center">Phys</span>
+              <span style="width:16%; text-align:center">Chem</span>
+              <span style="width:16%; text-align:center">Bio</span>
+              <span style="width:16%; text-align:center">Elec</span>
+              <span style="width:16%; text-align:center">CS</span>
+              <span style="width:16%; text-align:center">Mech</span>
+            </div>
           </div>
         </div>
       </div>
@@ -358,7 +436,7 @@ select.form-control { cursor:pointer; }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
           </svg>
-          <input type="text" id="studentSearch" placeholder="Search by name, Roll number..." oninput="handleSearchFilter()" />
+          <input type="text" id="expSearch" placeholder="Search experiment by title..." oninput="handleSearchFilter()" />
         </div>
         <div class="filter-group">
           <select id="deptFilter" class="filter-select" onchange="handleSearchFilter()">
@@ -371,30 +449,28 @@ select.form-control { cursor:pointer; }
             <option value="Mechanical">Mechanical</option>
           </select>
           <button class="filter-btn active" id="filter-all" onclick="setStatusFilter('all')">All Status</button>
-          <button class="filter-btn" id="filter-active" onclick="setStatusFilter('Active')">Active</button>
-          <button class="filter-btn" id="filter-struggling" onclick="setStatusFilter('Struggling')">Struggling</button>
+          <button class="filter-btn" id="filter-published" onclick="setStatusFilter('Published')">Published</button>
+          <button class="filter-btn" id="filter-draft" onclick="setStatusFilter('Draft')">Draft</button>
         </div>
       </div>
 
-      <!-- Students Table Card -->
+      <!-- Experiments Table Card -->
       <div class="card" style="padding:0; overflow:hidden">
         <div style="overflow-x:auto">
           <table class="data-table">
             <thead>
               <tr>
-                <th>Student</th>
-                <th>Roll Number</th>
+                <th>Experiment Title</th>
                 <th>Department</th>
-                <th>Lab Level</th>
-                <th>Total XP</th>
-                <th>Completed Labs</th>
-                <th>Overall Grade</th>
+                <th>Level</th>
+                <th>Attempt Count</th>
+                <th>Average Score</th>
                 <th>Status</th>
                 <th style="text-align:right">Actions</th>
               </tr>
             </thead>
-            <tbody id="studentsTableBody">
-              <!-- Dynamically populated -->
+            <tbody id="experimentsTableBody">
+              <!-- Populated dynamically -->
             </tbody>
           </table>
         </div>
@@ -402,7 +478,7 @@ select.form-control { cursor:pointer; }
           <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:8px">
             <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/>
           </svg>
-          <div>No students match your query.</div>
+          <div>No experiments match your search criteria.</div>
         </div>
       </div>
     </div>
@@ -410,30 +486,26 @@ select.form-control { cursor:pointer; }
 </div>
 </div>
 
-<!-- Add/Edit Student Modal -->
-<div class="modal-overlay" id="studentModal">
+<!-- Add/Edit Experiment Modal -->
+<div class="modal-overlay" id="expModal">
 <div class="modal-card">
   <div class="modal-header">
-    <h2 id="modalTitle">Enroll New Student</h2>
+    <h2 id="modalTitle">Create Experiment Template</h2>
     <button class="close-modal" onclick="closeModal()">&times;</button>
   </div>
-  <form id="studentForm" onsubmit="handleFormSubmit(event)">
+  <form id="expForm" onsubmit="handleFormSubmit(event)">
     <input type="hidden" id="modalMode" value="add" />
-    <input type="hidden" id="modalStudentId" value="" />
+    <input type="hidden" id="modalExpId" value="" />
     
     <div class="modal-body">
       <div class="form-group">
-        <label for="studName">Student Full Name</label>
-        <input type="text" id="studName" class="form-control" placeholder="e.g. Rahul Sharma" required />
-      </div>
-      <div class="form-group">
-        <label for="studRoll">Roll Number / ID</label>
-        <input type="text" id="studRoll" class="form-control" placeholder="e.g. SRM2026101" required />
+        <label for="expTitle">Experiment Title</label>
+        <input type="text" id="expTitle" class="form-control" placeholder="e.g. Ohm's Law Simulator" required />
       </div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px">
         <div class="form-group">
-          <label for="studDept">Department</label>
-          <select id="studDept" class="form-control">
+          <label for="expDept">Department</label>
+          <select id="expDept" class="form-control">
             <option value="Physics">Physics</option>
             <option value="Chemistry">Chemistry</option>
             <option value="Biology">Biology</option>
@@ -443,46 +515,31 @@ select.form-control { cursor:pointer; }
           </select>
         </div>
         <div class="form-group">
-          <label for="studLevel">Lab Execution Level</label>
-          <input type="number" id="studLevel" class="form-control" min="1" max="10" placeholder="e.g. 4" required />
+          <label for="expLevel">Assigned Level</label>
+          <input type="number" id="expLevel" class="form-control" min="1" max="10" placeholder="e.g. 3" required />
         </div>
       </div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px">
         <div class="form-group">
-          <label for="studXp">Total XP</label>
-          <input type="number" id="studXp" class="form-control" min="0" placeholder="e.g. 3850" required />
+          <label for="expAttempts">Attempts baseline</label>
+          <input type="number" id="expAttempts" class="form-control" min="0" placeholder="e.g. 1240" required />
         </div>
         <div class="form-group">
-          <label for="studLabs">Completed Labs</label>
-          <input type="number" id="studLabs" class="form-control" min="0" placeholder="e.g. 10" required />
+          <label for="expScore">Average Success Score (%)</label>
+          <input type="number" id="expScore" class="form-control" min="0" max="100" placeholder="e.g. 85" required />
         </div>
       </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px">
-        <div class="form-group">
-          <label for="studGrade">Academic Grade</label>
-          <select id="studGrade" class="form-control">
-            <option value="A+">A+</option>
-            <option value="A">A</option>
-            <option value="A-">A-</option>
-            <option value="B+">B+</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="studStatus">Status</label>
-          <select id="studStatus" class="form-control">
-            <option value="Active">Active</option>
-            <option value="Struggling">Struggling</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-        </div>
+      <div class="form-group">
+        <label for="expStatus">Publish Status</label>
+        <select id="expStatus" class="form-control">
+          <option value="Published">Published</option>
+          <option value="Draft">Draft</option>
+        </select>
       </div>
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-      <button type="submit" class="btn btn-primary">Enroll Student</button>
+      <button type="submit" class="btn btn-primary">Save Template</button>
     </div>
   </form>
 </div>
@@ -492,47 +549,84 @@ select.form-control { cursor:pointer; }
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-// Seed default students data
-const defaultStudents = [
-  { id: 'stud-1', name: 'Rahul Sharma', roll: 'SRM2026101', dept: 'Physics', level: 5, xp: 4600, labs: 12, grade: 'A+', status: 'Active', seed: 'rahul', avatarBg: 'b6e3f4' },
-  { id: 'stud-2', name: 'Priyana Patel', roll: 'SRM2026102', dept: 'Chemistry', level: 4, xp: 4200, labs: 10, grade: 'A', status: 'Active', seed: 'priyana', avatarBg: 'ffd5dc' },
-  { id: 'stud-3', name: 'Amit Sen', roll: 'SRM2026103', dept: 'Biology', level: 4, xp: 3950, labs: 8, grade: 'A', status: 'Active', seed: 'amit', avatarBg: 'c0aede' },
-  { id: 'stud-4', name: 'Dev Deepak', roll: 'SRM2026104', dept: 'CS Labs', level: 4, xp: 3850, labs: 10, grade: 'A-', status: 'Active', seed: 'deepak', avatarBg: 'b6e3f4' },
-  { id: 'stud-5', name: 'Sneha Reddy', roll: 'SRM2026105', dept: 'Electronics', level: 3, xp: 3400, labs: 6, grade: 'B', status: 'Active', seed: 'sneha', avatarBg: 'ffd5dc' },
-  { id: 'stud-6', name: 'Karan Malhotra', roll: 'SRM2026106', dept: 'Mechanical', level: 2, xp: 2100, labs: 3, grade: 'C', status: 'Struggling', seed: 'karan', avatarBg: 'c0aede' },
-  { id: 'stud-7', name: 'Pooja Roy', roll: 'SRM2026107', dept: 'Physics', level: 1, xp: 980, labs: 1, grade: 'D', status: 'Struggling', seed: 'pooja', avatarBg: 'ffd5dc' }
+// Seed default experiments
+const defaultExperiments = [
+  { id: 'exp-1', title: "Ohm's Law Simulator", dept: 'Physics', level: 3, attempts: 1240, score: 88, status: 'Published' },
+  { id: 'exp-2', title: 'Acid-Base Titration Configuration', dept: 'Chemistry', level: 4, attempts: 980, score: 82, status: 'Published' },
+  { id: 'exp-3', title: 'Cellular Mitosis Observation', dept: 'Biology', level: 2, attempts: 1530, score: 91, status: 'Published' },
+  { id: 'exp-4', title: 'RLC Circuit Frequency Response', dept: 'Electronics', level: 5, attempts: 710, score: 74, status: 'Published' },
+  { id: 'exp-5', title: 'Bubble & Merge Sort Performance', dept: 'CS Labs', level: 4, attempts: 2450, score: 85, status: 'Published' },
+  { id: 'exp-6', title: 'Crank-Nicolson PDE Solver', dept: 'CS Labs', level: 6, attempts: 420, score: 71, status: 'Published' },
+  { id: 'exp-7', title: 'Heat Exchanger Efficiency Ratio', dept: 'Mechanical', level: 5, attempts: 320, score: 68, status: 'Draft' },
+  { id: 'exp-8', title: 'Double Pendulum Chaotic Dynamics', dept: 'Physics', level: 5, attempts: 0, score: 0, status: 'Draft' }
 ];
 
-let students = [];
+let experiments = [];
 let statusFilter = 'all';
 
-function initStudents() {
-  const savedStuds = localStorage.getItem('zeai_students');
-  if (savedStuds) {
-    students = JSON.parse(savedStuds);
+function initExperiments() {
+  const saved = localStorage.getItem('zeai_experiments');
+  if (saved) {
+    experiments = JSON.parse(saved);
   } else {
-    students = [...defaultStudents];
-    localStorage.setItem('zeai_students', JSON.stringify(students));
+    experiments = [...defaultExperiments];
+    localStorage.setItem('zeai_experiments', JSON.stringify(experiments));
   }
 }
 
 function updateKPIs() {
-  const total = students.length;
-  // Simulating active students as 60% of total roster + baseline
-  const active = Math.round(total * 0.58 + 2);
-  const struggling = students.filter(s => s.status === 'Struggling').length;
+  const total = experiments.length;
+  const totalAttempts = experiments.reduce((sum, e) => sum + parseInt(e.attempts), 0);
+  
+  const publishedExps = experiments.filter(e => e.status === 'Published');
+  let avgScore = 0;
+  if (publishedExps.length > 0) {
+    const totalScore = publishedExps.reduce((sum, e) => sum + parseInt(e.score), 0);
+    avgScore = Math.round(totalScore / publishedExps.length);
+  }
 
-  let totalLabs = students.reduce((sum, s) => sum + parseInt(s.labs), 0);
-  const avgProgress = total > 0 ? Math.round((totalLabs / (total * 12)) * 100) : 0;
-
-  document.getElementById('kpi-total-students').textContent = total.toLocaleString();
-  document.getElementById('kpi-active-students').textContent = active.toLocaleString();
-  document.getElementById('kpi-avg-progress').textContent = avgProgress + '%';
-  document.getElementById('kpi-struggling').textContent = struggling;
+  document.getElementById('kpi-total-exps').textContent = total;
+  document.getElementById('kpi-total-attempts').textContent = (totalAttempts / 1000).toFixed(1) + 'K';
+  document.getElementById('kpi-success-rate').textContent = avgScore + '%';
 }
 
-function renderTable(data = students) {
-  const tbody = document.getElementById('studentsTableBody');
+function drawBarChart() {
+  const svg = document.getElementById('successRateBarChart');
+  svg.innerHTML = '';
+  
+  const width = svg.clientWidth || 450;
+  const height = 150;
+  
+  // Calculate average score per department
+  const depts = ['Physics', 'Chemistry', 'Biology', 'Electronics', 'CS Labs', 'Mechanical'];
+  const scores = depts.map(dept => {
+    const deptExps = experiments.filter(e => e.dept === dept && e.status === 'Published');
+    if (deptExps.length === 0) return 0;
+    return Math.round(deptExps.reduce((sum, e) => sum + e.score, 0) / deptExps.length);
+  });
+
+  const barCount = scores.length;
+  const gap = 16;
+  const barWidth = (width - gap * (barCount + 1)) / barCount;
+
+  scores.forEach((score, i) => {
+    const x = gap + i * (barWidth + gap);
+    const barHeight = (score / 100) * height;
+    const y = height - barHeight;
+
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('class', 'bar');
+    rect.setAttribute('x', x);
+    rect.setAttribute('y', y);
+    rect.setAttribute('width', barWidth);
+    rect.setAttribute('height', barHeight);
+    
+    svg.appendChild(rect);
+  });
+}
+
+function renderTable(data = experiments) {
+  const tbody = document.getElementById('experimentsTableBody');
   const noResults = document.getElementById('noResults');
   tbody.innerHTML = '';
 
@@ -543,45 +637,40 @@ function renderTable(data = students) {
     noResults.style.display = 'none';
   }
 
-  data.forEach(stud => {
+  data.forEach(exp => {
     const row = document.createElement('tr');
     
-    let statusClass = 'badge-green';
-    if (stud.status === 'Struggling') statusClass = 'badge-red';
-    else if (stud.status === 'Inactive') statusClass = 'badge-amber';
+    let scoreColor = '#16a34a';
+    if (exp.score < 70) scoreColor = '#dc2626';
+    else if (exp.score < 80) scoreColor = '#d97706';
 
     row.innerHTML = `
+      <td><div style="font-weight:600; color:var(--foreground)">${escapeHTML(exp.title)}</div></td>
+      <td>${escapeHTML(exp.dept)}</td>
+      <td>Lvl ${exp.level}</td>
+      <td>${parseInt(exp.attempts).toLocaleString()} attempts</td>
       <td>
-        <div class="name-cell">
-          <img class="avatar" src="https://api.dicebear.com/7.x/adventurer/svg?seed=${stud.seed || 'student'}" alt="${escapeHTML(stud.name)}" />
-          <div>
-            <div style="font-weight:600; color:var(--foreground)">${escapeHTML(stud.name)}</div>
-            <div class="sub">Level ${stud.level} Scholar</div>
+        <div style="display:flex; align-items:center; gap:8px">
+          <span style="font-weight:600; color:${scoreColor}">${exp.score}%</span>
+          <div class="progress-track" style="width:70px">
+            <div class="progress-fill" style="width:${exp.score}%; background:${scoreColor}"></div>
           </div>
         </div>
       </td>
-      <td><span style="font-family:monospace; font-size:12.5px">${escapeHTML(stud.roll)}</span></td>
-      <td>${escapeHTML(stud.dept)}</td>
-      <td>Lvl ${stud.level}</td>
-      <td><span style="font-weight:600">${parseInt(stud.xp).toLocaleString()} XP</span></td>
-      <td>${parseInt(stud.labs)}</td>
       <td>
-        <span style="font-weight:700; color:var(--primary); font-size:14px">${escapeHTML(stud.grade)}</span>
-      </td>
-      <td>
-        <span class="badge ${statusClass}">
+        <span class="badge ${exp.status === 'Published' ? 'badge-green' : 'badge-amber'}">
           <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:currentColor"></span>
-          ${stud.status}
+          ${exp.status}
         </span>
       </td>
       <td style="text-align:right">
         <div class="action-btns" style="justify-content:flex-end">
-          <button class="action-icon-btn" onclick="openEditModal('${stud.id}')" title="Edit Student">
+          <button class="action-icon-btn" onclick="openEditModal('${exp.id}')" title="Edit Experiment">
             <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
             </svg>
           </button>
-          <button class="action-icon-btn delete-btn" onclick="handleDelete('${stud.id}')" title="Remove Roster">
+          <button class="action-icon-btn delete-btn" onclick="handleDelete('${exp.id}')" title="Delete Experiment">
             <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
             </svg>
@@ -594,13 +683,13 @@ function renderTable(data = students) {
 }
 
 function handleSearchFilter() {
-  const searchQuery = document.getElementById('studentSearch').value.toLowerCase().trim();
+  const searchQuery = document.getElementById('expSearch').value.toLowerCase().trim();
   const deptQuery = document.getElementById('deptFilter').value;
   
-  const filtered = students.filter(s => {
-    const matchesSearch = s.name.toLowerCase().includes(searchQuery) || s.roll.toLowerCase().includes(searchQuery);
-    const matchesDept = deptQuery === 'all' || s.dept === deptQuery;
-    const matchesStatus = statusFilter === 'all' || s.status === statusFilter;
+  const filtered = experiments.filter(e => {
+    const matchesSearch = e.title.toLowerCase().includes(searchQuery);
+    const matchesDept = deptQuery === 'all' || e.dept === deptQuery;
+    const matchesStatus = statusFilter === 'all' || e.status === statusFilter;
     return matchesSearch && matchesDept && matchesStatus;
   });
 
@@ -611,47 +700,45 @@ function setStatusFilter(type) {
   statusFilter = type;
   document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
   if (type === 'all') document.getElementById('filter-all').classList.add('active');
-  else if (type === 'Active') document.getElementById('filter-active').classList.add('active');
-  else if (type === 'Struggling') document.getElementById('filter-struggling').classList.add('active');
+  else if (type === 'Published') document.getElementById('filter-published').classList.add('active');
+  else if (type === 'Draft') document.getElementById('filter-draft').classList.add('active');
 
   handleSearchFilter();
 }
 
 function openAddModal() {
-  document.getElementById('modalTitle').textContent = 'Enroll New Student';
+  document.getElementById('modalTitle').textContent = 'Create Experiment Template';
   document.getElementById('modalMode').value = 'add';
-  document.getElementById('modalStudentId').value = '';
-  document.getElementById('studentForm').reset();
+  document.getElementById('modalExpId').value = '';
+  document.getElementById('expForm').reset();
   
-  const modal = document.getElementById('studentModal');
+  const modal = document.getElementById('expModal');
   modal.style.display = 'flex';
   setTimeout(() => { modal.querySelector('.modal-card').style.transform = 'translateY(0)'; }, 10);
 }
 
-function openEditModal(studId) {
-  const stud = students.find(s => s.id === studId);
-  if (!stud) return;
+function openEditModal(expId) {
+  const exp = experiments.find(e => e.id === expId);
+  if (!exp) return;
 
-  document.getElementById('modalTitle').textContent = 'Edit Student Info';
+  document.getElementById('modalTitle').textContent = 'Edit Experiment Template';
   document.getElementById('modalMode').value = 'edit';
-  document.getElementById('modalStudentId').value = studId;
+  document.getElementById('modalExpId').value = expId;
   
-  document.getElementById('studName').value = stud.name;
-  document.getElementById('studRoll').value = stud.roll;
-  document.getElementById('studDept').value = stud.dept;
-  document.getElementById('studLevel').value = stud.level;
-  document.getElementById('studXp').value = stud.xp;
-  document.getElementById('studLabs').value = stud.labs;
-  document.getElementById('studGrade').value = stud.grade;
-  document.getElementById('studStatus').value = stud.status;
+  document.getElementById('expTitle').value = exp.title;
+  document.getElementById('expDept').value = exp.dept;
+  document.getElementById('expLevel').value = exp.level;
+  document.getElementById('expAttempts').value = exp.attempts;
+  document.getElementById('expScore').value = exp.score;
+  document.getElementById('expStatus').value = exp.status;
 
-  const modal = document.getElementById('studentModal');
+  const modal = document.getElementById('expModal');
   modal.style.display = 'flex';
   setTimeout(() => { modal.querySelector('.modal-card').style.transform = 'translateY(0)'; }, 10);
 }
 
 function closeModal() {
-  const modal = document.getElementById('studentModal');
+  const modal = document.getElementById('expModal');
   modal.querySelector('.modal-card').style.transform = 'translateY(10px)';
   setTimeout(() => { modal.style.display = 'none'; }, 200);
 }
@@ -660,52 +747,51 @@ function handleFormSubmit(event) {
   event.preventDefault();
   
   const mode = document.getElementById('modalMode').value;
-  const studId = document.getElementById('modalStudentId').value;
+  const expId = document.getElementById('modalExpId').value;
   
-  const name = document.getElementById('studName').value.trim();
-  const roll = document.getElementById('studRoll').value.trim();
-  const dept = document.getElementById('studDept').value;
-  const level = parseInt(document.getElementById('studLevel').value);
-  const xp = parseInt(document.getElementById('studXp').value);
-  const labs = parseInt(document.getElementById('studLabs').value);
-  const grade = document.getElementById('studGrade').value;
-  const status = document.getElementById('studStatus').value;
+  const title = document.getElementById('expTitle').value.trim();
+  const dept = document.getElementById('expDept').value;
+  const level = parseInt(document.getElementById('expLevel').value);
+  const attempts = parseInt(document.getElementById('expAttempts').value);
+  const score = parseInt(document.getElementById('expScore').value);
+  const status = document.getElementById('expStatus').value;
 
   if (mode === 'add') {
-    const seed = name.split(' ')[0].toLowerCase() || 'student';
-    const newStud = {
-      id: 'stud-' + Date.now(),
-      name, roll, dept, level, xp, labs, grade, status, seed
+    const newExp = {
+      id: 'exp-' + Date.now(),
+      title, dept, level, attempts, score, status
     };
-    students.push(newStud);
-    showToast(`Student ${name} successfully enrolled.`, 'success');
+    experiments.push(newExp);
+    showToast(`Simulation "${title}" added successfully.`, 'success');
   } else {
-    const idx = students.findIndex(s => s.id === studId);
+    const idx = experiments.findIndex(e => e.id === expId);
     if (idx !== -1) {
-      students[idx] = { 
-        ...students[idx],
-        name, roll, dept, level, xp, labs, grade, status 
+      experiments[idx] = { 
+        ...experiments[idx],
+        title, dept, level, attempts, score, status 
       };
-      showToast(`Student data modified.`, 'success');
+      showToast(`Experiment template parameters updated.`, 'success');
     }
   }
 
-  localStorage.setItem('zeai_students', JSON.stringify(students));
+  localStorage.setItem('zeai_experiments', JSON.stringify(experiments));
   closeModal();
   updateKPIs();
+  drawBarChart();
   handleSearchFilter();
 }
 
-function handleDelete(studId) {
-  const stud = students.find(s => s.id === studId);
-  if (!stud) return;
+function handleDelete(expId) {
+  const exp = experiments.find(e => e.id === expId);
+  if (!exp) return;
 
-  const confirmed = confirm(`Are you sure you want to remove ${stud.name} from the active student roster? Doing so releases their allocated seat license.`);
+  const confirmed = confirm(`Are you sure you want to delete the simulator template "${exp.title}"? Doing so removes all student workbook grades associated with this module.`);
   if (confirmed) {
-    students = students.filter(s => s.id !== studId);
-    localStorage.setItem('zeai_students', JSON.stringify(students));
-    showToast(`Student ${stud.name} removed.`, 'error');
+    experiments = experiments.filter(e => e.id !== expId);
+    localStorage.setItem('zeai_experiments', JSON.stringify(experiments));
+    showToast(`Experiment "${exp.title}" deleted.`, 'error');
     updateKPIs();
+    drawBarChart();
     handleSearchFilter();
   }
 }
@@ -749,9 +835,15 @@ function escapeHTML(str) {
   return str.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag] || tag));
 }
 
+// Window resize triggers chart redraw
+window.addEventListener('resize', () => {
+  drawBarChart();
+});
+
 window.addEventListener('DOMContentLoaded', () => {
-  initStudents();
+  initExperiments();
   updateKPIs();
+  drawBarChart();
   renderTable();
 
   const savedTheme = localStorage.getItem("zeai_theme");
