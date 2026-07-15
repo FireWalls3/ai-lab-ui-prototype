@@ -391,12 +391,24 @@ table.data-table tr:hover td { background:var(--secondary); }
 
             <!-- Assignment input controls -->
             <div class="card" style="background:var(--muted); border-color:var(--border); padding:16px; margin-top:16px">
-              <div style="font-size:12.5px; font-weight:600; margin-bottom:8px">Assign New Student to supervisor</div>
-              <div class="assign-box">
-                <select id="assignStudentSelect" class="assign-select">
-                  <!-- List of students in department not mapped to this faculty -->
-                </select>
-                <button class="btn-assign" onclick="handleAssignStudent()">Assign Student</button>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+                <span style="font-size:12.5px; font-weight:600">Assign New Students to supervisor (Bulk Mode)</span>
+              </div>
+              
+              <div style="margin-bottom: 8px;">
+                <input type="text" id="assignStudentSearch" placeholder="Search eligible students..." class="form-control" style="height:32px; font-size:12px; margin-bottom:8px" oninput="filterEligibleChecklist()" />
+              </div>
+
+              <div id="eligibleStudentsContainer" style="max-height: 120px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; background: var(--card); display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                <!-- Dynamically populated checkbox inputs -->
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center">
+                <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:500; cursor:pointer">
+                  <input type="checkbox" id="selectAllEligible" onchange="toggleSelectAllEligible(this)" />
+                  <span>Select All</span>
+                </label>
+                <button class="btn-assign" id="btnBulkAssign" onclick="handleBulkAssign()" style="height:34px; padding:0 14px; font-size:12.5px" disabled>Assign Selected (0)</button>
               </div>
             </div>
           </div>
@@ -534,7 +546,7 @@ function selectFaculty(facultyId) {
   document.getElementById('selectedFacultyDetails').textContent = `Department: ${fac.dept} | Specialization: ${fac.spec}`;
 
   renderMappedStudents();
-  populateStudentDropdown();
+  populateStudentChecklist();
 }
 
 function renderMappedStudents() {
@@ -575,51 +587,96 @@ function renderMappedStudents() {
   });
 }
 
-function populateStudentDropdown() {
-  const select = document.getElementById('assignStudentSelect');
-  select.innerHTML = '';
+let currentEligibleStudents = [];
+
+function populateStudentChecklist() {
+  const container = document.getElementById('eligibleStudentsContainer');
+  container.innerHTML = '';
+  document.getElementById('assignStudentSearch').value = '';
+  document.getElementById('selectAllEligible').checked = false;
 
   const fac = faculty.find(f => f.id === selectedFacultyId);
-
-  // Filter students:
-  // 1. Must belong to the same department as the faculty
-  // 2. Must NOT be currently assigned to this faculty member
   const alreadyMappedIds = mappings.filter(m => m.facultyId === selectedFacultyId).map(m => m.studentId);
   
-  const eligible = students.filter(s => {
+  currentEligibleStudents = students.filter(s => {
     return s.dept === fac.dept && !alreadyMappedIds.includes(s.id);
   });
 
-  if (eligible.length === 0) {
-    const option = document.createElement('option');
-    option.textContent = `No available students in ${fac.dept}`;
-    option.value = '';
-    select.appendChild(option);
-    select.disabled = true;
+  renderEligibleChecklist(currentEligibleStudents);
+}
+
+function renderEligibleChecklist(list) {
+  const container = document.getElementById('eligibleStudentsContainer');
+  container.innerHTML = '';
+
+  if (list.length === 0) {
+    container.innerHTML = `<div style="font-size:12px; color:var(--muted-foreground); text-align:center; padding:10px 0">No available students in ${faculty.find(f => f.id === selectedFacultyId).dept}</div>`;
+    document.getElementById('selectAllEligible').disabled = true;
+    updateBulkAssignButton();
     return;
   }
 
-  select.disabled = false;
-  eligible.forEach(stud => {
-    const option = document.createElement('option');
-    option.value = stud.id;
-    option.textContent = `${stud.name} (${stud.roll})`;
-    select.appendChild(option);
+  document.getElementById('selectAllEligible').disabled = false;
+
+  list.forEach(stud => {
+    const label = document.createElement('label');
+    label.style.display = 'flex';
+    label.style.alignItems = 'center';
+    label.style.gap = '8px';
+    label.style.fontSize = '13px';
+    label.style.cursor = 'pointer';
+    label.className = 'eligible-student-item';
+    
+    label.innerHTML = `
+      <input type="checkbox" value="${stud.id}" class="student-checkbox" onchange="updateBulkAssignButton()" />
+      <span>${escapeHTML(stud.name)} <span style="font-family:monospace; font-size:11px; color:var(--muted-foreground)">(${escapeHTML(stud.roll)})</span></span>
+    `;
+    container.appendChild(label);
   });
+
+  updateBulkAssignButton();
 }
 
-function handleAssignStudent() {
-  const studId = document.getElementById('assignStudentSelect').value;
-  if (!studId) return;
+function filterEligibleChecklist() {
+  const query = document.getElementById('assignStudentSearch').value.toLowerCase().trim();
+  const filtered = currentEligibleStudents.filter(s => s.name.toLowerCase().includes(query) || s.roll.toLowerCase().includes(query));
+  renderEligibleChecklist(filtered);
+}
+
+function toggleSelectAllEligible(selectAllCheckbox) {
+  const checkboxes = document.querySelectorAll('.student-checkbox');
+  checkboxes.forEach(cb => {
+    cb.checked = selectAllCheckbox.checked;
+  });
+  updateBulkAssignButton();
+}
+
+function updateBulkAssignButton() {
+  const checked = document.querySelectorAll('.student-checkbox:checked');
+  const btn = document.getElementById('btnBulkAssign');
+  btn.textContent = `Assign Selected (${checked.length})`;
+  btn.disabled = checked.length === 0;
+}
+
+function handleBulkAssign() {
+  const checkedCheckboxes = document.querySelectorAll('.student-checkbox:checked');
+  if (checkedCheckboxes.length === 0) return;
 
   const fac = faculty.find(f => f.id === selectedFacultyId);
-  const stud = students.find(s => s.id === studId);
+  const newlyAssignedNames = [];
 
-  // Add mapping
-  mappings.push({ facultyId: selectedFacultyId, studentId: studId });
+  checkedCheckboxes.forEach(cb => {
+    const studId = cb.value;
+    const stud = students.find(s => s.id === studId);
+    if (stud) {
+      mappings.push({ facultyId: selectedFacultyId, studentId: studId });
+      newlyAssignedNames.push(stud.name);
+    }
+  });
+
   localStorage.setItem('zeai_mappings', JSON.stringify(mappings));
 
-  showToast(`Successfully assigned ${stud.name} under ${fac.name}.`, 'success');
+  showToast(`Successfully bulk assigned ${newlyAssignedNames.length} students under ${fac.name}.`, 'success');
   updateKPIs();
   selectFaculty(selectedFacultyId); // Refresh details
 }
