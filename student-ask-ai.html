@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Ask AI · ZEAI</title>
+<title>Ask AI · Bharath Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
@@ -159,7 +159,7 @@ button { font-family:var(--font); cursor:pointer; }
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="box"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5a2 2 0 0 1-.4 1.2L5 17.5A2 2 0 0 0 6.6 21h10.8a2 2 0 0 0 1.6-3.5l-4.6-6.8A2 2 0 0 1 14 9.5V3"/></svg></div>
-    <div class="name">ZEAI</div>
+    <div class="name">Bharath Lab</div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-label">MAIN</div>
@@ -202,7 +202,7 @@ button { font-family:var(--font); cursor:pointer; }
           <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>
         </div>
         <div class="ai-head-info">
-          <h2>ZEAI — Your Lab AI Tutor</h2>
+          <h2>Bharath Lab — Your Lab AI Tutor</h2>
           <p>Powered by advanced AI · Specialized in STEM lab experiments &amp; theory</p>
         </div>
         <div class="ai-caps">
@@ -222,7 +222,7 @@ button { font-family:var(--font); cursor:pointer; }
           </div>
           <div class="msg-body">
             <div class="bubble">
-              Hello, Ananya! 👋 I'm <strong>ZEAI</strong>, your intelligent lab AI tutor. I'm here to help you with anything related to your experiments, concepts, and coursework at SRM.<br/><br/>
+              Hello, Ananya! 👋 I'm <strong>Bharath Lab</strong>, your intelligent lab AI tutor. I'm here to help you with anything related to your experiments, concepts, and coursework at SRM.<br/><br/>
               Here's what I can do:
               <ul style="margin:10px 0 0 18px;display:flex;flex-direction:column;gap:5px;font-size:13px">
                 <li>🔬 Explain lab procedures step-by-step</li>
@@ -343,7 +343,7 @@ const aiKnowledge = {
 
   "v-i graph": "To plot a V-I graph (Voltage-Current characteristic curve):\n\n**Steps:**\n1. Set up your circuit with a variable power supply\n2. Start at V = 0, record I = 0\n3. Increase voltage in steps (e.g., 1V, 2V, 3V...)\n4. Record current at each step\n5. Plot **V on X-axis**, **I on Y-axis**\n\n**What to look for:**\n• A straight line through origin = **Ohmic conductor** (follows Ohm's Law)\n• Curved line = **Non-ohmic** (e.g., diode, filament bulb)\n• The slope = **1/R** (reciprocal of resistance)\n\nThe steeper the slope, the lower the resistance! 📈",
 
-  "cell division": "Cell division involves two main types:\n\n**Mitosis** (for growth &amp; repair):\n1. **Prophase** — Chromosomes condense\n2. **Metaphase** — Line up at center\n3. **Anaphase** — Pulled to opposite poles\n4. **Telophase** — Two nuclei form\n5. **Cytokinesis** — Cell splits → 2 identical daughter cells\n\n**Meiosis** (for reproduction):\n• Goes through 2 division rounds\n• Produces 4 genetically unique cells\n• Chromosome number is halved (haploid)\n\nIn the ZEAI simulation, focus on identifying each phase! 🧬",
+  "cell division": "Cell division involves two main types:\n\n**Mitosis** (for growth &amp; repair):\n1. **Prophase** — Chromosomes condense\n2. **Metaphase** — Line up at center\n3. **Anaphase** — Pulled to opposite poles\n4. **Telophase** — Two nuclei form\n5. **Cytokinesis** — Cell splits → 2 identical daughter cells\n\n**Meiosis** (for reproduction):\n• Goes through 2 division rounds\n• Produces 4 genetically unique cells\n• Chromosome number is halved (haploid)\n\nIn the Bharath Lab simulation, focus on identifying each phase! 🧬",
 
   "chatelier": "Le Chatelier's Principle states:\n\n*'When a system at equilibrium is disturbed, it shifts to counteract the disturbance.'*\n\n**Examples:**\n• **Add reactant** → Equilibrium shifts forward (more products form)\n• **Remove product** → Equilibrium shifts forward\n• **Increase pressure** → Shifts toward fewer moles of gas\n• **Increase temperature** → Shifts toward endothermic direction\n\n**Real example:** The Haber process (N₂ + 3H₂ ⇌ 2NH₃):\nHigh pressure + low temperature favors ammonia production 🏭",
 };
@@ -356,7 +356,7 @@ function getResponse(text) {
   if (t.includes('v-i') || t.includes('vi graph') || t.includes('v i graph')) return aiKnowledge['v-i graph'];
   if (t.includes('cell division') || t.includes('mitosis') || t.includes('meiosis')) return aiKnowledge['cell division'];
   if (t.includes('chatelier') || t.includes('le chat') || t.includes('equilibrium')) return aiKnowledge['chatelier'];
-  return `That's a great question about **"${text}"**! 🤔\n\nIn the ZEAI lab curriculum, this concept connects to several of your current experiments. Here's my understanding:\n\nScience progresses by questioning and experimenting. The key is to:\n1. Form a hypothesis\n2. Design a controlled experiment\n3. Collect data carefully\n4. Analyze and interpret results\n\nWant me to relate this specifically to one of your current experiments like Ohm's Law or the Titration lab? I can give you a more targeted explanation! 💡`;
+  return `That's a great question about **"${text}"**! 🤔\n\nIn the Bharath Lab curriculum, this concept connects to several of your current experiments. Here's my understanding:\n\nScience progresses by questioning and experimenting. The key is to:\n1. Form a hypothesis\n2. Design a controlled experiment\n3. Collect data carefully\n4. Analyze and interpret results\n\nWant me to relate this specifically to one of your current experiments like Ohm's Law or the Titration lab? I can give you a more targeted explanation! 💡`;
 }
 
 function sendMsg() {
