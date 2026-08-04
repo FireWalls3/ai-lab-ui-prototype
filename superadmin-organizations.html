@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Organizations · Super Admin · ZEAI</title>
+<title>Organizations · Super Admin · Bharath Lab</title>
 <style>
 :root {
   --background:#ffffff; --foreground:#0f172a; --card:#ffffff; --card-foreground:#0f172a;
@@ -153,7 +153,7 @@ table.data-table tr:hover td { background:#f8fafc; }
 <body>
 <div class="shell">
 <aside class="sidebar">
-<div class="sidebar-logo"><div class="box"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5a2 2 0 0 1-.4 1.2L5 17.5A2 2 0 0 0 6.6 21h10.8a2 2 0 0 0 1.6-3.5l-4.6-6.8A2 2 0 0 1 14 9.5V3"/></svg></div><div class="name">ZEAI</div></div>
+<div class="sidebar-logo"><div class="box"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5a2 2 0 0 1-.4 1.2L5 17.5A2 2 0 0 0 6.6 21h10.8a2 2 0 0 0 1.6-3.5l-4.6-6.8A2 2 0 0 1 14 9.5V3"/></svg></div><div class="name">Bharath Lab</div></div>
 <nav class="sidebar-nav">
 <div class="nav-label">PLATFORM</div>
 <a class="nav-link" href="superadmin-dashboard.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>
@@ -178,7 +178,7 @@ table.data-table tr:hover td { background:#f8fafc; }
 </aside>
 <div class="main-col">
 <header class="navbar">
-  <div class="inst-switch"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--muted-foreground)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M9 6h1M14 6h1M9 10h1M14 10h1M9 14h1M14 14h1"/></svg><span>ZEAI Platform — All Organizations</span></div>
+  <div class="inst-switch"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--muted-foreground)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M9 6h1M14 6h1M9 10h1M14 10h1M9 14h1M14 14h1"/></svg><span>Bharath Lab Platform — All Organizations</span></div>
   <div class="navbar-search"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search organizations..." id="topSearch" oninput="syncAndFilter(this.value)" /></div>
   <div class="navbar-actions">
     <button class="icon-btn"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
@@ -188,7 +188,7 @@ table.data-table tr:hover td { background:#f8fafc; }
 <main class="content">
 <div class="page-wrap-admin">
   <div class="page-header">
-    <div><h1>Organizations</h1><p>Manage all tenant institutions on the ZEAI platform</p></div>
+    <div><h1>Organizations</h1><p>Manage all tenant institutions on the Bharath Lab platform</p></div>
     <div class="header-actions">
       <button class="btn btn-secondary" onclick="exportData()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export</button>
       <button class="btn btn-primary" onclick="openAddModal()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> Add Organization</button>
@@ -393,13 +393,13 @@ table.data-table tr:hover td { background:#f8fafc; }
 <script>
 // Mock Database
 let organizations = [
-  { name: "SRM Institute of Science & Technology", domain: "srmist.edu.in", code: "SR", plan: "enterprise", users: 4820, storage: 72, joined: "Jan 2025", status: "active", tokenCap: "5,000,000", maxGpu: 32, dedicatedGpu: "Yes", customSub: "srm.zeai.app", sslStatus: "valid", ssoProvider: "Google SSO", brandColor: "#2b4ed6" },
-  { name: "VIT Chennai", domain: "vit.ac.in", code: "VI", plan: "enterprise", users: 3910, storage: 61, joined: "Mar 2025", status: "active", tokenCap: "5,000,000", maxGpu: 32, dedicatedGpu: "Yes", customSub: "vit.zeai.app", sslStatus: "valid", ssoProvider: "Microsoft AD", brandColor: "#7c3aed" },
-  { name: "Anna University", domain: "annauniv.edu", code: "AN", plan: "pro", users: 2140, storage: 44, joined: "Jun 2025", status: "trial", tokenCap: "1,000,000", maxGpu: 16, dedicatedGpu: "No", customSub: "annauniv.zeai.app", sslStatus: "valid", ssoProvider: "None (Email)", brandColor: "#0891b2" },
-  { name: "PSG College of Technology", domain: "psgtech.ac.in", code: "PS", plan: "pro", users: 1780, storage: 38, joined: "May 2025", status: "active", tokenCap: "1,000,000", maxGpu: 16, dedicatedGpu: "No", customSub: "psgtech.zeai.app", sslStatus: "valid", ssoProvider: "None (Email)", brandColor: "#16a34a" },
-  { name: "Bannari Amman Institute", domain: "bitsathy.ac.in", code: "BA", plan: "starter", users: 640, storage: 18, joined: "Jul 2025", status: "pending", tokenCap: "250,000", maxGpu: 8, dedicatedGpu: "No", customSub: "bitsathy.zeai.app", sslStatus: "expired", ssoProvider: "None (Email)", brandColor: "#d97706" },
-  { name: "Sastra University", domain: "sastra.edu", code: "SA", plan: "pro", users: 2300, storage: 52, joined: "Feb 2025", status: "active", tokenCap: "1,000,000", maxGpu: 16, dedicatedGpu: "No", customSub: "sastra.zeai.app", sslStatus: "valid", ssoProvider: "Google SSO", brandColor: "#dc2626" },
-  { name: "Karunya Institute of Technology", domain: "karunya.edu", code: "KA", plan: "starter", users: 820, storage: 24, joined: "Jun 2025", status: "suspended", tokenCap: "250,000", maxGpu: 8, dedicatedGpu: "No", customSub: "karunya.zeai.app", sslStatus: "expired", ssoProvider: "None (Email)", brandColor: "#475569" }
+  { name: "SRM Institute of Science & Technology", domain: "srmist.edu.in", code: "SR", plan: "enterprise", users: 4820, storage: 72, joined: "Jan 2025", status: "active", tokenCap: "5,000,000", maxGpu: 32, dedicatedGpu: "Yes", customSub: "srm.Bharath Lab.app", sslStatus: "valid", ssoProvider: "Google SSO", brandColor: "#2b4ed6" },
+  { name: "VIT Chennai", domain: "vit.ac.in", code: "VI", plan: "enterprise", users: 3910, storage: 61, joined: "Mar 2025", status: "active", tokenCap: "5,000,000", maxGpu: 32, dedicatedGpu: "Yes", customSub: "vit.Bharath Lab.app", sslStatus: "valid", ssoProvider: "Microsoft AD", brandColor: "#7c3aed" },
+  { name: "Anna University", domain: "annauniv.edu", code: "AN", plan: "pro", users: 2140, storage: 44, joined: "Jun 2025", status: "trial", tokenCap: "1,000,000", maxGpu: 16, dedicatedGpu: "No", customSub: "annauniv.Bharath Lab.app", sslStatus: "valid", ssoProvider: "None (Email)", brandColor: "#0891b2" },
+  { name: "PSG College of Technology", domain: "psgtech.ac.in", code: "PS", plan: "pro", users: 1780, storage: 38, joined: "May 2025", status: "active", tokenCap: "1,000,000", maxGpu: 16, dedicatedGpu: "No", customSub: "psgtech.Bharath Lab.app", sslStatus: "valid", ssoProvider: "None (Email)", brandColor: "#16a34a" },
+  { name: "Bannari Amman Institute", domain: "bitsathy.ac.in", code: "BA", plan: "starter", users: 640, storage: 18, joined: "Jul 2025", status: "pending", tokenCap: "250,000", maxGpu: 8, dedicatedGpu: "No", customSub: "bitsathy.Bharath Lab.app", sslStatus: "expired", ssoProvider: "None (Email)", brandColor: "#d97706" },
+  { name: "Sastra University", domain: "sastra.edu", code: "SA", plan: "pro", users: 2300, storage: 52, joined: "Feb 2025", status: "active", tokenCap: "1,000,000", maxGpu: 16, dedicatedGpu: "No", customSub: "sastra.Bharath Lab.app", sslStatus: "valid", ssoProvider: "Google SSO", brandColor: "#dc2626" },
+  { name: "Karunya Institute of Technology", domain: "karunya.edu", code: "KA", plan: "starter", users: 820, storage: 24, joined: "Jun 2025", status: "suspended", tokenCap: "250,000", maxGpu: 8, dedicatedGpu: "No", customSub: "karunya.Bharath Lab.app", sslStatus: "expired", ssoProvider: "None (Email)", brandColor: "#475569" }
 ];
 
 const avatarColors = {
@@ -752,7 +752,7 @@ function saveOrganization() {
       storage: Math.floor(Math.random() * 80) + 5,
       joined: new Date().toLocaleString('default', { month: 'short', year: 'numeric' }),
       tokenCap: "250,000", maxGpu: 8, dedicatedGpu: "No",
-      customSub: code.toLowerCase() + ".zeai.app", sslStatus: "valid", ssoProvider: "None (Email)", brandColor: "#3b82f6"
+      customSub: code.toLowerCase() + ".Bharath Lab.app", sslStatus: "valid", ssoProvider: "None (Email)", brandColor: "#3b82f6"
     });
     showToast(`${name} has been added successfully!`);
   } else {
