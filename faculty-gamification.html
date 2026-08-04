@@ -191,7 +191,7 @@ table.data-table tr:hover td { background:var(--secondary); }
       <span>Analytics</span>
     </a>
     <div class="nav-label">SUPPORT</div>
-    <a class="nav-link" href="#">
+    <a class="nav-link" href="faculty-ai-insights.html">
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/>
       </svg>
@@ -203,12 +203,12 @@ table.data-table tr:hover td { background:var(--secondary); }
       <img class="avatar" src="https://api.dicebear.com/9.x/thumbs/svg?seed=Rakesh&backgroundColor=c0aede" alt="Faculty avatar" />
       <div><div class="uname">Prof. Rakesh Rao</div><div class="urole">Faculty · Physics Dept.</div></div>
     </div>
-    <a class="logout-btn" href="index.html">
+    <button class="logout-btn" onclick="handleLogout()">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>
       </svg> 
       <span>Log Out</span>
-    </a>
+    </button>
   </div>
 </aside>
 <div class="main-col">
@@ -585,6 +585,16 @@ window.addEventListener('DOMContentLoaded', () => {
     applyTheme(!isDark);
   });
 });
+
+function handleLogout() {
+  try {
+    localStorage.removeItem("zeai_role");
+    localStorage.removeItem("zeai_user");
+    sessionStorage.removeItem("zeai_role");
+    sessionStorage.removeItem("zeai_user");
+  } catch(e) {}
+  window.location.href = "index.html?logout=true";
+}
 </script>
 </body>
 </html>

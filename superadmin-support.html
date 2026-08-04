@@ -248,19 +248,32 @@ table.data-table tr:hover td { background:#f8fafc; }
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-// Mock Database
-let tickets = [
-  { id: "#4821", title: "Login OAuth failing for staff SSO integration", org: "SRM Institute", category: "bug", priority: "high", assignee: "Rajan K.", assigneeImg: "Rajan", time: "2h ago", status: "in progress", desc: "Our staff cannot authenticate using their custom Google OAuth integration. They get a 403 authorization error on redirect.", replies: [{ sender: "reporter", text: "We need this fixed by tomorrow morning for exam schedules." }] },
-  { id: "#4820", title: "Students cannot upload lab reports over 50MB", org: "VIT Chennai", category: "bug", priority: "high", assignee: "Priya M.", assigneeImg: "Priya", time: "3h ago", status: "open", desc: "For physics datasets, students need to upload large ZIP archives. Currently failing at 50MB upload limit.", replies: [] },
-  { id: "#4819", title: "Analytics page extremely slow to load (>15s)", org: "Anna University", category: "performance", priority: "medium", assignee: "Suresh V.", assigneeImg: "Suresh", time: "6h ago", status: "in progress", desc: "Loading the faculty analytics reports takes over 15 seconds. Need indexes or optimization on DB query.", replies: [] },
-  { id: "#4818", title: "Request: bulk certificate export as ZIP", org: "PSG College", category: "feature", priority: "low", assignee: "Unassigned", assigneeImg: "", time: "1d ago", status: "open", desc: "We want a way to export student certificates in batch. Downloading them individually is very tedious.", replies: [] },
-  { id: "#4817", title: "GPU timeout on molecular dynamics simulation render", org: "SRM Institute", category: "bug", priority: "high", assignee: "Kumar A.", assigneeImg: "Kumar", time: "1d ago", status: "in progress", desc: "Chemistry lab simulations crash with dynamic memory allocation error during rendering of large protein molecules.", replies: [] },
-  { id: "#4816", title: "Billing invoice for June shows incorrect amount", org: "Bannari Amman", category: "billing", priority: "medium", assignee: "Lakshmi R.", assigneeImg: "Lakshmi", time: "2d ago", status: "resolved", desc: "The automatic invoice generated for June charged us for 100 extra students. Please audit.", replies: [{ sender: "admin", text: "Checked. The database records show those students were deleted on July 2nd. I have issued a refund of ₹4,000 to your card." }] },
-  { id: "#4815", title: "Cannot access faculty dashboard after password reset", org: "Sastra University", category: "access", priority: "high", assignee: "Rajan K.", assigneeImg: "Rajan", time: "2d ago", status: "resolved", desc: "Professor Suresh cannot log in. The password reset email link states 'expired' immediately on click.", replies: [{ sender: "admin", text: "Fixed the token expiry duration from 15 minutes to 2 hours. Link re-sent." }] }
+const defaultTickets = [
+  { id: "#4821", title: "Login OAuth failing for staff SSO integration", org: "SRM Institute", user: "Dr. Meera Krishnan", role: "Admin", category: "bug", priority: "high", assignee: "Rajan K.", assigneeImg: "Rajan", time: "2h ago", status: "in progress", desc: "Our staff cannot authenticate using their custom Google OAuth integration. They get a 403 authorization error on redirect.", replies: [{ sender: "reporter", text: "We need this fixed by tomorrow morning for exam schedules." }] },
+  { id: "#4820", title: "Students cannot upload lab reports over 50MB", org: "VIT Chennai", user: "Ananya Sharma", role: "Student", category: "bug", priority: "high", assignee: "Priya M.", assigneeImg: "Priya", time: "3h ago", status: "open", desc: "For physics datasets, students need to upload large ZIP archives. Currently failing at 50MB upload limit.", replies: [] },
+  { id: "#4819", title: "Analytics page extremely slow to load (>15s)", org: "Anna University", user: "Prof. Rakesh Rao", role: "Faculty", category: "performance", priority: "medium", assignee: "Suresh V.", assigneeImg: "Suresh", time: "6h ago", status: "in progress", desc: "Loading the faculty analytics reports takes over 15 seconds. Need indexes or optimization on DB query.", replies: [] },
+  { id: "#4818", title: "Request: bulk certificate export as ZIP", org: "PSG College", user: "Prof. Suresh Iyer", role: "Faculty", category: "feature", priority: "low", assignee: "Unassigned", assigneeImg: "", time: "1d ago", status: "open", desc: "We want a way to export student certificates in batch. Downloading them individually is very tedious.", replies: [] },
+  { id: "#4817", title: "GPU timeout on molecular dynamics simulation render", org: "SRM Institute", user: "Rahul Sharma", role: "Student", category: "bug", priority: "high", assignee: "Kumar A.", assigneeImg: "Kumar", time: "1d ago", status: "in progress", desc: "Chemistry lab simulations crash with dynamic memory allocation error during rendering of large protein molecules.", replies: [] },
+  { id: "#4816", title: "Billing invoice for June shows incorrect amount", org: "Bannari Amman", user: "Dr. Meera Krishnan", role: "Admin", category: "billing", priority: "medium", assignee: "Lakshmi R.", assigneeImg: "Lakshmi", time: "2d ago", status: "resolved", desc: "The automatic invoice generated for June charged us for 100 extra students. Please audit.", replies: [{ sender: "admin", text: "Checked. Database records updated and refund issued." }] }
 ];
 
+let tickets = [];
 let activeTab = 'all';
 let viewingTicketIndex = -1;
+
+function initTickets() {
+  const saved = localStorage.getItem('zeai_tickets');
+  if (saved) {
+    tickets = JSON.parse(saved);
+  } else {
+    tickets = [...defaultTickets];
+    localStorage.setItem('zeai_tickets', JSON.stringify(tickets));
+  }
+}
+
+function saveTickets() {
+  localStorage.setItem('zeai_tickets', JSON.stringify(tickets));
+}
 
 function showToast(message, type = "success") {
   const container = document.getElementById("toastContainer");
@@ -287,51 +300,52 @@ function renderTickets() {
   let visibleCount = 0;
   
   tickets.forEach((ticket, index) => {
-    const matchesSearch = ticket.title.toLowerCase().includes(searchVal) || ticket.org.toLowerCase().includes(searchVal) || ticket.id.includes(searchVal);
-    const matchesPriority = !priorityVal || ticket.priority === priorityVal;
-    const matchesCategory = !categoryVal || ticket.category === categoryVal;
-    const matchesTab = activeTab === 'all' || ticket.status === activeTab;
+    const matchesSearch = ticket.title.toLowerCase().includes(searchVal) || (ticket.org && ticket.org.toLowerCase().includes(searchVal)) || ticket.id.includes(searchVal) || (ticket.user && ticket.user.toLowerCase().includes(searchVal));
+    const matchesPriority = !priorityVal || ticket.priority.toLowerCase() === priorityVal.toLowerCase();
+    const matchesCategory = !categoryVal || ticket.category.toLowerCase().includes(categoryVal.toLowerCase());
+    const matchesTab = activeTab === 'all' || ticket.status.toLowerCase() === activeTab.toLowerCase();
     
     if (matchesSearch && matchesPriority && matchesCategory && matchesTab) {
       visibleCount++;
       const tr = document.createElement("tr");
       
       let catBadge = "badge-slate";
-      if (ticket.category === "bug") catBadge = "badge-red";
-      else if (ticket.category === "feature") catBadge = "badge-slate";
-      else if (ticket.category === "access") catBadge = "badge-amber";
-      else if (ticket.category === "billing") catBadge = "badge-green";
-      else if (ticket.category === "performance") catBadge = "badge-blue";
+      if (ticket.category.toLowerCase().includes("bug")) catBadge = "badge-red";
+      else if (ticket.category.toLowerCase().includes("feature")) catBadge = "badge-slate";
+      else if (ticket.category.toLowerCase().includes("access")) catBadge = "badge-amber";
+      else if (ticket.category.toLowerCase().includes("billing")) catBadge = "badge-green";
+      else if (ticket.category.toLowerCase().includes("performance")) catBadge = "badge-blue";
       
       let prioColor = "#64748b";
-      if (ticket.priority === "high") prioColor = "#dc2626";
-      else if (ticket.priority === "medium") prioColor = "#d97706";
+      if (ticket.priority.toLowerCase() === "high") prioColor = "#dc2626";
+      else if (ticket.priority.toLowerCase() === "medium") prioColor = "#d97706";
       
       let statusBadge = "badge-slate";
-      if (ticket.status === "resolved") statusBadge = "badge-green";
-      else if (ticket.status === "in progress") statusBadge = "badge-amber";
-      else if (ticket.status === "open") statusBadge = "badge-red";
+      if (ticket.status.toLowerCase() === "resolved") statusBadge = "badge-green";
+      else if (ticket.status.toLowerCase() === "in progress") statusBadge = "badge-amber";
+      else if (ticket.status.toLowerCase() === "open") statusBadge = "badge-red";
       
       let assigneeHTML = `<span style="font-size:12px;color:#94a3b8">Unassigned</span>`;
-      if (ticket.assignee !== "Unassigned") {
+      if (ticket.assignee && ticket.assignee !== "Unassigned") {
         assigneeHTML = `
           <div class="assignee-cell">
-            <img src="https://api.dicebear.com/9.x/thumbs/svg?seed=${ticket.assigneeImg}&backgroundColor=dbeafe" style="width:24px;height:24px;border-radius:50%" />
             <span style="font-size:12px">${ticket.assignee}</span>
           </div>
         `;
       }
       
+      const userRoleDisplay = ticket.user ? `${ticket.user} <span style="font-size:11px;color:#64748b">(${ticket.role || 'User'})</span>` : (ticket.org || 'SRM Institute');
+
       tr.innerHTML = `
         <td class="ticket-id">${ticket.id}</td>
         <td style="font-weight:600;max-width:220px">${ticket.title}</td>
-        <td style="color:#64748b;font-size:12px">${ticket.org}</td>
+        <td style="color:#64748b;font-size:12px">${userRoleDisplay}</td>
         <td><span class="badge ${catBadge}">${ticket.category}</span></td>
         <td><span style="color:${prioColor};font-weight:600;font-size:12px"><span class="p-dot" style="background:${prioColor}"></span>${ticket.priority}</span></td>
         <td>${assigneeHTML}</td>
-        <td style="color:#94a3b8;font-size:12px">${ticket.time}</td>
+        <td style="color:#94a3b8;font-size:12px">${ticket.time || 'Today'}</td>
         <td><span class="badge ${statusBadge}">${ticket.status}</span></td>
-        <td><button class="action-btn" onclick="viewTicket(${index})">View</button></td>
+        <td><button class="action-btn" onclick="viewTicket(${index})">View / Triage</button></td>
       `;
       body.appendChild(tr);
     }
@@ -341,17 +355,17 @@ function renderTickets() {
   
   // Update Tab Header counts
   document.getElementById("tab-all").textContent = `All (${tickets.length})`;
-  document.getElementById("tab-open").textContent = `Open (${tickets.filter(t => t.status === 'open').length})`;
-  document.getElementById("tab-in-progress").textContent = `In Progress (${tickets.filter(t => t.status === 'in progress').length})`;
-  document.getElementById("tab-resolved").textContent = `Resolved (${tickets.filter(t => t.status === 'resolved').length})`;
+  document.getElementById("tab-open").textContent = `Open (${tickets.filter(t => t.status.toLowerCase() === 'open').length})`;
+  document.getElementById("tab-in-progress").textContent = `In Progress (${tickets.filter(t => t.status.toLowerCase() === 'in progress').length})`;
+  document.getElementById("tab-resolved").textContent = `Resolved (${tickets.filter(t => t.status.toLowerCase() === 'resolved').length})`;
   
   updateStats();
 }
 
 function updateStats() {
-  const openCount = tickets.filter(t => t.status === 'open').length;
-  const highCount = tickets.filter(t => t.priority === 'high' && t.status !== 'resolved').length;
-  const resolvedCount = tickets.filter(t => t.status === 'resolved').length;
+  const openCount = tickets.filter(t => t.status.toLowerCase() === 'open').length;
+  const highCount = tickets.filter(t => t.priority.toLowerCase() === 'high' && t.status.toLowerCase() !== 'resolved').length;
+  const resolvedCount = tickets.filter(t => t.status.toLowerCase() === 'resolved').length;
   
   document.getElementById("stat-open").textContent = openCount;
   document.getElementById("stat-high-priority").textContent = `${highCount} high priority`;
@@ -380,21 +394,29 @@ function viewTicket(index) {
   const details = document.getElementById("modalTicketDetails");
   
   let threadHTML = "";
-  ticket.replies.forEach(rep => {
+  (ticket.replies || []).forEach(rep => {
     const isSystem = rep.sender === "system";
     const isAdmin = rep.sender === "admin";
     let senderClass = "msg reporter";
     if (isAdmin) senderClass = "msg admin";
     else if (isSystem) senderClass = "msg system";
     
-    threadHTML += `<div class="${senderClass}">${rep.text}</div>`;
+    threadHTML += `<div class="${senderClass}"><strong>${rep.sender.toUpperCase()}:</strong> ${rep.text}</div>`;
   });
   
   details.innerHTML = `
     <div style="font-size:13px;margin-bottom:12px;">
       <strong>ID:</strong> <span class="ticket-id">${ticket.id}</span> | 
-      <strong>Category:</strong> <span class="badge badge-blue">${ticket.category}</span> | 
-      <strong>Priority:</strong> <span style="font-weight:700;">${ticket.priority}</span>
+      <strong>Reporter:</strong> <strong>${ticket.user || 'Unknown'} (${ticket.role || 'User'})</strong> | 
+      <strong>Category:</strong> <span class="badge badge-blue">${ticket.category}</span>
+    </div>
+    <div style="margin-bottom:12px; display:flex; gap:10px; align-items:center;">
+      <label style="font-size:12px; font-weight:600; color:#475569">Update Status:</label>
+      <select id="statusSelect" style="padding:4px 8px; border-radius:6px; border:1px solid #cbd5e1; font-size:12px;" onchange="updateTicketStatus(this.value)">
+        <option value="open" ${ticket.status.toLowerCase() === 'open' ? 'selected' : ''}>Open</option>
+        <option value="in progress" ${ticket.status.toLowerCase() === 'in progress' ? 'selected' : ''}>In Progress</option>
+        <option value="resolved" ${ticket.status.toLowerCase() === 'resolved' ? 'selected' : ''}>Resolved</option>
+      </select>
     </div>
     <h3 style="font-size:15px;margin-bottom:8px;color:#1e293b;">${ticket.title}</h3>
     <p style="font-size:13px;color:#475569;background:#f8fafc;padding:12px;border-radius:8px;border:1px solid var(--border);">${ticket.desc}</p>
@@ -406,6 +428,15 @@ function viewTicket(index) {
   
   document.getElementById("replyText").value = "";
   document.getElementById("viewTicketModal").classList.add("open");
+}
+
+function updateTicketStatus(newStatus) {
+  if (viewingTicketIndex !== -1 && tickets[viewingTicketIndex]) {
+    tickets[viewingTicketIndex].status = newStatus;
+    saveTickets();
+    renderTickets();
+    showToast(`Ticket status updated to "${newStatus.toUpperCase()}".`);
+  }
 }
 
 function closeViewModal() {
@@ -420,10 +451,12 @@ function sendReply() {
   }
   
   const ticket = tickets[viewingTicketIndex];
+  if (!ticket.replies) ticket.replies = [];
   ticket.replies.push({ sender: "admin", text: replyText });
   ticket.status = "in progress"; // Auto transition to in progress
   
-  showToast("Reply sent to institution admin!");
+  saveTickets();
+  showToast("Reply sent to user!");
   closeViewModal();
   renderTickets();
 }
@@ -451,10 +484,10 @@ function createTicket() {
     return;
   }
   
-  const idNum = Math.floor(Math.random() * 100) + 4822;
+  const idNum = Math.floor(Math.random() * 1000) + 4825;
   const newTicket = {
     id: "#" + idNum,
-    title, org, category, priority, assignee,
+    title, org, user: "Aditya Verma", role: "Super Admin", category, priority, assignee,
     assigneeImg: assignee.split(" ")[0],
     time: "Just now",
     status: "open",
@@ -463,6 +496,7 @@ function createTicket() {
   };
   
   tickets.unshift(newTicket);
+  saveTickets();
   showToast(`Ticket ${newTicket.id} created successfully.`);
   closeCreateModal();
   renderTickets();
@@ -472,7 +506,18 @@ function exportData() {
   showToast("Support tickets index exported successfully.");
 }
 
+function handleLogout() {
+  try {
+    localStorage.removeItem("zeai_role");
+    localStorage.removeItem("zeai_user");
+    sessionStorage.removeItem("zeai_role");
+    sessionStorage.removeItem("zeai_user");
+  } catch(e) {}
+  window.location.href = "index.html?logout=true";
+}
+
 // Initial Render
+initTickets();
 renderTickets();
 
 document.getElementById('viewTicketModal').addEventListener('click', function(e) {

@@ -139,7 +139,7 @@ input,select,textarea { font-family:var(--font); }
       <img style="width:32px;height:32px;border-radius:50%;" src="https://api.dicebear.com/9.x/thumbs/svg?seed=Ananya&backgroundColor=b6e3f4" />
       <div><div class="uname">Ananya Sharma</div><div class="urole">Student · Sem 5</div></div>
     </div>
-    <button class="logout-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Log Out</button>
+    <button class="logout-btn" onclick="handleLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg> <span>Log Out</span></button>
   </div>
 </aside>
 
@@ -178,6 +178,10 @@ input,select,textarea { font-family:var(--font); }
       <div class="s-nav-item" onclick="switchSection('privacy', this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         Privacy
+      </div>
+      <div class="s-nav-item" onclick="switchSection('tickets', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="m4.9 4.9 4.2 4.2M14.9 14.9l4.2 4.2M14.9 9.1l4.2-4.2M4.9 19.1l4.2-4.2"/></svg>
+        Bug Reports &amp; Feature Requests
       </div>
     </div>
 
@@ -488,6 +492,56 @@ input,select,textarea { font-family:var(--font); }
         <button class="save-btn" style="margin-top:14px">Save Privacy Settings</button>
       </div>
 
+      <!-- BUG REPORTS & FEATURE REQUESTS -->
+      <div class="settings-section" id="section-tickets" style="display:none;">
+        <div class="section-head">
+          <h2>Bug Reports & Feature Requests</h2>
+          <p>Submit tickets directly to ZEAI Platform Engineering and track their resolution status</p>
+        </div>
+
+        <!-- Submit Ticket Card -->
+        <div class="setting-card" style="padding:20px;">
+          <h3 style="font-size:15px; font-weight:700; margin-bottom:14px; color:#1e293b;">Submit New Ticket</h3>
+          <form id="studentTicketForm" onsubmit="handleStudentTicketSubmit(event)">
+            <div style="margin-bottom:12px;">
+              <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:4px;">Ticket Title / Issue Summary *</label>
+              <input type="text" id="ticketTitle" class="form-input" style="width:100%;" placeholder="e.g. Simulation stutters when adjusting resistance above 100 ohms" required />
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+              <div>
+                <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:4px;">Category *</label>
+                <select id="ticketCategory" class="form-select" style="width:100%;">
+                  <option value="Bug Report">🐛 Bug Report</option>
+                  <option value="Feature Request">💡 Feature Request</option>
+                  <option value="Access Issue">🔑 Access Issue</option>
+                </select>
+              </div>
+              <div>
+                <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:4px;">Priority</label>
+                <select id="ticketPriority" class="form-select" style="width:100%;">
+                  <option value="Low">Low</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="High">High</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-bottom:14px;">
+              <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:4px;">Detailed Description *</label>
+              <textarea id="ticketDesc" class="form-input" style="width:100%; height:90px; resize:vertical;" placeholder="Describe what happened, steps to reproduce, or feature details..." required></textarea>
+            </div>
+            <button type="submit" class="save-btn">Submit Ticket to Superadmin</button>
+          </form>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- My Tickets List -->
+        <h3 style="font-size:15px; font-weight:700; margin-bottom:14px; color:#1e293b;">My Submitted Tickets</h3>
+        <div id="studentTicketsList" style="display:flex; flex-direction:column; gap:12px;">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -499,6 +553,92 @@ function switchSection(id, el) {
   document.querySelectorAll('.s-nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('section-' + id).style.display = 'block';
   el.classList.add('active');
+
+  if (id === 'tickets') {
+    renderStudentTickets();
+  }
+}
+
+function handleStudentTicketSubmit(e) {
+  e.preventDefault();
+  const title = document.getElementById('ticketTitle').value.trim();
+  const category = document.getElementById('ticketCategory').value;
+  const priority = document.getElementById('ticketPriority').value;
+  const desc = document.getElementById('ticketDesc').value.trim();
+
+  if (!title || !desc) return;
+
+  const saved = localStorage.getItem('zeai_tickets');
+  let tickets = saved ? JSON.parse(saved) : [];
+
+  const newTicket = {
+    id: '#' + (Math.floor(Math.random() * 1000) + 4830),
+    title: title,
+    org: 'SRM Institute of Science & Technology',
+    user: 'Ananya Sharma',
+    role: 'Student',
+    category: category,
+    priority: priority,
+    status: 'Open',
+    time: 'Just now',
+    desc: desc,
+    replies: []
+  };
+
+  tickets.unshift(newTicket);
+  localStorage.setItem('zeai_tickets', JSON.stringify(tickets));
+
+  document.getElementById('studentTicketForm').reset();
+  alert('Ticket submitted successfully! Super Admin has been notified.');
+  renderStudentTickets();
+}
+
+function renderStudentTickets() {
+  const container = document.getElementById('studentTicketsList');
+  if (!container) return;
+  
+  const saved = localStorage.getItem('zeai_tickets');
+  let tickets = saved ? JSON.parse(saved) : [];
+
+  // Filter tickets submitted by Student or Ananya Sharma
+  const myTickets = tickets.filter(t => t.user === 'Ananya Sharma' || t.role === 'Student');
+
+  if (myTickets.length === 0) {
+    container.innerHTML = `<div style="padding:20px; text-align:center; color:var(--muted); font-size:13px; background:white; border:1px solid var(--border); border-radius:10px;">You have no active bug reports or feature request tickets.</div>`;
+    return;
+  }
+
+  container.innerHTML = '';
+  myTickets.forEach(t => {
+    let statusColor = '#dc2626';
+    if (t.status.toLowerCase() === 'resolved') statusColor = '#16a34a';
+    else if (t.status.toLowerCase() === 'in progress') statusColor = '#d97706';
+
+    let repliesHTML = '';
+    if (t.replies && t.replies.length > 0) {
+      repliesHTML = `<div style="margin-top:10px; padding:10px; background:#eff3ff; border-radius:6px; font-size:12px; color:#1e3a8a;">
+        <strong>Super Admin Reply:</strong> ${t.replies[t.replies.length - 1].text}
+      </div>`;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'setting-card';
+    card.style.padding = '16px';
+    card.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+        <span style="font-weight:700; font-size:14px; color:#1e293b;">${t.title}</span>
+        <span style="font-size:11px; font-weight:700; color:${statusColor}; background:#f1f5f9; padding:3px 8px; border-radius:6px; text-transform:uppercase;">${t.status}</span>
+      </div>
+      <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">
+        ID: <span style="font-family:monospace;">${t.id}</span> | Category: <strong>${t.category}</strong> | Priority: <strong>${t.priority}</strong> | Submitted: ${t.time || 'Recently'}
+      </div>
+      <div style="font-size:13px; color:#334155; background:#f8fafc; padding:10px; border-radius:6px; border:1px solid var(--border);">
+        ${t.desc}
+      </div>
+      ${repliesHTML}
+    `;
+    container.appendChild(card);
+  });
 }
 
 function setColor(el, color) {
@@ -511,6 +651,16 @@ function setColor(el, color) {
     d.style.border = '';
   });
   el.style.boxShadow = '0 0 0 2px white inset, 0 0 0 3px ' + color;
+}
+
+function handleLogout() {
+  try {
+    localStorage.removeItem("zeai_role");
+    localStorage.removeItem("zeai_user");
+    sessionStorage.removeItem("zeai_role");
+    sessionStorage.removeItem("zeai_user");
+  } catch(e) {}
+  window.location.href = "index.html?logout=true";
 }
 </script>
 </body>
