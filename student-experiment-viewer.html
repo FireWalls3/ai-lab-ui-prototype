@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Experiment Viewer · ZEAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --primary:#2b4ed6; --primary-light:#eff3ff;
+  --bg:#f8fafc; --card:#ffffff; --border:#e2e8f0;
+  --text:#0f172a; --muted:#64748b; --subtle:#94a3b8;
+  --ai-from:#4f46e5; --ai-to:#9333ea;
+  --radius:10px; --radius-sm:6px;
+  --font:"Inter", system-ui, sans-serif;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; font-family:var(--font); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
+a { text-decoration:none; color:inherit; }
+button { font-family:var(--font); cursor:pointer; }
+
+/* ─ Toolbar ─ */
+.toolbar {
+  height:54px; background:white; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between; padding:0 20px;
+  position:sticky; top:0; z-index:50; gap:16px;
+}
+.toolbar-left { display:flex; align-items:center; gap:12px; }
+.back-btn {
+  display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:var(--radius-sm);
+  border:1px solid var(--border); background:white; font-size:13px; font-weight:500; color:#475569;
+  transition:all 0.18s;
+}
+.back-btn:hover { background:var(--bg); color:var(--text); }
+.back-btn svg { width:14px; height:14px; stroke:currentColor; }
+.breadcrumb { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--muted); }
+.breadcrumb span { color:var(--text); font-weight:600; }
+.toolbar-right { display:flex; align-items:center; gap:12px; }
+.progress-pill { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); }
+.progress-pill .bar { width:80px; height:5px; background:#e2e8f0; border-radius:3px; overflow:hidden; }
+.progress-pill .fill { height:100%; background:var(--primary); border-radius:3px; width:62%; }
+.mode-badge { padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+.mode-resume { background:#dbeafe; color:#1d4ed8; }
+.mode-preview { background:#f3e8ff; color:#7c3aed; }
+.mode-start { background:#dcfce7; color:#15803d; }
+.mode-review { background:#fef3c7; color:#b45309; }
+
+/* ─ Main split layout ─ */
+.viewer-shell { display:flex; height:calc(100vh - 54px); overflow:hidden; }
+
+/* ─ Lab panel ─ */
+.lab-panel { flex:1; overflow-y:auto; display:flex; flex-direction:column; }
+.lab-header { padding:24px 28px 0; }
+.lab-subject-tag { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--primary); margin-bottom:6px; }
+.lab-title { font-size:22px; font-weight:700; color:#1e293b; margin-bottom:4px; }
+.lab-meta { display:flex; align-items:center; gap:14px; font-size:12px; color:var(--muted); margin-bottom:20px; }
+.lab-meta svg { width:13px; height:13px; stroke:currentColor; }
+.lab-meta span { display:flex; align-items:center; gap:4px; }
+
+/* ─ Tabs ─ */
+.tabs { display:flex; gap:0; border-bottom:2px solid #e2e8f0; padding:0 28px; background:white; position:sticky; top:0; z-index:10; }
+.tab-btn {
+  padding:11px 18px; font-size:13px; font-weight:500; color:var(--muted);
+  border:none; background:none; border-bottom:2px solid transparent; margin-bottom:-2px;
+  transition:all 0.18s; cursor:pointer;
+}
+.tab-btn.active { color:var(--primary); border-bottom-color:var(--primary); font-weight:600; }
+.tab-btn:hover:not(.active) { color:#1e293b; }
+
+/* ─ Tab content ─ */
+.tab-content { padding:24px 28px; flex:1; }
+.tab-pane { display:none; }
+.tab-pane.active { display:block; }
+
+/* ─ Overview ─ */
+.overview-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+.info-card { background:var(--bg); border-radius:var(--radius); padding:16px; border:1px solid #e2e8f0; }
+.info-card h4 { font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:10px; }
+.objective-list { list-style:none; display:flex; flex-direction:column; gap:8px; }
+.objective-list li { display:flex; align-items:flex-start; gap:8px; font-size:13px; color:#334155; }
+.obj-dot { width:18px; height:18px; border-radius:50%; background:#eff3ff; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+.obj-dot svg { width:10px; height:10px; stroke:var(--primary); }
+.material-list { display:flex; flex-wrap:wrap; gap:7px; }
+.material-tag { padding:4px 10px; background:#f1f5f9; border-radius:20px; font-size:12px; color:#475569; font-weight:500; }
+.safety-note { display:flex; gap:10px; padding:12px 14px; background:#fef3c7; border-radius:var(--radius-sm); border-left:3px solid #f59e0b; font-size:13px; color:#78350f; margin-top:16px; }
+.safety-note svg { width:16px; height:16px; stroke:#f59e0b; flex-shrink:0; margin-top:1px; }
+
+/* ─ Simulation ─ */
+.sim-container { display:grid; grid-template-columns:1fr 280px; gap:20px; }
+.sim-canvas {
+  background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);
+  border-radius:12px; aspect-ratio:16/9; position:relative; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+}
+.sim-controls { background:white; border:1px solid var(--border); border-radius:12px; padding:18px; display:flex; flex-direction:column; gap:16px; }
+.sim-controls h4 { font-size:13px; font-weight:600; color:#1e293b; margin-bottom:4px; }
+.control-row { display:flex; flex-direction:column; gap:6px; }
+.control-label { display:flex; justify-content:space-between; font-size:12px; }
+.control-label .name { color:#475569; }
+.control-label .val { font-weight:700; color:var(--primary); }
+input[type=range] { width:100%; accent-color:var(--primary); }
+.readout-row { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:#f8fafc; border-radius:8px; }
+.readout-label { font-size:12px; color:var(--muted); }
+.readout-val { font-size:18px; font-weight:700; color:#1e293b; font-variant-numeric:tabular-nums; }
+.readout-unit { font-size:11px; color:var(--muted); }
+.run-btn {
+  width:100%; padding:10px; border-radius:8px; border:none;
+  background:var(--primary); color:white; font-size:13px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s;
+}
+.run-btn:hover { background:#2340b8; transform:scale(1.01); }
+.run-btn svg { width:14px; height:14px; stroke:white; }
+.run-btn.running { background:#16a34a; }
+
+/* Circuit SVG animation */
+.circuit-svg { width:100%; height:100%; }
+.wire { stroke:#60a5fa; stroke-width:2; fill:none; stroke-dasharray:8 4; animation:dash 1.5s linear infinite; }
+.wire.off { stroke:#334155; animation:none; }
+@keyframes dash { to { stroke-dashoffset:-24; } }
+.resistor-body { fill:#fbbf24; stroke:#78350f; stroke-width:1.5; rx:3; }
+.battery { fill:#22c55e; }
+.ammeter { fill:none; stroke:#f472b6; stroke-width:2; }
+.sim-label { fill:#94a3b8; font-size:10px; font-family:Inter,sans-serif; }
+.sim-val { fill:#60a5fa; font-size:13px; font-weight:700; font-family:Inter,sans-serif; }
+
+/* ─ Quiz ─ */
+.quiz-progress { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+.quiz-step { width:28px; height:28px; border-radius:50%; border:2px solid #e2e8f0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--muted); background:white; transition:all 0.2s; }
+.quiz-step.done { background:var(--primary); border-color:var(--primary); color:white; }
+.quiz-step.current { border-color:var(--primary); color:var(--primary); }
+.quiz-connector { flex:1; height:2px; background:#e2e8f0; }
+.quiz-connector.done { background:var(--primary); }
+.quiz-card { background:white; border:1px solid var(--border); border-radius:12px; padding:24px; }
+.quiz-q { font-size:15px; font-weight:600; color:#1e293b; margin-bottom:18px; line-height:1.5; }
+.quiz-options { display:flex; flex-direction:column; gap:10px; }
+.quiz-opt {
+  padding:12px 16px; border-radius:8px; border:2px solid #e2e8f0; background:white;
+  font-size:13px; font-weight:500; color:#334155; text-align:left; transition:all 0.18s; cursor:pointer;
+}
+.quiz-opt:hover { border-color:#a5b4fc; background:#f5f7ff; }
+.quiz-opt.selected { border-color:var(--primary); background:#eff3ff; color:var(--primary); }
+.quiz-opt.correct { border-color:#16a34a; background:#dcfce7; color:#15803d; }
+.quiz-opt.wrong { border-color:#dc2626; background:#fef2f2; color:#dc2626; }
+.quiz-feedback { margin-top:16px; padding:12px 14px; border-radius:8px; font-size:13px; display:none; }
+.quiz-feedback.correct { background:#dcfce7; color:#15803d; border-left:3px solid #16a34a; }
+.quiz-feedback.wrong { background:#fef2f2; color:#dc2626; border-left:3px solid #dc2626; }
+.quiz-actions { display:flex; justify-content:space-between; align-items:center; margin-top:20px; }
+.quiz-btn { padding:9px 20px; border-radius:8px; font-size:13px; font-weight:600; border:none; cursor:pointer; transition:all 0.2s; }
+.quiz-btn-next { background:var(--primary); color:white; }
+.quiz-btn-skip { background:#f1f5f9; color:#475569; }
+
+/* ─ AI Bot Panel ─ */
+.ai-panel {
+  width:340px; flex-shrink:0; background:white; border-left:1px solid var(--border);
+  display:flex; flex-direction:column; position:relative;
+}
+.ai-header {
+  padding:16px 18px; border-bottom:1px solid #e2e8f0;
+  background:linear-gradient(135deg,#4f46e5 0%,#9333ea 100%);
+  display:flex; align-items:center; gap:10px;
+}
+.ai-avatar {
+  width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.2);
+  display:flex; align-items:center; justify-content:center;
+}
+.ai-avatar svg { width:18px; height:18px; stroke:white; }
+.ai-name { font-size:14px; font-weight:700; color:white; }
+.ai-status { font-size:11px; color:rgba(255,255,255,0.75); display:flex; align-items:center; gap:4px; }
+.ai-status-dot { width:6px; height:6px; border-radius:50%; background:#4ade80; }
+.ai-context { padding:10px 14px; background:#f8fafc; border-bottom:1px solid #e2e8f0; font-size:11px; color:var(--muted); display:flex; align-items:center; gap:6px; }
+.ai-context svg { width:12px; height:12px; stroke:var(--primary); }
+
+.ai-messages { flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:12px; }
+.msg { max-width:88%; }
+.msg-bot { align-self:flex-start; }
+.msg-user { align-self:flex-end; }
+.msg-bubble {
+  padding:10px 13px; border-radius:12px; font-size:13px; line-height:1.55;
+}
+.msg-bot .msg-bubble {
+  background:#f1f5f9; color:#1e293b; border-radius:4px 12px 12px 12px;
+}
+.msg-user .msg-bubble {
+  background:linear-gradient(135deg,#4f46e5,#9333ea); color:white;
+  border-radius:12px 4px 12px 12px;
+}
+.msg-time { font-size:10px; color:var(--subtle); margin-top:3px; }
+.msg-user .msg-time { text-align:right; }
+
+.typing-indicator { align-self:flex-start; }
+.typing-bubble { background:#f1f5f9; border-radius:4px 12px 12px 12px; padding:10px 14px; display:flex; gap:4px; }
+.dot { width:7px; height:7px; border-radius:50%; background:#94a3b8; animation:bounce 1.2s ease-in-out infinite; }
+.dot:nth-child(2) { animation-delay:0.15s; }
+.dot:nth-child(3) { animation-delay:0.3s; }
+@keyframes bounce { 0%,60%,100% { transform:translateY(0); } 30% { transform:translateY(-6px); } }
+
+.ai-suggestions { padding:10px 14px; display:flex; flex-wrap:wrap; gap:6px; border-top:1px solid #f1f5f9; }
+.ai-suggestion-chip {
+  padding:5px 10px; border-radius:16px; font-size:11px; font-weight:500;
+  border:1px solid #e2e8f0; background:white; color:#475569; cursor:pointer;
+  transition:all 0.15s; white-space:nowrap;
+}
+.ai-suggestion-chip:hover { border-color:#a5b4fc; color:var(--primary); background:#f5f7ff; }
+
+.ai-input-row { padding:12px 14px; border-top:1px solid #e2e8f0; display:flex; gap:8px; }
+.ai-input {
+  flex:1; padding:9px 13px; border:1.5px solid #e2e8f0; border-radius:20px;
+  font-size:13px; color:#1e293b; outline:none; background:var(--bg);
+  transition:border-color 0.2s; resize:none; font-family:var(--font);
+}
+.ai-input:focus { border-color:#a5b4fc; }
+.ai-send {
+  width:36px; height:36px; border-radius:50%; border:none;
+  background:linear-gradient(135deg,#4f46e5,#9333ea); display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all 0.2s;
+}
+.ai-send:hover { transform:scale(1.08); }
+.ai-send svg { width:15px; height:15px; stroke:white; }
+</style>
+</head>
+<body>
+<!-- ─ Toolbar ─ -->
+<div class="toolbar">
+  <div class="toolbar-left">
+    <button class="back-btn" onclick="window.location.href='student-experiments.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      Back to Experiments
+    </button>
+    <div class="breadcrumb">
+      Physics Lab
+      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      <span id="expTitle">Ohm's Law &amp; Resistivity</span>
+    </div>
+  </div>
+  <div class="toolbar-right">
+    <div class="progress-pill">
+      <span>Progress</span>
+      <div class="bar"><div class="fill" id="progressFill"></div></div>
+      <span id="progressLabel">62%</span>
+    </div>
+    <div class="mode-badge mode-resume" id="modeBadge">In Progress</div>
+    <button style="padding:7px 14px;border-radius:6px;border:none;background:var(--primary);color:white;font-size:13px;font-weight:600;cursor:pointer;" onclick="saveProgress()">Save &amp; Exit</button>
+  </div>
+</div>
+
+<!-- ─ Viewer Shell ─ -->
+<div class="viewer-shell">
+
+  <!-- ─ Lab Panel ─ -->
+  <div class="lab-panel">
+    <div class="lab-header">
+      <div class="lab-subject-tag" id="labSubject">Physics</div>
+      <div class="lab-title" id="labTitle">Ohm's Law &amp; Resistivity</div>
+      <div class="lab-meta">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>45 min</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg>120 XP</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Prof. Rao · Sem 5</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Due: Fri, 6 PM</span>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('overview',this)">📋 Overview</button>
+      <button class="tab-btn" onclick="switchTab('simulation',this)">⚗️ Simulation</button>
+      <button class="tab-btn" onclick="switchTab('quiz',this)">📝 Quiz</button>
+    </div>
+
+    <div class="tab-content">
+      <!-- OVERVIEW TAB -->
+      <div class="tab-pane active" id="tab-overview">
+        <div class="overview-grid">
+          <div class="info-card">
+            <h4>Learning Objectives</h4>
+            <ul class="objective-list">
+              <li><div class="obj-dot"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/></svg></div>Understand Ohm's Law (V = IR)</li>
+              <li><div class="obj-dot"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/></svg></div>Measure current, voltage, and resistance</li>
+              <li><div class="obj-dot"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/></svg></div>Plot V-I characteristic curves</li>
+              <li><div class="obj-dot"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/></svg></div>Determine resistivity of conductors</li>
+            </ul>
+          </div>
+          <div class="info-card">
+            <h4>Materials</h4>
+            <div class="material-list">
+              <span class="material-tag">Resistors (10Ω, 47Ω, 100Ω)</span>
+              <span class="material-tag">Ammeter</span>
+              <span class="material-tag">Voltmeter</span>
+              <span class="material-tag">Power Supply (0–12V)</span>
+              <span class="material-tag">Connecting Wires</span>
+              <span class="material-tag">Breadboard</span>
+              <span class="material-tag">Multimeter</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-card" style="margin-bottom:16px">
+          <h4>Theory &amp; Background</h4>
+          <p style="font-size:13px;color:#334155;line-height:1.7;margin-top:8px">
+            Ohm's Law states that the current through a conductor between two points is directly proportional to the voltage across the two points. Mathematically, <strong>V = I × R</strong>, where V is voltage (volts), I is current (amperes), and R is resistance (ohms).
+          </p>
+          <p style="font-size:13px;color:#334155;line-height:1.7;margin-top:10px">
+            Resistivity (ρ) is an intrinsic property of a material that describes how strongly it resists electrical current. It is related to resistance by <strong>R = ρL/A</strong>, where L is the length and A is the cross-sectional area of the conductor.
+          </p>
+        </div>
+
+        <div class="safety-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+          <div>
+            <div style="font-weight:600;margin-bottom:3px">Safety Note</div>
+            Never exceed the rated voltage for any component. Ensure all connections are secure before turning on the power supply. Disconnect power before changing circuit configurations.
+          </div>
+        </div>
+
+        <div style="margin-top:20px;display:flex;gap:12px">
+          <button class="run-btn" style="flex:0 0 auto;width:auto;padding:10px 24px;" onclick="switchTab('simulation',document.querySelectorAll('.tab-btn')[1])">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            Start Simulation
+          </button>
+        </div>
+      </div>
+
+      <!-- SIMULATION TAB -->
+      <div class="tab-pane" id="tab-simulation">
+        <div class="sim-container">
+          <!-- Canvas -->
+          <div class="sim-canvas" id="simCanvas">
+            <svg class="circuit-svg" viewBox="0 0 500 280" id="circuitSvg">
+              <!-- Battery -->
+              <rect x="30" y="100" width="40" height="80" rx="4" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1.5"/>
+              <rect x="38" y="90" width="24" height="10" rx="2" fill="#60a5fa"/>
+              <text x="50" y="148" text-anchor="middle" class="sim-label">Battery</text>
+              <text x="50" y="162" text-anchor="middle" class="sim-val" id="voltLabel">6.0V</text>
+
+              <!-- Wires top -->
+              <line x1="70" y1="110" x2="220" y2="110" class="wire" id="wireTop1"/>
+              <line x1="220" y1="110" x2="380" y2="110" class="wire" id="wireTop2"/>
+              <line x1="380" y1="110" x2="460" y2="110" class="wire" id="wireTop3"/>
+
+              <!-- Resistor -->
+              <rect x="200" y="95" width="60" height="30" rx="4" fill="#fbbf24" stroke="#78350f" stroke-width="1.5"/>
+              <text x="230" y="108" text-anchor="middle" class="sim-label">Resistor</text>
+              <text x="230" y="122" text-anchor="middle" fill="#78350f" font-size="11" font-family="Inter,sans-serif" font-weight="700" id="resistorLabel">47 Ω</text>
+
+              <!-- Wires bottom -->
+              <line x1="70" y1="170" x2="220" y2="170" class="wire" id="wireBot1"/>
+              <line x1="220" y1="170" x2="380" y2="170" class="wire" id="wireBot2"/>
+              <line x1="380" y1="170" x2="460" y2="170" class="wire" id="wireBot3"/>
+              <line x1="460" y1="110" x2="460" y2="170" class="wire" id="wireRight"/>
+              <line x1="30" y1="110" x2="30" y2="100" class="wire" id="wireLeftTop"/>
+              <line x1="30" y1="180" x2="30" y2="170" class="wire" id="wireLeftBot"/>
+
+              <!-- Ammeter circle -->
+              <circle cx="380" cy="140" r="22" fill="white" stroke="#f472b6" stroke-width="2"/>
+              <text x="380" y="136" text-anchor="middle" class="sim-label">A</text>
+              <text x="380" y="150" text-anchor="middle" fill="#f472b6" font-size="11" font-family="Inter,sans-serif" font-weight="700" id="amperLabel">0.13</text>
+
+              <!-- Voltmeter -->
+              <circle cx="230" cy="200" r="20" fill="white" stroke="#a78bfa" stroke-width="2"/>
+              <line x1="210" y1="170" x2="215" y2="200" stroke="#a78bfa" stroke-width="1.5"/>
+              <line x1="250" y1="170" x2="245" y2="200" stroke="#a78bfa" stroke-width="1.5"/>
+              <text x="230" y="197" text-anchor="middle" class="sim-label">V</text>
+              <text x="230" y="208" text-anchor="middle" fill="#a78bfa" font-size="10" font-family="Inter,sans-serif" font-weight="700" id="voltmLabel">6.0</text>
+
+              <!-- Electrons animation dots -->
+              <circle class="electron" cx="150" cy="110" r="4" fill="#60a5fa" opacity="0.8"><animateMotion dur="2.5s" repeatCount="indefinite" path="M0,0 L310,0 L310,60 L0,60 Z"/></circle>
+              <circle class="electron" cx="80" cy="110" r="3" fill="#93c5fd" opacity="0.6"><animateMotion dur="2.5s" begin="0.8s" repeatCount="indefinite" path="M0,0 L310,0 L310,60 L0,60 Z"/></circle>
+            </svg>
+          </div>
+
+          <!-- Controls -->
+          <div class="sim-controls">
+            <h4>⚙️ Control Panel</h4>
+
+            <div class="control-row">
+              <div class="control-label">
+                <span class="name">Voltage (V)</span>
+                <span class="val" id="voltDispCtrl">6.0 V</span>
+              </div>
+              <input type="range" min="1" max="12" step="0.5" value="6" id="voltSlider" oninput="updateSim()">
+            </div>
+
+            <div class="control-row">
+              <div class="control-label">
+                <span class="name">Resistance (Ω)</span>
+                <span class="val" id="resDispCtrl">47 Ω</span>
+              </div>
+              <select id="resSelect" onchange="updateSim()" style="padding:6px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+                <option value="10">10 Ω</option>
+                <option value="47" selected>47 Ω</option>
+                <option value="100">100 Ω</option>
+                <option value="220">220 Ω</option>
+              </select>
+            </div>
+
+            <div style="border-top:1px solid #e2e8f0;padding-top:12px">
+              <h4 style="margin-bottom:10px">📊 Readings</h4>
+              <div class="readout-row" style="margin-bottom:8px">
+                <div class="readout-label">Current (I)</div>
+                <div><span class="readout-val" id="currentOut">0.128</span> <span class="readout-unit">A</span></div>
+              </div>
+              <div class="readout-row" style="margin-bottom:8px">
+                <div class="readout-label">Voltage (V)</div>
+                <div><span class="readout-val" id="voltOut">6.0</span> <span class="readout-unit">V</span></div>
+              </div>
+              <div class="readout-row">
+                <div class="readout-label">Resistance (R)</div>
+                <div><span class="readout-val" id="resOut">47</span> <span class="readout-unit">Ω</span></div>
+              </div>
+            </div>
+
+            <button class="run-btn" id="runBtn" onclick="toggleRun()">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="runIcon"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+              <span id="runLabel">Run Simulation</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- V-I Table -->
+        <div style="margin-top:20px;background:white;border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <div style="padding:14px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:600;color:#1e293b">📈 V-I Data Table (Auto-recorded)</div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead><tr style="background:#f8fafc"><th style="padding:9px 14px;text-align:left;color:var(--muted);font-weight:600">Voltage (V)</th><th style="padding:9px 14px;text-align:left;color:var(--muted);font-weight:600">Current (A)</th><th style="padding:9px 14px;text-align:left;color:var(--muted);font-weight:600">R = V/I (Ω)</th><th style="padding:9px 14px;text-align:left;color:var(--muted);font-weight:600">Observation</th></tr></thead>
+            <tbody id="viTable">
+              <tr style="border-bottom:1px solid #f1f5f9"><td style="padding:8px 14px">2.0</td><td style="padding:8px 14px">0.043</td><td style="padding:8px 14px">47</td><td style="padding:8px 14px;color:#16a34a">Linear ✓</td></tr>
+              <tr style="border-bottom:1px solid #f1f5f9"><td style="padding:8px 14px">4.0</td><td style="padding:8px 14px">0.085</td><td style="padding:8px 14px">47</td><td style="padding:8px 14px;color:#16a34a">Linear ✓</td></tr>
+              <tr style="border-bottom:1px solid #f1f5f9"><td style="padding:8px 14px">6.0</td><td style="padding:8px 14px;font-weight:600;color:var(--primary)">0.128 ←</td><td style="padding:8px 14px;font-weight:600;color:var(--primary)">47 ←</td><td style="padding:8px 14px;color:var(--primary);font-weight:600">Current ←</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- QUIZ TAB -->
+      <div class="tab-pane" id="tab-quiz">
+        <div style="max-width:600px">
+          <div class="quiz-progress">
+            <div class="quiz-step done">1</div>
+            <div class="quiz-connector done"></div>
+            <div class="quiz-step current">2</div>
+            <div class="quiz-connector"></div>
+            <div class="quiz-step">3</div>
+            <div class="quiz-connector"></div>
+            <div class="quiz-step">4</div>
+            <div class="quiz-connector"></div>
+            <div class="quiz-step">5</div>
+          </div>
+
+          <div class="quiz-card" id="quizCard">
+            <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px">Question 2 of 5</div>
+            <div class="quiz-q" id="quizQ">If a circuit has a voltage of 12V and a current of 0.5A, what is the resistance according to Ohm's Law?</div>
+            <div class="quiz-options" id="quizOpts">
+              <button class="quiz-opt" onclick="selectOpt(this,'wrong')">A)&nbsp; 6 Ω</button>
+              <button class="quiz-opt" onclick="selectOpt(this,'correct')">B)&nbsp; 24 Ω</button>
+              <button class="quiz-opt" onclick="selectOpt(this,'wrong')">C)&nbsp; 0.5 Ω</button>
+              <button class="quiz-opt" onclick="selectOpt(this,'wrong')">D)&nbsp; 12 Ω</button>
+            </div>
+            <div class="quiz-feedback" id="quizFeedback"></div>
+            <div class="quiz-actions">
+              <button class="quiz-btn quiz-btn-skip" onclick="nextQ()">Skip</button>
+              <button class="quiz-btn quiz-btn-next" onclick="nextQ()">Next Question →</button>
+            </div>
+          </div>
+
+          <div style="margin-top:16px;padding:14px;background:#f8fafc;border-radius:10px;font-size:12px;color:var(--muted)">
+            💡 <strong>Tip:</strong> You can ask the ZEAI AI assistant on the right for hints without revealing the answer directly.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─ AI Bot Panel ─ -->
+  <div class="ai-panel">
+    <div class="ai-header">
+      <div class="ai-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg></div>
+      <div>
+        <div class="ai-name">ZEAI Assistant</div>
+        <div class="ai-status"><div class="ai-status-dot"></div>Active · Lab Mode</div>
+      </div>
+    </div>
+    <div class="ai-context">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5a2 2 0 0 1-.4 1.2L5 17.5A2 2 0 0 0 6.6 21h10.8a2 2 0 0 0 1.6-3.5l-4.6-6.8A2 2 0 0 1 14 9.5V3"/></svg>
+      Ohm's Law &amp; Resistivity · Physics Lab
+    </div>
+
+    <div class="ai-messages" id="aiMessages">
+      <div class="msg msg-bot">
+        <div class="msg-bubble">Hello Ananya! 👋 I'm your ZEAI lab assistant for this experiment. I can help you understand Ohm's Law concepts, guide you through the simulation, and give hints on the quiz — without giving away answers directly.<br/><br/>What would you like to explore?</div>
+        <div class="msg-time">Just now</div>
+      </div>
+      <div class="msg msg-bot">
+        <div class="msg-bubble">📌 <strong>Quick tip:</strong> In the Simulation tab, try adjusting the voltage slider and observe how current changes. Notice that when you double the voltage, what happens to the current? 🤔</div>
+        <div class="msg-time">Just now</div>
+      </div>
+    </div>
+
+    <div class="ai-suggestions" id="aiSuggestions">
+      <button class="ai-suggestion-chip" onclick="askSuggestion(this)">Explain V = IR</button>
+      <button class="ai-suggestion-chip" onclick="askSuggestion(this)">Give me a hint for Q2</button>
+      <button class="ai-suggestion-chip" onclick="askSuggestion(this)">What is resistivity?</button>
+      <button class="ai-suggestion-chip" onclick="askSuggestion(this)">How to read ammeter?</button>
+    </div>
+
+    <div class="ai-input-row">
+      <textarea class="ai-input" id="aiInput" placeholder="Ask anything about this experiment..." rows="1" onkeydown="handleKey(event)"></textarea>
+      <button class="ai-send" onclick="sendMsg()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4 20-7Z"/><path d="M22 2 11 13"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─ URL params ─
+const params = new URLSearchParams(location.search);
+const expId = params.get('exp') || 'ohms-law';
+const mode = params.get('mode') || 'preview';
+
+const expData = {
+  'ohms-law':        { title:"Ohm's Law & Resistivity", subject:"Physics", progress:62 },
+  'titration-2':     { title:"Acid-Base Titration II", subject:"Chemistry", progress:0 },
+  'cell-division':   { title:"Cell Division Simulation", subject:"Biology", progress:0 },
+  'series-circuits': { title:"Series & Parallel Circuits", subject:"Electronics", progress:100 },
+  'newtons-laws':    { title:"Newton's Laws of Motion", subject:"Physics", progress:0 },
+  'enzyme-kinetics': { title:"Enzyme Kinetics Lab", subject:"Biology", progress:25 },
+  'logic-gates':     { title:"Logic Gates & Truth Tables", subject:"Electronics", progress:0 },
+  'thermodynamics':  { title:"Thermodynamics: Heat Transfer", subject:"Physics", progress:0 },
+  'organic-synthesis':{ title:"Organic Compound Synthesis", subject:"Chemistry", progress:100 },
+};
+
+const exp = expData[expId] || expData['ohms-law'];
+document.getElementById('expTitle').textContent = exp.title;
+document.getElementById('labTitle').textContent = exp.title;
+document.getElementById('labSubject').textContent = exp.subject;
+document.getElementById('progressFill').style.width = exp.progress + '%';
+document.getElementById('progressLabel').textContent = exp.progress + '%';
+
+const badgeEl = document.getElementById('modeBadge');
+const modeMap = { preview:'mode-preview', resume:'mode-resume', start:'mode-start', review:'mode-review' };
+const modeLabelMap = { preview:'Preview', resume:'In Progress', start:'Starting', review:'Review' };
+badgeEl.className = 'mode-badge ' + (modeMap[mode] || 'mode-preview');
+badgeEl.textContent = modeLabelMap[mode] || mode;
+
+// ─ Tabs ─
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ─ Simulation ─
+let running = false;
+function updateSim() {
+  const V = parseFloat(document.getElementById('voltSlider').value);
+  const R = parseFloat(document.getElementById('resSelect').value);
+  const I = V / R;
+  document.getElementById('voltDispCtrl').textContent = V.toFixed(1) + ' V';
+  document.getElementById('resDispCtrl').textContent = R + ' Ω';
+  document.getElementById('currentOut').textContent = I.toFixed(3);
+  document.getElementById('voltOut').textContent = V.toFixed(1);
+  document.getElementById('resOut').textContent = R;
+  document.getElementById('voltLabel').textContent = V.toFixed(1) + 'V';
+  document.getElementById('resistorLabel').textContent = R + ' Ω';
+  document.getElementById('amperLabel').textContent = I.toFixed(3);
+  document.getElementById('voltmLabel').textContent = V.toFixed(1);
+}
+
+function toggleRun() {
+  running = !running;
+  const btn = document.getElementById('runBtn');
+  const icon = document.getElementById('runIcon');
+  const lbl = document.getElementById('runLabel');
+  if (running) {
+    btn.classList.add('running');
+    lbl.textContent = 'Stop Simulation';
+    icon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+    // Record current reading
+    const V = parseFloat(document.getElementById('voltSlider').value);
+    const R = parseFloat(document.getElementById('resSelect').value);
+    const I = V / R;
+    const tbody = document.getElementById('viTable');
+    const tr = document.createElement('tr');
+    tr.style.cssText = 'border-bottom:1px solid #f1f5f9;background:#fffff0;animation:fadeIn 0.3s';
+    tr.innerHTML = `<td style="padding:8px 14px">${V.toFixed(1)}</td><td style="padding:8px 14px;font-weight:600;color:var(--primary)">${I.toFixed(3)} ←</td><td style="padding:8px 14px;font-weight:600;color:var(--primary)">${R} ←</td><td style="padding:8px 14px;color:#16a34a">Linear ✓</td>`;
+    tbody.appendChild(tr);
+  } else {
+    btn.classList.remove('running');
+    lbl.textContent = 'Run Simulation';
+    icon.innerHTML = '<polygon points="6 3 20 12 6 21 6 3"/>';
+  }
+}
+
+updateSim();
+
+// ─ Quiz ─
+function selectOpt(btn, type) {
+  document.querySelectorAll('.quiz-opt').forEach(b => { b.classList.remove('selected','correct','wrong'); b.disabled = false; });
+  btn.classList.add(type);
+  const fb = document.getElementById('quizFeedback');
+  fb.style.display = 'block';
+  if (type === 'correct') {
+    fb.className = 'quiz-feedback correct';
+    fb.textContent = '✅ Correct! R = V/I = 12/0.5 = 24Ω. Well done!';
+  } else {
+    fb.className = 'quiz-feedback wrong';
+    fb.textContent = '❌ Not quite. Remember Ohm\'s Law: R = V ÷ I. Try dividing 12V by 0.5A.';
+  }
+  document.querySelectorAll('.quiz-opt').forEach(b => b.disabled = true);
+}
+
+function nextQ() {
+  document.getElementById('quizFeedback').style.display = 'none';
+  document.querySelectorAll('.quiz-opt').forEach(b => { b.classList.remove('selected','correct','wrong'); b.disabled = false; });
+  document.getElementById('quizQ').textContent = 'A wire has a resistivity of 1.7×10⁻⁸ Ω·m, length of 2m and cross-sectional area of 1mm². What is its resistance?';
+  document.getElementById('quizOpts').innerHTML = `
+    <button class="quiz-opt" onclick="selectOpt(this,'wrong')">A)&nbsp; 0.034 Ω</button>
+    <button class="quiz-opt" onclick="selectOpt(this,'correct')">B)&nbsp; 0.034 mΩ</button>
+    <button class="quiz-opt" onclick="selectOpt(this,'wrong')">C)&nbsp; 3.4 Ω</button>
+    <button class="quiz-opt" onclick="selectOpt(this,'wrong')">D)&nbsp; 17 Ω</button>
+  `;
+}
+
+// ─ AI Chat ─
+const aiResponses = {
+  'explain v = ir': 'Ohm\'s Law (V = IR) tells us that Voltage equals Current times Resistance. Think of it like water pipes: Voltage is water pressure, Current is flow rate, and Resistance is how narrow the pipe is. If you increase pressure (V) but keep the pipe same (R), more water flows (I increases)! 💡',
+  'give me a hint for q2': 'Think about it this way: you know V = IR, so to find R, rearrange it as R = V ÷ I. Now plug in the values from the question. 🤫 I won\'t give the answer, but you\'ve got this!',
+  'what is resistivity': 'Resistivity (ρ) is an intrinsic material property — it tells you how much a material inherently resists current flow. Unlike resistance (R), which depends on shape and size, resistivity is constant for a material at a given temperature. The formula is R = ρL/A. Copper has very low resistivity; rubber has very high resistivity! ⚡',
+  'how to read ammeter': 'An ammeter measures current in Amperes (A). Key rules:\n1️⃣ Always connect in SERIES with the circuit\n2️⃣ Never connect in parallel — it will short-circuit!\n3️⃣ Ensure polarity: + terminal to the higher potential side\nIn our simulation, look at the pink circle labeled "A" — that\'s your ammeter! 🎯',
+};
+
+function sendMsg() {
+  const input = document.getElementById('aiInput');
+  const text = input.value.trim();
+  if (!text) return;
+  addMsg(text, 'user');
+  input.value = '';
+  showTyping();
+  setTimeout(() => {
+    removeTyping();
+    const key = text.toLowerCase().replace(/[^a-z0-9 ]/g,'').trim();
+    let response = null;
+    for (const k of Object.keys(aiResponses)) {
+      if (key.includes(k.split(' ')[0]) || key.includes(k.split(' ')[1] || '')) { response = aiResponses[k]; break; }
+    }
+    if (!response) response = `Great question about "${text}"! 🤔 In the context of Ohm's Law, every observation connects back to V=IR. Try running the simulation with different values and see what you notice. Feel free to ask me anything more specific!`;
+    addMsg(response, 'bot');
+  }, 1200);
+}
+
+function askSuggestion(btn) {
+  document.getElementById('aiInput').value = btn.textContent;
+  sendMsg();
+}
+
+function addMsg(text, role) {
+  const msgs = document.getElementById('aiMessages');
+  const div = document.createElement('div');
+  div.className = 'msg msg-' + role;
+  div.innerHTML = `<div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div><div class="msg-time">${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('aiMessages');
+  const div = document.createElement('div');
+  div.className = 'msg msg-bot typing-indicator';
+  div.id = 'typingDot';
+  div.innerHTML = '<div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typingDot');
+  if (el) el.remove();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+}
+
+function saveProgress() {
+  alert('Progress saved! Returning to experiments...');
+  window.location.href = 'student-experiments.html';
+}
+</script>
+</body>
+</html>
