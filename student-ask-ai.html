@@ -176,7 +176,7 @@ button { font-family:var(--font); cursor:pointer; }
       <img style="width:32px;height:32px;border-radius:50%;" src="https://api.dicebear.com/9.x/thumbs/svg?seed=Ananya&backgroundColor=b6e3f4" />
       <div><div class="uname">Ananya Sharma</div><div class="urole">Student · Sem 5</div></div>
     </div>
-    <button class="logout-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg> Log Out</button>
+    <button class="logout-btn" onclick="handleLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg> <span>Log Out</span></button>
   </div>
 </aside>
 
@@ -264,12 +264,14 @@ button { font-family:var(--font); cursor:pointer; }
           </button>
         </div>
         <div class="suggestions-row">
+          <button class="suggestion" style="background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8" onclick="suggest(this)">📊 Show my current XP & Leaderboard Rank</button>
+          <button class="suggestion" style="background:#f0fdf4; border-color:#bbf7d0; color:#15803d" onclick="suggest(this)">🔬 What lab assignments are due this week?</button>
+          <button class="suggestion" style="background:#fef2f2; border-color:#fecaca; color:#dc2626" onclick="suggest(this)">📈 What are my weakest experiment topics?</button>
+          <button class="suggestion" style="background:#fef3c7; border-color:#fde68a; color:#b45309" onclick="suggest(this)">🏆 List all badges I have unlocked</button>
           <button class="suggestion" onclick="suggest(this)">⚡ Explain Ohm's Law in simple terms</button>
           <button class="suggestion" onclick="suggest(this)">🧪 How do I write a titration report?</button>
           <button class="suggestion" onclick="suggest(this)">📊 How to plot a V-I graph?</button>
           <button class="suggestion" onclick="suggest(this)">🔋 What is resistivity vs resistance?</button>
-          <button class="suggestion" onclick="suggest(this)">🌡️ Explain Le Chatelier's principle</button>
-          <button class="suggestion" onclick="suggest(this)">🧬 What happens during cell division?</button>
         </div>
       </div>
     </div>
@@ -350,6 +352,22 @@ const aiKnowledge = {
 
 function getResponse(text) {
   const t = text.toLowerCase();
+  
+  // Database Queries
+  if (t.includes('xp') || t.includes('rank') || t.includes('leaderboard')) {
+    return `📊 **DB Query Result — Student Performance Ledger**:\n\n• **Student Name:** Ananya Sharma (Roll: SRM-CS-01)\n• **Current Rank:** #1 in Section A (Physics Dept)\n• **Accumulated XP:** 18,450 XP\n• **Level:** Level 8 (Mastery Level)\n• **Overall Grade:** A\n\nYou're currently leading Section A! Keep up the great work! 🏆`;
+  }
+  if (t.includes('due') || t.includes('assignment') || t.includes('deadline')) {
+    return `🔬 **DB Query Result — Pending Lab Assignments**:\n\n1. **Ohm's Law & Resistivity**\n   • Department: Physics\n   • Submission Deadline: **July 20, 2026**\n   • Status: 62% Completed (Worksheet pending)\n\n2. **Double Pendulum Chaotic Dynamics**\n   • Department: Physics\n   • Submission Deadline: **August 10, 2026**\n   • Status: Assigned`;
+  }
+  if (t.includes('weak') || t.includes('improvement') || t.includes('topic')) {
+    return `📈 **DB Query Result — AI Weak Concept Analysis**:\n\nBased on your recent simulation attempts and quiz records:\n• **Kirchhoff's Current Law:** 41% miss rate (Requires review of node equations)\n• **Thermodynamics Heat Transfer:** 35% miss rate\n• **Drift Velocity Derivations:** 28% miss rate\n\n💡 *Tip: Try reviewing Chapter 4 in your Lab Notebook before your next simulation!*`;
+  }
+  if (t.includes('badge') || t.includes('unlocked') || t.includes('achievement')) {
+    return `🏆 **DB Query Result — Unlocked Badges**:\n\n1. 🥇 **Ohm's Master** — Awarded for completing 5 electricity circuit simulations with >90% accuracy.\n2. ⚡ **Speed Runner** — Awarded for submitting lab worksheets within 24 hours of assignment.`;
+  }
+
+  // General STEM knowledge
   if (t.includes('ohm') || t.includes('v=ir') || t.includes('v = ir')) return aiKnowledge['ohm'];
   if (t.includes('titration') || t.includes('report')) return aiKnowledge['titration'];
   if (t.includes('resistivity') || t.includes('vs resistance')) return aiKnowledge['resistivity'];
@@ -436,6 +454,16 @@ function handleKey(e) {
 function autoGrow(el) {
   el.style.height = 'auto';
   el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function handleLogout() {
+  try {
+    localStorage.removeItem("zeai_role");
+    localStorage.removeItem("zeai_user");
+    sessionStorage.removeItem("zeai_role");
+    sessionStorage.removeItem("zeai_user");
+  } catch(e) {}
+  window.location.href = "index.html?logout=true";
 }
 </script>
 </body>

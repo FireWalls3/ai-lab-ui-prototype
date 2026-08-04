@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Insights & DB Assistant · ZEAI Admin</title>
+<style>
+:root {
+  --background:#ffffff; --foreground:#0f172a; --card:#ffffff; --card-foreground:#0f172a;
+  --primary:#2b4ed6; --primary-foreground:#ffffff; --secondary:#f1f5f9; --secondary-foreground:#0f172a;
+  --muted:#f8fafc; --muted-foreground:#64748b; --accent:#f1f5f9; --accent-foreground:#0f172a;
+  --destructive:#ef4444; --border:#e2e8f0;
+  --radius-lg:8px; --radius-md:6px; --radius-sm:4px;
+  --font-family-body:"Inter", system-ui, -apple-system, sans-serif;
+}
+[data-theme="dark"] {
+  --background:#0f172a; --foreground:#e2e8f0; --card:#1e293b; --card-foreground:#e2e8f0;
+  --primary:#818cf8; --primary-foreground:#ffffff; --secondary:#1e293b; --secondary-foreground:#e2e8f0;
+  --muted:#1e293b; --muted-foreground:#94a3b8; --accent:#334155; --accent-foreground:#e2e8f0;
+  --destructive:#f87171; --border:#334155;
+}
+* { box-sizing:border-box; }
+html,body { margin:0; padding:0; height:100%; }
+body {
+  font-family:var(--font-family-body);
+  background:var(--muted);
+  color:var(--foreground);
+  -webkit-font-smoothing:antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+a { text-decoration:none; color:inherit; }
+button { font-family:var(--font-family-body); cursor:pointer; }
+input, select, textarea { font-family:var(--font-family-body); }
+
+.shell { display:flex; height:100vh; overflow:hidden; background:var(--muted); }
+.sidebar {
+  width:260px; background:var(--background); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; flex-shrink:0; height:100vh; position:sticky; top:0;
+}
+.sidebar-logo { height:60px; padding:0 24px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border); }
+.sidebar-logo .box { width:24px; height:24px; border-radius:6px; background:var(--primary); display:flex; align-items:center; justify-content:center; }
+.sidebar-logo .box svg { width:16px; height:16px; stroke:white; }
+.sidebar-logo .name { font-size:18px; font-weight:700; color:var(--primary); }
+.sidebar-nav { flex:1; overflow-y:auto; padding:16px 12px; display:flex; flex-direction:column; gap:4px; }
+.nav-label { font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted-foreground); font-weight:600; padding:16px 12px 8px; }
+.nav-label:first-child { padding-top:4px; }
+.nav-link { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:var(--radius-md); font-size:14px; font-weight:500; color:var(--foreground); transition:all 0.2s; }
+.nav-link svg { width:16px; height:16px; flex-shrink:0; stroke:currentColor; }
+.nav-link:hover { background:var(--secondary); }
+.nav-link.active { color:var(--primary); background:var(--secondary); }
+.sidebar-footer { padding:16px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:10px; }
+.sidebar-footer .user-row { display:flex; align-items:center; gap:10px; }
+.sidebar-footer img { width:32px; height:32px; border-radius:50%; }
+.sidebar-footer .uname { font-size:13px; font-weight:500; color:var(--foreground); }
+.sidebar-footer .urole { font-size:11px; color:var(--muted-foreground); }
+.logout-btn { width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-md); background:var(--background); font-size:13px; color:var(--foreground); transition:all 0.2s; }
+.logout-btn:hover { background:#fef2f2; color:#dc2626; border-color:#fecaca; }
+
+.main-col { flex:1; display:flex; flex-direction:column; overflow:hidden; background:var(--muted); }
+.navbar { height:60px; background:var(--background); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 24px; flex-shrink:0; position:sticky; top:0; z-index:30; }
+.inst-switch { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:500; padding:6px 10px; border:1px solid var(--border); border-radius:var(--radius-md); }
+.navbar-actions { display:flex; align-items:center; gap:16px; }
+.icon-btn { position:relative; background:none; border:none; padding:6px; border-radius:var(--radius-md); display:flex; color:var(--muted-foreground); transition:all 0.2s; }
+.icon-btn:hover { background:var(--muted); color:var(--foreground); }
+
+main.content { flex:1; overflow-y:auto; padding:24px 32px; max-width:1400px; margin:0 auto; width:100%; }
+
+.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; gap:16px; flex-wrap:wrap; }
+.page-header h1 { font-size:24px; font-weight:700; margin:0 0 6px 0; color:var(--foreground); }
+.page-header p { font-size:13.5px; color:var(--muted-foreground); margin:0; }
+
+.grid-2fr1fr { display:grid; grid-template-columns:2fr 1fr; gap:20px; }
+@media (max-width:1024px) { .grid-2fr1fr { grid-template-columns:1fr; } }
+
+.card { background:var(--card); border-radius:12px; padding:20px; border:1px solid var(--border); box-shadow:0 1px 2px rgba(0,0,0,0.03); }
+.card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.card-header h3 { font-size:15px; font-weight:600; color:var(--foreground); margin:0; display:flex; align-items:center; gap:8px; }
+
+/* Assistant Chat Box */
+.chat-box { display:flex; flex-direction:column; height:520px; border-radius:12px; background:var(--card); border:1px solid var(--border); overflow:hidden; }
+.chat-header-bar { padding:14px 18px; background:linear-gradient(135deg, #4f46e5, #9333ea); color:white; display:flex; align-items:center; gap:10px; font-weight:600; font-size:14px; }
+.chat-messages { flex:1; padding:18px; overflow-y:auto; display:flex; flex-direction:column; gap:14px; background:var(--muted); }
+.chat-msg { max-width:82%; padding:12px 16px; border-radius:12px; font-size:13px; line-height:1.5; word-wrap:break-word; }
+.chat-msg-bot { background:var(--card); color:var(--foreground); border:1px solid var(--border); align-self:flex-start; border-bottom-left-radius:2px; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+.chat-msg-user { background:var(--primary); color:white; align-self:flex-end; border-bottom-right-radius:2px; }
+
+.queries-chip-wrap { padding:12px 18px; background:var(--card); border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:8px; }
+.query-chip { padding:6px 12px; border-radius:20px; border:1px solid var(--border); background:var(--muted); color:var(--foreground); font-size:12px; font-weight:500; cursor:pointer; transition:all 0.2s; }
+.query-chip:hover { border-color:var(--primary); color:var(--primary); background:var(--secondary); }
+
+.chat-input-row { padding:12px 18px; background:var(--card); border-top:1px solid var(--border); display:flex; gap:10px; }
+.chat-input-row input { flex:1; height:38px; padding:0 14px; border:1px solid var(--border); border-radius:8px; font-size:13px; background:var(--muted); color:var(--foreground); outline:none; }
+.chat-input-row button { padding:0 18px; border-radius:8px; border:none; background:var(--primary); color:white; font-size:13px; font-weight:600; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="box">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="white" stroke-width="2"><path d="M9 3h6"/><path d="M10 3v6.5a2 2 0 0 1-.4 1.2L5 17.5A2 2 0 0 0 6.6 21h10.8a2 2 0 0 0 1.6-3.5l-4.6-6.8A2 2 0 0 1 14 9.5V3"/></svg>
+    </div>
+    <div class="name">ZEAI</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">MAIN</div>
+    <a class="nav-link" href="admin-dashboard.html">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a class="nav-link" href="admin-departments.html">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 12.18-8.58 3.9a2 2 0 0 1-1.66 0L3.18 12.18"/><path d="m22 17.18-8.58 3.9a2 2 0 0 1-1.66 0L3.18 17.18"/></svg>
+      <span>Departments</span>
+    </a>
+    <a class="nav-link" href="admin-faculty.html">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Faculty</span>
+    </a>
+    <a class="nav-link" href="admin-students.html">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Students</span>
+    </a>
+    <a class="nav-link" href="admin-mapping.html">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 22V20a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Faculty Mapping</span>
+    </a>
+    <a class="nav-link" href="admin-experiments.html">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      <span>Experiments</span>
+    </a>
+    <a class="nav-link" href="admin-reports.html">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5M8 13h8M8 17h8M8 9h2"/></svg>
+      <span>Reports</span>
+    </a>
+    <div class="nav-label">SUPPORT</div>
+    <a class="nav-link active" href="admin-ai-insights.html">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>
+      <span>AI Insights</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <img class="avatar" src="https://api.dicebear.com/9.x/thumbs/svg?seed=Meera&backgroundColor=ffd5dc" alt="Admin avatar" />
+      <div><div class="uname">Dr. Meera Krishnan</div><div class="urole">College Admin</div></div>
+    </div>
+    <button class="logout-btn" onclick="handleLogout()">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      <span>Log Out</span>
+    </button>
+  </div>
+</aside>
+
+<div class="main-col">
+  <header class="navbar">
+    <div class="inst-switch">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--muted-foreground)" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M9 6h1M14 6h1M9 10h1M14 10h1M9 14h1M14 14h1"/></svg>
+      <span>SRM Institute of Science & Technology</span>
+    </div>
+    <div class="navbar-actions">
+      <button class="icon-btn" id="themeToggle" aria-label="Toggle theme"></button>
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="page-header">
+      <div>
+        <h1>College Admin AI Insights & DB Assistant</h1>
+        <p>Institutional database analytics for department performance, student enrollments, faculty ratings, and cost savings.</p>
+      </div>
+    </div>
+
+    <div class="grid-2fr1fr">
+      <!-- AI Chat Box -->
+      <div class="chat-box">
+        <div class="chat-header-bar">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="2.5"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>
+          College Admin DB Assistant AI
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-msg chat-msg-bot">
+            Welcome, Dr. Meera Krishnan! I am your <strong>Institutional AI DB Assistant</strong>.<br/>
+            I can cross-query student enrollments, departmental health indexes, unmapped faculty-student ratios, and infrastructure cost savings.<br/><br/>
+            Click a sample query below or ask your own question!
+          </div>
+        </div>
+        <div class="queries-chip-wrap">
+          <button class="query-chip" onclick="askQuery('How many students are enrolled across all departments?')">🏢 Enrolled Students</button>
+          <button class="query-chip" onclick="askQuery('Show department performance summary')">📊 Dept Performance</button>
+          <button class="query-chip" onclick="askQuery('List unmapped students in Physics')">🔗 Unmapped Students</button>
+          <button class="query-chip" onclick="askQuery('Which faculty members have the highest ratings?')">👩‍🏫 Top Faculty</button>
+          <button class="query-chip" onclick="askQuery('What is the physical lab cost savings this term?')">💸 Infra Savings</button>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="queryInput" placeholder="Query institutional DB (departments, faculty, students, costs)..." onkeydown="if(event.key === 'Enter') handleSend()" />
+          <button onclick="handleSend()">Query DB</button>
+        </div>
+      </div>
+
+      <!-- Right Column: Institutional Overview -->
+      <div style="display:flex; flex-direction:column; gap:16px">
+        <div class="card">
+          <div class="card-header">
+            <h3>🏛️ Institutional Overview</h3>
+          </div>
+          <div style="font-size:13px; line-height:1.8; color:var(--foreground)">
+            • <strong>Active Departments:</strong> 6<br/>
+            • <strong>Total Enrolled Students:</strong> 4,820<br/>
+            • <strong>Total Faculty:</strong> 186<br/>
+            • <strong>Overall Health Index:</strong> 82.5%
+          </div>
+        </div>
+        <div class="card" style="background:linear-gradient(135deg, rgba(238,242,255,0.5), rgba(243,232,255,0.5))">
+          <div class="card-header">
+            <h3>📈 Financial Impact</h3>
+          </div>
+          <div style="font-size:12.5px; line-height:1.6; color:var(--foreground)">
+            Virtual lab simulation deployment has reduced physical lab consumable expenditure by <strong>₹42.6 Lakhs</strong> this academic year.
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</div>
+
+<script>
+const adminDBAnswers = {
+  "enrolled": `🏢 **DB Query Result — Institutional Enrollment Summary**:\n\nAccording to college records, there are **4,820 students** enrolled across 6 active departments:\n• **CS Labs:** 1,250 students (88 active labs)\n• **Biology:** 850 students (52 active labs)\n• **Physics:** 780 students (45 active labs)\n• **Electronics:** 710 students (40 active labs)\n• **Chemistry:** 690 students (38 active labs)\n• **Mechanical:** 540 students (30 active labs)`,
+
+  "performance": `📊 **DB Query Result — Department Performance Index**:\n\n1. **Biology:** **91%** (HOD: Prof. Suresh Iyer)\n2. **Physics:** **88%** (HOD: Dr. Rakesh Rao)\n3. **CS Labs:** **85%** (HOD: Prof. R. Ananth)\n4. **Chemistry:** **79%** (HOD: Dr. Lakshmi Nair)\n5. **Electronics:** **74%** ⚠️ *Warning status*\n6. **Mechanical:** **68%** ⚠️ *Warning status*`,
+
+  "unmapped": `🔗 **DB Query Result — Faculty Mapping Audit**:\n\nFound **3 unmapped students** in Physics Department:\n1. **Rohan Mehta** (Roll: SRM-PH-03) — Unassigned advisor\n2. **Divya S** (Roll: SRM-PH-04) — Unassigned advisor\n3. **Vikram K** (Roll: SRM-PH-05) — Unassigned advisor\n\n💡 *Action needed: Go to [Faculty Mapping](admin-mapping.html) to assign advisor.*`,
+
+  "top": `👩‍🏫 **DB Query Result — Top Rated Faculty**:\n\n1. **Prof. R. Ananth** (CS Labs) — Rating: **4.9/5** | 96% Completion\n2. **Prof. Rakesh Rao** (Physics) — Rating: **4.8/5** | 94% Completion\n3. **Dr. Lakshmi Nair** (Chemistry) — Rating: **4.7/5** | 91% Completion\n4. **Prof. Suresh Iyer** (Biology) — Rating: **4.6/5** | 89% Completion`,
+
+  "savings": `💸 **DB Query Result — Cost Savings Audit**:\n\n• **Physical Lab Equipment & Chemicals Saved:** ₹42,60,000\n• **Energy & Power Overhead Reduced:** 34%\n• **Virtual Lab License ROI:** **340%**`
+};
+
+function getAdminResponse(text) {
+  const t = text.toLowerCase();
+  if (t.includes('enrolled') || t.includes('total student') || t.includes('how many student')) return adminDBAnswers['enrolled'];
+  if (t.includes('department') || t.includes('performance') || t.includes('dept')) return adminDBAnswers['performance'];
+  if (t.includes('unmapped') || t.includes('mapping') || t.includes('advisor')) return adminDBAnswers['unmapped'];
+  if (t.includes('faculty') || t.includes('rating') || t.includes('professor') || t.includes('top')) return adminDBAnswers['top'];
+  if (t.includes('saving') || t.includes('cost') || t.includes('financial') || t.includes('infra')) return adminDBAnswers['savings'];
+
+  return `🤖 **DB Query Result**:\n\nQuerying SRM database for *"${text}"*...\n\nFound matching database records. Total institution count: **4,820 students**, **186 faculty**, **6 departments**. Health status: Operational.`;
+}
+
+function askQuery(text) {
+  document.getElementById('queryInput').value = text;
+  handleSend();
+}
+
+function handleSend() {
+  const input = document.getElementById('queryInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const msgs = document.getElementById('chatMessages');
+
+  // User msg
+  const userDiv = document.createElement('div');
+  userDiv.className = 'chat-msg chat-msg-user';
+  userDiv.textContent = text;
+  msgs.appendChild(userDiv);
+
+  input.value = '';
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // Bot response
+  setTimeout(() => {
+    const botDiv = document.createElement('div');
+    botDiv.className = 'chat-msg chat-msg-bot';
+    const resp = getAdminResponse(text);
+    botDiv.innerHTML = resp.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    msgs.appendChild(botDiv);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 500);
+}
+
+// Theme Management
+let isDark = false;
+function applyTheme(dark) {
+  isDark = dark;
+  document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  const toggleBtn = document.getElementById("themeToggle");
+  if (toggleBtn) {
+    toggleBtn.innerHTML = dark 
+      ? `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>` 
+      : `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+  }
+  localStorage.setItem("zeai_theme", dark ? "dark" : "light");
+}
+
+function handleLogout() {
+  try {
+    localStorage.removeItem("zeai_role");
+    localStorage.removeItem("zeai_user");
+    sessionStorage.removeItem("zeai_role");
+    sessionStorage.removeItem("zeai_user");
+  } catch(e) {}
+  window.location.href = "index.html?logout=true";
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const savedTheme = localStorage.getItem("zeai_theme");
+  applyTheme(savedTheme === "dark");
+  document.getElementById("themeToggle").addEventListener("click", () => {
+    applyTheme(!isDark);
+  });
+});
+</script>
+</body>
+</html>
