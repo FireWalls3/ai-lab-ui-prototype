@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Audit Logs · Super Admin · ZEAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#fff;--fg:#0f172a;--muted:#f8fafc;--border:#e2e8f0;--primary:#2b4ed6;--muted-fg:#64748b;--font:"Inter",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--font);background:var(--muted);color:var(--fg);-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:6px}
+a{text-decoration:none;color:inherit}
+button,input,select{font-family:var(--font);cursor:pointer}
+
+.shell{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:252px;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;height:100vh}
+.sb-logo{height:60px;padding:0 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.sb-logo .icon{width:28px;height:28px;border-radius:7px;background:var(--primary);display:flex;align-items:center;justify-content:center}
+.sb-logo .wordmark{font-size:19px;font-weight:800;color:var(--primary);letter-spacing:-0.5px}
+.sb-nav{flex:1;overflow-y:auto;padding:14px 10px;display:flex;flex-direction:column;gap:2px}
+.sb-section{font-size:10.5px;text-transform:uppercase;letter-spacing:0.7px;color:#94a3b8;font-weight:700;padding:14px 10px 6px}
+.sb-section:first-child{padding-top:4px}
+.sb-link{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;font-size:13.5px;font-weight:500;color:#334155;transition:all 0.15s}
+.sb-link svg{width:15px;height:15px;flex-shrink:0;stroke:currentColor}
+.sb-link:hover{background:#f1f5f9;color:#1e293b}
+.sb-link.active{background:#eff6ff;color:var(--primary);font-weight:600}
+.sb-link .badge-count{margin-left:auto;background:#fef2f2;color:#dc2626;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px}
+.sb-footer{padding:14px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.sb-user{display:flex;align-items:center;gap:9px}
+.sb-user img{width:32px;height:32px;border-radius:50%}
+.sb-user .name{font-size:13px;font-weight:600;color:#1e293b}
+.sb-user .role{font-size:11px;color:#94a3b8}
+.logout-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:8px;border:1px solid var(--border);border-radius:7px;background:white;font-size:12.5px;color:#475569;transition:all 0.15s}
+.logout-btn:hover{background:#fef2f2;color:#dc2626;border-color:#fca5a5}
+
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:60px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.breadcrumb{font-size:13px;color:#94a3b8;display:flex;align-items:center;gap:6px}
+.breadcrumb span{color:#1e293b;font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.icon-btn{background:none;border:none;padding:6px;border-radius:7px;display:flex;color:#94a3b8;cursor:pointer;position:relative}
+.icon-btn:hover{background:#f1f5f9}
+.notif-dot{position:absolute;top:3px;right:3px;width:7px;height:7px;background:#ef4444;border-radius:50%;border:2px solid white}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all 0.15s}
+.btn svg{width:14px;height:14px;stroke:currentColor}
+.btn-primary{background:var(--primary);color:white}
+.btn-ghost{background:white;color:#475569;border:1px solid var(--border)}
+.btn-ghost:hover{background:#f8fafc}
+
+.content{flex:1;overflow-y:auto;padding:28px 32px}
+.ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;gap:16px;flex-wrap:wrap}
+.ph h1{font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;margin-bottom:4px}
+.ph p{font-size:13.5px;color:#64748b}
+.ph-actions{display:flex;gap:10px;align-items:center;flex-shrink:0}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.kpi{background:white;border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0}
+.kpi.blue::before{background:var(--primary)}.kpi.green::before{background:#16a34a}
+.kpi.red::before{background:#dc2626}.kpi.amber::before{background:#d97706}
+.kpi-label{font-size:11.5px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px}
+.kpi-value{font-size:26px;font-weight:800;color:#0f172a;letter-spacing:-1px;margin-bottom:4px}
+.kpi-sub{font-size:11.5px;color:#94a3b8}
+
+.card{background:white;border:1px solid var(--border);border-radius:14px;padding:22px;box-shadow:0 1px 3px rgba(0,0,0,0.04);margin-bottom:20px}
+.card-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.card-hd h3{font-size:14px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:7px}
+
+/* Toolbar */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.search-box{position:relative;flex:1;max-width:320px}
+.search-box svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:#94a3b8;pointer-events:none}
+.search-box input{width:100%;height:36px;padding:0 12px 0 32px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:white;outline:none;color:#0f172a;font-family:var(--font)}
+.search-box input:focus{border-color:#2b4ed6}
+.filter-sel{height:36px;padding:0 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12.5px;background:white;color:#334155;outline:none;font-family:var(--font)}
+.date-input{height:36px;padding:0 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12.5px;background:white;color:#334155;outline:none;font-family:var(--font)}
+
+/* Timeline log */
+.log-timeline{display:flex;flex-direction:column;gap:0}
+.log-entry{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid #f8fafc;position:relative;transition:background 0.1s}
+.log-entry:last-child{border-bottom:none}
+.log-entry:hover{background:#fafafa;border-radius:8px;padding-left:6px;margin:0 -6px}
+.log-time{width:100px;flex-shrink:0;font-size:11.5px;color:#94a3b8;font-family:monospace;padding-top:2px;text-align:right}
+.log-icon{width:32px;height:32px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.log-icon svg{width:14px;height:14px}
+.log-body{flex:1}
+.log-action{font-size:13px;font-weight:600;color:#1e293b;margin-bottom:2px}
+.log-detail{font-size:12px;color:#64748b;line-height:1.4}
+.log-meta{display:flex;align-items:center;gap:8px;margin-top:5px;flex-wrap:wrap}
+.log-actor{display:flex;align-items:center;gap:5px;font-size:11.5px;color:#64748b}
+.log-actor img{width:18px;height:18px;border-radius:50%}
+.log-actor strong{color:#334155;font-weight:600}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700}
+.badge-green{background:#dcfce7;color:#15803d}
+.badge-blue{background:#dbeafe;color:#1d4ed8}
+.badge-amber{background:#fef3c7;color:#b45309}
+.badge-red{background:#fef2f2;color:#dc2626}
+.badge-slate{background:#f1f5f9;color:#475569}
+.badge-purple{background:#f3e8ff;color:#7c3aed}
+.badge-cyan{background:#cffafe;color:#0e7490}
+.badge-orange{background:#fff7ed;color:#c2410c}
+
+/* Category Pills */
+.cat-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.cat-pill{padding:5px 12px;border-radius:20px;border:1.5px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;color:#64748b;background:white}
+.cat-pill.active{border-color:#2b4ed6;background:#eff6ff;color:#2b4ed6}
+.cat-pill:hover:not(.active){background:#f8fafc}
+
+/* Stats sidebar in grid */
+.grid-2fr1fr{display:grid;grid-template-columns:2fr 1fr;gap:20px}
+
+/* Risk score */
+.risk-card{background:white;border:1px solid var(--border);border-radius:14px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.risk-score{font-size:42px;font-weight:900;letter-spacing:-2px;margin:8px 0 4px}
+.risk-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:16px;border-top:1px solid #f1f5f9}
+.page-info{font-size:13px;color:#64748b}
+.page-btns{display:flex;gap:4px}
+.page-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:12.5px;color:#475569;cursor:pointer;font-family:var(--font)}
+.page-btn.active{background:#eff6ff;color:#2b4ed6;border-color:#bfdbfe;font-weight:700}
+.page-btn:hover:not(.active){background:#f8fafc}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+  <div class="sb-logo"><div class="icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5a2 2 0 0 1-.4 1.2L5 17.5A2 2 0 0 0 6.6 21h10.8a2 2 0 0 0 1.6-3.5l-4.6-6.8A2 2 0 0 1 14 9.5V3"/></svg></div><div class="wordmark">ZEAI</div></div>
+  <nav class="sb-nav">
+    <div class="sb-section">Platform</div>
+    <a class="sb-link" href="superadmin-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
+    <a class="sb-link" href="superadmin-organizations.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M9 6h1M14 6h1M9 10h1M14 10h1M9 14h1M14 14h1"/></svg>Organizations</a>
+    <a class="sb-link" href="superadmin-billing.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Billing &amp; Revenue</a>
+    <a class="sb-link" href="superadmin-analytics.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>Analytics</a>
+    <a class="sb-link" href="superadmin-ai-models.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/><path d="M7.5 14h.01M16.5 14h.01M10 17h4"/></svg>AI Models</a>
+    <a class="sb-link" href="superadmin-infrastructure.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="7" rx="1"/><rect x="2" y="14" width="20" height="7" rx="1"/><path d="M6 6.5h.01M6 17.5h.01"/></svg>Infrastructure</a>
+    <div class="sb-section">Management</div>
+    <a class="sb-link" href="superadmin-support.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="m4.9 4.9 4.2 4.2M14.9 14.9l4.2 4.2M14.9 9.1l4.2-4.2M4.9 19.1l4.2-4.2"/></svg>Support Tickets<span class="badge-count">5</span></a>
+    <a class="sb-link" href="superadmin-features.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.3.2a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.4a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.3.2a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.3-.2a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.4a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.3-.2a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>Feature Flags</a>
+    <a class="sb-link active" href="superadmin-audit-logs.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>Audit Logs</a>
+    <a class="sb-link" href="superadmin-announcements.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>Announcements</a>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-user"><img src="https://api.dicebear.com/9.x/thumbs/svg?seed=Aditya&backgroundColor=b6e3f4"/><div><div class="name">Aditya Verma</div><div class="role">Super Admin</div></div></div>
+    <button class="logout-btn"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg> Log Out</button>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="breadcrumb">ZEAI <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg> <span>Audit Logs</span></div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost" style="height:34px;font-size:12.5px;padding:0 12px"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export Logs</button>
+      <button class="icon-btn"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="notif-dot"></span></button>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="ph">
+      <div><h1>Audit Logs</h1><p>Complete security trail of all admin actions, system events, and data access across the platform</p></div>
+      <div class="ph-actions">
+        <button class="btn btn-ghost">🔔 Set Alert Rule</button>
+        <button class="btn btn-primary"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export Full Report</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi blue"><div class="kpi-label">Events (30 days)</div><div class="kpi-value">48,294</div><div class="kpi-sub">Across all tenants</div></div>
+      <div class="kpi red"><div class="kpi-label">Security Alerts</div><div class="kpi-value">3</div><div class="kpi-sub">2 high, 1 critical — review now</div></div>
+      <div class="kpi amber"><div class="kpi-label">Failed Logins</div><div class="kpi-value">127</div><div class="kpi-sub">Last 24 hours</div></div>
+      <div class="kpi green"><div class="kpi-label">Data Exports</div><div class="kpi-value">84</div><div class="kpi-sub">All authorized</div></div>
+    </div>
+
+    <!-- Main log + sidebar -->
+    <div class="grid-2fr1fr">
+      <!-- Log -->
+      <div class="card" style="grid-row:1/3">
+        <div class="card-hd">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="#2b4ed6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg> Event Log</h3>
+          <div style="font-size:12px;color:#94a3b8">48,294 total events</div>
+        </div>
+
+        <!-- Category Pills -->
+        <div class="cat-pills">
+          <button class="cat-pill active" onclick="filterCat(this)">All Events</button>
+          <button class="cat-pill" onclick="filterCat(this)">🔐 Auth</button>
+          <button class="cat-pill" onclick="filterCat(this)">🏢 Org</button>
+          <button class="cat-pill" onclick="filterCat(this)">💰 Billing</button>
+          <button class="cat-pill" onclick="filterCat(this)">🤖 AI</button>
+          <button class="cat-pill" onclick="filterCat(this)">⚙️ Config</button>
+          <button class="cat-pill" onclick="filterCat(this)">⚠️ Security</button>
+          <button class="cat-pill" onclick="filterCat(this)">📁 Data</button>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search events, actors, IPs..." /></div>
+          <select class="filter-sel"><option>All Actors</option><option>Aditya Verma (Super Admin)</option><option>Dr. Meera Krishnan (Admin)</option><option>System</option></select>
+          <input type="date" class="date-input" value="2026-07-15" />
+          <select class="filter-sel"><option>All Severities</option><option>Critical</option><option>High</option><option>Info</option></select>
+        </div>
+
+        <!-- Log Entries -->
+        <div class="log-timeline">
+
+          <div class="log-entry">
+            <div class="log-time">22:14:08</div>
+            <div class="log-icon" style="background:#fef2f2"><svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div class="log-body">
+              <div class="log-action">⚠️ Multiple Failed Login Attempts Detected</div>
+              <div class="log-detail">14 consecutive failed logins for <strong>admin@karunaya.edu</strong> within 5 minutes. IP blocked automatically.</div>
+              <div class="log-meta"><span class="badge badge-red">Critical · Security</span><span class="badge badge-slate">IP: 203.128.44.92</span><div class="log-actor"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="7" rx="1"/><rect x="2" y="14" width="20" height="7" rx="1"/></svg><span>System Auto-Block</span></div></div>
+            </div>
+          </div>
+
+          <div class="log-entry">
+            <div class="log-time">21:58:32</div>
+            <div class="log-icon" style="background:#eff6ff"><svg viewBox="0 0 24 24" fill="none" stroke="#2b4ed6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M9 6h1M14 6h1"/></svg></div>
+            <div class="log-body">
+              <div class="log-action">Organization Approved — Bannari Amman Institute</div>
+              <div class="log-detail">Organization moved from <strong>Pending</strong> to <strong>Trial</strong> status. Admin account created: <strong>hod@bitsathy.ac.in</strong></div>
+              <div class="log-meta"><span class="badge badge-blue">Org Management</span><div class="log-actor"><img src="https://api.dicebear.com/9.x/thumbs/svg?seed=Aditya&backgroundColor=b6e3f4"/><span>by <strong>Aditya Verma</strong></span></div></div>
+            </div>
+          </div>
+
+          <div class="log-entry">
+            <div class="log-time">21:32:11</div>
+            <div class="log-icon" style="background:#dcfce7"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg></div>
+            <div class="log-body">
+              <div class="log-action">Feature Flag Enabled — AI Lab Tutor v2</div>
+              <div class="log-detail">Flag <code style="background:#f1f5f9;padding:1px 6px;border-radius:4px;font-size:11.5px">ai_lab_tutor_v2</code> enabled for all organizations. Previous state: disabled.</div>
+              <div class="log-meta"><span class="badge badge-green">Feature Flags</span><div class="log-actor"><img src="https://api.dicebear.com/9.x/thumbs/svg?seed=Aditya&backgroundColor=b6e3f4"/><span>by <strong>Aditya Verma</strong></span></div></div>
+            </div>
+          </div>
+
+          <div class="log-entry">
+            <div class="log-time">20:15:44</div>
+            <div class="log-icon" style="background:#fef3c7"><svg viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>
+            <div class="log-body">
+              <div class="log-action">Invoice Generated — VIT Chennai · ₹48,000</div>
+              <div class="log-detail">Monthly invoice <strong>#INV-2026-083</strong> generated and sent to <strong>finance@vit.ac.in</strong>. Plan: Enterprise.</div>
+              <div class="log-meta"><span class="badge badge-amber">Billing</span><div class="log-actor"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="7" rx="1"/></svg><span>System (Auto-billing)</span></div></div>
+            </div>
+          </div>
+
+          <div class="log-entry">
+            <div class="log-time">19:48:02</div>
+            <div class="log-icon" style="background:#f3e8ff"><svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/></svg></div>
+            <div class="log-body">
+              <div class="log-action">AI Model API Key Rotated — Gemini 1.5 Pro</div>
+              <div class="log-detail">Primary Gemini API key rotated. Old key invalidated. New key stored with AES-256 encryption in secrets vault.</div>
+              <div class="log-meta"><span class="badge badge-purple">AI Config</span><div class="log-actor"><img src="https://api.dicebear.com/9.x/thumbs/svg?seed=Aditya&backgroundColor=b6e3f4"/><span>by <strong>Aditya Verma</strong></span></div></div>
+            </div>
+          </div>
+
+          <div class="log-entry">
+            <div class="log-time">18:30:20</div>
+            <div class="log-icon" style="background:#dbeafe"><svg viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg></div>
+            <div class="log-body">
+              <div class="log-action">Super Admin Login — Successful</div>
+              <div class="log-detail">Login from <strong>Aditya Verma</strong> authenticated via 2FA (TOTP). Session started from Mumbai, India.</div>
+              <div class="log-meta"><span class="badge badge-blue">Authentication</span><span class="badge badge-slate">IP: 122.160.41.18</span><span class="badge badge-green">2FA ✓</span></div>
+            </div>
+          </div>
+
+          <div class="log-entry">
+            <div class="log-time">17:10:55</div>
+            <div class="log-icon" style="background:#fef2f2"><svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+            <div class="log-body">
+              <div class="log-action">Org Suspended — Karunya Institute of Technology</div>
+              <div class="log-detail">Organization account suspended due to non-payment (overdue 45 days). All user sessions terminated. Data preserved for 60 days.</div>
+              <div class="log-meta"><span class="badge badge-red">Critical · Org</span><div class="log-actor"><img src="https://api.dicebear.com/9.x/thumbs/svg?seed=Aditya&backgroundColor=b6e3f4"/><span>by <strong>Aditya Verma</strong></span></div></div>
+            </div>
+          </div>
+
+          <div class="log-entry">
+            <div class="log-time">14:22:41</div>
+            <div class="log-icon" style="background:#cffafe"><svg viewBox="0 0 24 24" fill="none" stroke="#0e7490" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+            <div class="log-body">
+              <div class="log-action">Analytics Report Exported</div>
+              <div class="log-detail">Platform-wide analytics report for June 2026 exported as CSV (284K rows). Report includes PII — access logged for compliance.</div>
+              <div class="log-meta"><span class="badge badge-cyan">Data Export</span><div class="log-actor"><img src="https://api.dicebear.com/9.x/thumbs/svg?seed=Aditya&backgroundColor=b6e3f4"/><span>by <strong>Aditya Verma</strong></span></div></div>
+            </div>
+          </div>
+
+          <div class="log-entry">
+            <div class="log-time">11:05:18</div>
+            <div class="log-icon" style="background:#dcfce7"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg></div>
+            <div class="log-body">
+              <div class="log-action">Infrastructure Scaling — GPU Cluster Expanded</div>
+              <div class="log-detail">GPU cluster auto-scaled from 6 nodes to 8 nodes in response to peak load (94%). Scale-down scheduled for 02:00 AM.</div>
+              <div class="log-meta"><span class="badge badge-green">Infrastructure</span><div class="log-actor"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="7" rx="1"/></svg><span>System (Auto-scale)</span></div></div>
+            </div>
+          </div>
+
+          <div class="log-entry">
+            <div class="log-time">09:30:00</div>
+            <div class="log-icon" style="background:#fff7ed"><svg viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></div>
+            <div class="log-body">
+              <div class="log-action">Announcement Sent — Platform v3.2 Release Notes</div>
+              <div class="log-detail">Announcement broadcast to all 86 organizations (38,210 users). Type: Feature Update. Delivery: In-app + email.</div>
+              <div class="log-meta"><span class="badge badge-orange">Announcement</span><div class="log-actor"><img src="https://api.dicebear.com/9.x/thumbs/svg?seed=Aditya&backgroundColor=b6e3f4"/><span>by <strong>Aditya Verma</strong></span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pagination">
+          <div class="page-info">Showing 10 of 48,294 events</div>
+          <div class="page-btns">
+            <button class="page-btn">← Prev</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">···</button>
+            <button class="page-btn">4830</button>
+            <button class="page-btn">Next →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar: Risk + Activity -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="risk-card">
+          <div class="risk-label" style="color:#dc2626">Security Risk Score</div>
+          <div class="risk-score" style="color:#dc2626">24</div>
+          <div style="height:6px;background:#f1f5f9;border-radius:3px;overflow:hidden;margin-bottom:8px"><div style="height:100%;width:24%;background:linear-gradient(90deg,#16a34a,#d97706,#dc2626);border-radius:3px"></div></div>
+          <div style="font-size:12px;color:#64748b">Low risk · Last updated just now</div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid #f1f5f9">
+            <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12.5px"><span style="color:#64748b">Failed Logins</span><span style="font-weight:700;color:#dc2626">127</span></div>
+            <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12.5px"><span style="color:#64748b">Suspicious IPs</span><span style="font-weight:700;color:#d97706">3</span></div>
+            <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12.5px"><span style="color:#64748b">Policy Violations</span><span style="font-weight:700;color:#16a34a">0</span></div>
+            <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12.5px"><span style="color:#64748b">Unusual Exports</span><span style="font-weight:700;color:#16a34a">0</span></div>
+          </div>
+        </div>
+        <div class="risk-card">
+          <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:12px">Events by Category</div>
+          <div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:4px"><span>🔐 Authentication</span><span style="font-weight:700;color:#1e293b">38%</span></div><div style="height:5px;background:#f1f5f9;border-radius:3px;overflow:hidden"><div style="height:100%;width:38%;background:#2b4ed6;border-radius:3px"></div></div></div>
+          <div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:4px"><span>🏢 Org Management</span><span style="font-weight:700;color:#1e293b">24%</span></div><div style="height:5px;background:#f1f5f9;border-radius:3px;overflow:hidden"><div style="height:100%;width:24%;background:#7c3aed;border-radius:3px"></div></div></div>
+          <div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:4px"><span>⚙️ Config Changes</span><span style="font-weight:700;color:#1e293b">18%</span></div><div style="height:5px;background:#f1f5f9;border-radius:3px;overflow:hidden"><div style="height:100%;width:18%;background:#16a34a;border-radius:3px"></div></div></div>
+          <div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:4px"><span>🤖 AI Operations</span><span style="font-weight:700;color:#1e293b">12%</span></div><div style="height:5px;background:#f1f5f9;border-radius:3px;overflow:hidden"><div style="height:100%;width:12%;background:#d97706;border-radius:3px"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:4px"><span>📁 Data Exports</span><span style="font-weight:700;color:#1e293b">8%</span></div><div style="height:5px;background:#f1f5f9;border-radius:3px;overflow:hidden"><div style="height:100%;width:8%;background:#0891b2;border-radius:3px"></div></div></div>
+        </div>
+        <div class="risk-card">
+          <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:12px">Top Actors (7 days)</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:8px"><img src="https://api.dicebear.com/9.x/thumbs/svg?seed=Aditya&backgroundColor=b6e3f4" style="width:24px;height:24px;border-radius:50%"/><div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:#1e293b">Aditya Verma</div><div style="font-size:11px;color:#94a3b8">Super Admin</div></div><div style="font-size:12px;font-weight:700;color:#0f172a">1,842</div></div>
+            <div style="display:flex;align-items:center;gap:8px"><img src="https://api.dicebear.com/9.x/thumbs/svg?seed=Priya&backgroundColor=dcfce7" style="width:24px;height:24px;border-radius:50%"/><div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:#1e293b">Priya Menon</div><div style="font-size:11px;color:#94a3b8">Support Agent</div></div><div style="font-size:12px;font-weight:700;color:#0f172a">284</div></div>
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:24px;height:24px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#94a3b8" stroke-width="2"><rect x="2" y="3" width="20" height="7" rx="1"/></svg></div><div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:#1e293b">System</div><div style="font-size:11px;color:#94a3b8">Automated tasks</div></div><div style="font-size:12px;font-weight:700;color:#0f172a">42,168</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+function filterCat(el){
+  document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

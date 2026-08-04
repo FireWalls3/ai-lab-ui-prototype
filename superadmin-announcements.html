@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Announcements · Super Admin · ZEAI</title>
+<style>
+:root {
+  --background:#ffffff; --foreground:#0f172a;
+  --primary:#2b4ed6; --secondary:#f1f5f9; --muted:#f8fafc; --muted-foreground:#64748b;
+  --destructive:#ef4444; --border:#e2e8f0;
+  --radius-md:6px; --font-family-body:"Inter", system-ui, -apple-system, sans-serif;
+}
+* { box-sizing:border-box; }
+html,body { margin:0; padding:0; height:100%; }
+body { font-family:var(--font-family-body); background:var(--muted); color:var(--foreground); -webkit-font-smoothing:antialiased; }
+::-webkit-scrollbar { width:8px; } ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:999px; }
+a { text-decoration:none; color:inherit; }
+button { font-family:var(--font-family-body); cursor:pointer; }
+input, select, textarea { font-family:var(--font-family-body); }
+
+.shell { display:flex; height:100vh; overflow:hidden; }
+.sidebar { width:260px; background:white; border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; height:100vh; }
+.sidebar-logo { height:60px; padding:0 24px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border); }
+.sidebar-logo .box { width:24px; height:24px; border-radius:6px; background:var(--primary); display:flex; align-items:center; justify-content:center; }
+.sidebar-logo .name { font-size:18px; font-weight:700; color:var(--primary); }
+.sidebar-nav { flex:1; overflow-y:auto; padding:16px 12px; display:flex; flex-direction:column; gap:4px; }
+.nav-label { font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted-foreground); font-weight:600; padding:16px 12px 8px; }
+.nav-label:first-child { padding-top:4px; }
+.nav-link { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:var(--radius-md); font-size:14px; font-weight:500; color:var(--foreground); transition:all 0.2s; }
+.nav-link svg { width:16px; height:16px; flex-shrink:0; stroke:currentColor; }
+.nav-link:hover { background:var(--secondary); }
+.nav-link.active { color:var(--primary); background:var(--secondary); }
+.sidebar-footer { padding:16px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:10px; }
+.sidebar-footer .user-row { display:flex; align-items:center; gap:10px; }
+.sidebar-footer .uname { font-size:13px; font-weight:500; } .sidebar-footer .urole { font-size:11px; color:var(--muted-foreground); }
+.logout-btn { width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-md); background:white; font-size:13px; transition:all 0.2s; }
+.logout-btn:hover { background:#fef2f2; color:#dc2626; border-color:#fecaca; }
+.main-col { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.navbar { height:60px; background:white; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 24px; flex-shrink:0; }
+.navbar-search { position:relative; width:320px; }
+.navbar-search svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); width:16px; height:16px; stroke:#94a3b8; pointer-events:none; }
+.navbar-search input { width:100%; height:36px; padding-left:36px; padding-right:12px; border:1px solid var(--border); border-radius:var(--radius-md); font-size:13px; background:var(--muted); outline:none; }
+.navbar-actions { display:flex; align-items:center; gap:16px; }
+.icon-btn { position:relative; background:none; border:none; padding:6px; border-radius:var(--radius-md); display:flex; color:var(--muted-foreground); cursor:pointer; }
+.notif-dot { position:absolute; top:2px; right:2px; width:8px; height:8px; background:var(--destructive); border-radius:50%; border:2px solid white; }
+.inst-switch { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:500; padding:6px 10px; border:1px solid var(--border); border-radius:var(--radius-md); }
+main.content { flex:1; overflow-y:auto; }
+.page-wrap-admin { padding:24px 32px; max-width:1400px; margin:0 auto; }
+.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; gap:16px; flex-wrap:wrap; }
+.page-header h1 { font-size:26px; font-weight:700; margin:0 0 8px 0; color:#1e293b; }
+.page-header p { font-size:14px; color:#64748b; margin:0; }
+.header-actions { display:flex; align-items:center; gap:12px; }
+.btn { display:flex; align-items:center; gap:8px; padding:10px 18px; border-radius:8px; font-size:13px; font-weight:600; border:none; transition:all 0.2s; cursor:pointer; }
+.btn svg { width:16px; height:16px; stroke:currentColor; }
+.btn-primary { background:var(--primary); color:white; }
+.btn-secondary { background:white; color:#334155; border:1px solid var(--border); }
+.btn-secondary:hover { background:#f8fafc; }
+.card { background:white; border-radius:12px; padding:20px; border:1px solid #e2e8f0; box-shadow:0 1px 2px rgba(0,0,0,0.03); margin-bottom:20px; }
+.card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.card-header h3 { font-size:15px; font-weight:600; color:#1e293b; margin:0; display:flex; align-items:center; gap:8px; }
+.grid-2fr1fr { display:grid; grid-template-columns:2fr 1fr; gap:20px; }
+.badge { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; text-transform:capitalize; }
+.badge-green { background:#dcfce7; color:#15803d; }
+.badge-amber { background:#fef3c7; color:#b45309; }
+.badge-red { background:#fef2f2; color:#dc2626; }
+.badge-blue { background:#dbeafe; color:#1d4ed8; }
+.badge-slate { background:#f1f5f9; color:#475569; }
+.badge-purple { background:#f3e8ff; color:#7c3aed; }
+
+/* Compose form */
+.compose-form { display:flex; flex-direction:column; gap:14px; }
+.form-group { display:flex; flex-direction:column; gap:6px; }
+.form-group label { font-size:12px; font-weight:600; color:#475569; text-transform:uppercase; letter-spacing:0.3px; }
+.form-group input, .form-group select, .form-group textarea { border:1px solid var(--border); border-radius:var(--radius-md); padding:9px 12px; font-size:13px; color:#0f172a; outline:none; transition:border-color 0.2s; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:#2b4ed6; box-shadow:0 0 0 3px rgba(43,78,214,0.08); }
+.form-group textarea { height:100px; resize:vertical; line-height:1.5; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.type-pills { display:flex; gap:8px; flex-wrap:wrap; }
+.type-pill { padding:6px 14px; border-radius:20px; border:1.5px solid var(--border); font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; color:#64748b; background:white; }
+.type-pill.selected { border-color:#2b4ed6; background:#eff6ff; color:#2b4ed6; }
+.char-count { font-size:11px; color:#94a3b8; text-align:right; }
+.compose-actions { display:flex; gap:10px; justify-content:flex-end; }
+
+/* Announcement cards */
+.announcement-card { border:1px solid var(--border); border-radius:12px; padding:18px; margin-bottom:12px; transition:box-shadow 0.2s; }
+.announcement-card:hover { box-shadow:0 4px 12px rgba(0,0,0,0.06); }
+.ann-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+.ann-title { font-size:14px; font-weight:600; color:#1e293b; margin-bottom:4px; }
+.ann-meta { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.ann-meta span { font-size:11px; color:#94a3b8; }
+.ann-body { font-size:13px; color:#475569; line-height:1.6; margin-bottom:12px; }
+.ann-footer { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+.ann-stats { display:flex; gap:16px; }
+.ann-stat { font-size:12px; color:#64748b; display:flex; align-items:center; gap:4px; }
+.ann-actions { display:flex; gap:8px; }
+.action-btn { background:none; border:1px solid var(--border); border-radius:6px; padding:5px 10px; font-size:12px; color:#475569; cursor:pointer; transition:all 0.15s; }
+.action-btn:hover { background:#f1f5f9; }
+.action-btn.danger:hover { background:#fef2f2; color:#dc2626; border-color:#fca5a5; }
+.border-left-green { border-left:3px solid #16a34a; }
+.border-left-blue { border-left:3px solid #2b4ed6; }
+.border-left-amber { border-left:3px solid #d97706; }
+.border-left-purple { border-left:3px solid #7c3aed; }
+
+/* Reach card */
+.reach-card { background:#f8fafc; border-radius:10px; padding:14px; margin-bottom:10px; }
+.reach-label { font-size:12px; color:#64748b; margin-bottom:4px; }
+.reach-value { font-size:20px; font-weight:700; color:#1e293b; }
+.reach-sub { font-size:11px; color:#94a3b8; margin-top:2px; }
+
+/* Toast Notifications */
+.toast-container { position:fixed; bottom:24px; right:24px; display:flex; flex-direction:column; gap:10px; z-index:999; }
+.toast { background:white; border:1px solid var(--border); border-left:4px solid var(--primary); padding:16px 20px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.08); font-size:13px; font-weight:500; color:var(--foreground); display:flex; align-items:center; gap:10px; animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); min-width:300px; justify-content:space-between; }
+@keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.toast-close { border:none; background:none; font-size:16px; color:var(--muted-foreground); font-weight:700; }
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<div class="sidebar-logo"><div class="box"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5a2 2 0 0 1-.4 1.2L5 17.5A2 2 0 0 0 6.6 21h10.8a2 2 0 0 0 1.6-3.5l-4.6-6.8A2 2 0 0 1 14 9.5V3"/></svg></div><div class="name">ZEAI</div></div>
+<nav class="sidebar-nav">
+<div class="nav-label">PLATFORM</div>
+<a class="nav-link" href="superadmin-dashboard.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>
+<a class="nav-link" href="superadmin-organizations.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M9 6h1M14 6h1M9 10h1M14 10h1M9 14h1M14 14h1"/></svg><span>Organizations</span></a>
+<a class="nav-link" href="superadmin-billing.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Billing &amp; Revenue</span></a>
+<a class="nav-link" href="superadmin-analytics.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg><span>Analytics</span></a>
+<a class="nav-link" href="superadmin-ai-models.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg><span>AI Models</span></a>
+<a class="nav-link" href="superadmin-infrastructure.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="7" rx="1"/><rect x="2" y="14" width="20" height="7" rx="1"/><path d="M6 6.5h.01M6 17.5h.01"/></svg><span>Infrastructure</span></a>
+<a class="nav-link" href="superadmin-support.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="m4.9 4.9 4.2 4.2M14.9 14.9l4.2 4.2M14.9 9.1l4.2-4.2M4.9 19.1l4.2-4.2"/></svg><span>Support Tickets</span></a>
+<a class="nav-link" href="superadmin-features.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.3.2a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.4a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.3.2a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.3-.2a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.4a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.3-.2a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span>Feature Flags</span></a>
+<div class="nav-label">SUPPORT</div>
+<a class="nav-link" href="superadmin-audit-logs.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8"/></svg><span>Audit Logs</span></a>
+<a class="nav-link active" href="superadmin-announcements.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg><span>Announcements</span></a>
+</nav>
+<div class="sidebar-footer">
+  <div class="user-row"><img style="width:32px;height:32px;border-radius:50%" src="https://api.dicebear.com/9.x/thumbs/svg?seed=Aditya&backgroundColor=b6e3f4" /><div><div class="uname">Aditya Verma</div><div class="urole">Super Admin</div></div></div>
+  <button class="logout-btn"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg> Log Out</button>
+</div>
+</aside>
+<div class="main-col">
+<header class="navbar">
+  <div class="inst-switch"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg><span>Platform Announcements</span></div>
+  <div class="navbar-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search announcements..." id="topSearch" oninput="syncAndFilter(this.value)" /></div>
+  <div class="navbar-actions">
+    <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="notif-dot"></span></button>
+  </div>
+</header>
+<main class="content">
+<div class="page-wrap-admin">
+  <div class="page-header">
+    <div><h1>Announcements</h1><p>Broadcast platform updates and maintenance notices to all organizations</p></div>
+  </div>
+
+  <div class="grid-2fr1fr">
+    <!-- Left: Compose + History -->
+    <div>
+      <!-- Compose Card -->
+      <div class="card">
+        <div class="card-header"><h3><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2b4ed6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Compose Announcement</h3></div>
+        <div class="compose-form">
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" id="annTitle" placeholder="e.g. Scheduled Maintenance — July 20" oninput="updatePreview()" />
+          </div>
+          <div class="form-group">
+            <label>Message</label>
+            <textarea id="annBody" placeholder="Write your message here. Be clear and concise about what's happening and what users can expect..." oninput="updatePreview()"></textarea>
+            <div class="char-count"><span id="charCount">0</span> / 500 characters</div>
+          </div>
+          <div class="form-group">
+            <label>Type</label>
+            <div class="type-pills" id="typePills">
+              <button class="type-pill selected" onclick="selectType(this,'info')">ℹ️ Info</button>
+              <button class="type-pill" onclick="selectType(this,'maintenance')">🔧 Maintenance</button>
+              <button class="type-pill" onclick="selectType(this,'warning')">⚠️ Warning</button>
+              <button class="type-pill" onclick="selectType(this,'feature')">✨ Feature Update</button>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Audience</label>
+              <select id="annAudience">
+                <option value="All Organizations">All Organizations</option>
+                <option value="Enterprise Only">Enterprise Only</option>
+                <option value="Pro Only">Pro Only</option>
+                <option value="Specific Organizations">Specific Organizations</option>
+                <option value="Admins Only">Admins Only</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Send At</label>
+              <select id="annSendAt">
+                <option value="immediate">Send Immediately</option>
+                <option value="later">Schedule for Later</option>
+              </select>
+            </div>
+          </div>
+          <div class="compose-actions">
+            <button class="btn btn-secondary" onclick="saveDraft()">Save Draft</button>
+            <button class="btn btn-primary" onclick="sendAnnouncement()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Send Announcement</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="card">
+        <div class="card-header"><h3>Recent Announcements</h3><span style="font-size:12px;color:#64748b" id="history-total">8 total sent</span></div>
+        <div id="announcementsHistoryContainer">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Stats + Preview -->
+    <div>
+      <div class="card">
+        <div class="card-header"><h3>Reach Overview</h3></div>
+        <div class="reach-card"><div class="reach-label">Total Users Reached</div><div class="reach-value" id="reach-total">41,210</div><div class="reach-sub">Across all announcements</div></div>
+        <div class="reach-card"><div class="reach-label">Avg Open Rate</div><div class="reach-value">78.4%</div><div class="reach-sub">Industry avg: 42%</div></div>
+        <div class="reach-card"><div class="reach-label">Sent This Month</div><div class="reach-value" id="reach-month">4</div><div class="reach-sub">In-app notifications</div></div>
+        <div class="reach-card"><div class="reach-label">Avg Response Rate</div><div class="reach-value">3.8%</div><div class="reach-sub">Comments / replies</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Live Preview</h3></div>
+        <div id="preview" style="background:#f8fafc;border-radius:10px;padding:16px;border:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <div style="width:32px;height:32px;border-radius:8px;background:var(--primary);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5a2 2 0 0 1-.4 1.2L5 17.5A2 2 0 0 0 6.6 21h10.8a2 2 0 0 0 1.6-3.5l-4.6-6.8A2 2 0 0 1 14 9.5V3"/></svg></div>
+            <div><div style="font-size:13px;font-weight:700;color:#1e293b">ZEAI Platform</div><div style="font-size:11px;color:#94a3b8">Announcement</div></div>
+          </div>
+          <div id="previewTitle" style="font-size:14px;font-weight:600;color:#1e293b;margin-bottom:6px">Your title will appear here</div>
+          <div id="previewBody" style="font-size:13px;color:#475569;line-height:1.5">Your message will appear here. Start typing to see a preview.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Drafts</h3></div>
+        <div id="draftsContainer">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+</div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// Mock Database
+let announcements = [
+  { id: 1, title: "New Feature: AI Lab Tutor v2 is Live 🎉", body: "We're excited to announce the launch of AI Lab Tutor v2! Students now get real-time contextual guidance directly within their virtual lab workspace. This update includes improved accuracy for Physics and Chemistry labs.", type: "feature", audience: "All Organizations", date: "Jul 12, 2026 · 10:00 AM", status: "sent", views: 12480, responses: 38 },
+  { id: 2, title: "Scheduled Maintenance — GPU Cluster Upgrade", body: "We will be performing a GPU cluster upgrade on July 10 from 2:00 AM to 6:00 AM IST. During this window, GPU-intensive simulations may be temporarily unavailable. Please plan your lab sessions accordingly.", type: "maintenance", audience: "All Organizations", date: "Jul 8, 2026 · 6:00 PM", status: "sent", views: 10920, responses: 12 },
+  { id: 3, title: "Platform v3.2 Release Notes", body: "Version 3.2 is live with improved experiment loading speeds, new gamification badges, and an enhanced notebook editor. Full release notes available in the documentation portal.", type: "feature", audience: "All Organizations", date: "Jul 1, 2026 · 9:00 AM", status: "sent", views: 14200, responses: 67 },
+  { id: 4, title: "Welcome to ZEAI — Onboarding Resources", body: "Welcome to the ZEAI platform! This announcement contains links to getting started guides, video tutorials, and faculty onboarding checklists.", type: "info", audience: "New Organizations", date: "Jun 15, 2026 · 12:00 PM", status: "archived", views: 3820, responses: 24 }
+];
+
+let drafts = [
+  { id: 1, title: "Q3 Platform Roadmap", date: "Saved Jul 14 · Not sent", type: "info", body: "Draft content details for platform roadmap...", audience: "All Organizations" },
+  { id: 2, title: "Upcoming Downtime Notice", date: "Saved Jul 13 · Not sent", type: "maintenance", body: "Scheduled downtime draft notice details...", audience: "All Organizations" }
+];
+
+let selectedType = 'info';
+
+function showToast(message, type = "success") {
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  if (type === "error") toast.style.borderLeftColor = "var(--destructive)";
+  
+  toast.innerHTML = `
+    <span>${message}</span>
+    <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+function selectType(el, type) {
+  document.querySelectorAll('.type-pill').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedType = type;
+}
+
+function updatePreview() {
+  const title = document.getElementById('annTitle').value;
+  const body = document.getElementById('annBody').value;
+  document.getElementById('previewTitle').textContent = title || 'Your title will appear here';
+  document.getElementById('previewBody').textContent = body || 'Your message will appear here. Start typing to see a preview.';
+  document.getElementById('charCount').textContent = body.length;
+}
+
+function renderAnnouncements() {
+  const container = document.getElementById("announcementsHistoryContainer");
+  container.innerHTML = "";
+  
+  const searchVal = document.getElementById("topSearch").value.toLowerCase();
+  
+  let visibleCount = 0;
+  
+  announcements.forEach((ann, index) => {
+    if (searchVal && !ann.title.toLowerCase().includes(searchVal) && !ann.body.toLowerCase().includes(searchVal)) {
+      return;
+    }
+    
+    visibleCount++;
+    const card = document.createElement("div");
+    
+    let leftBorderClass = "border-left-blue";
+    let typeLabel = "Info";
+    if (ann.type === "maintenance") { leftBorderClass = "border-left-amber"; typeLabel = "Maintenance"; }
+    else if (ann.type === "warning") { leftBorderClass = "border-left-red"; typeLabel = "Warning"; }
+    else if (ann.type === "feature") { leftBorderClass = "border-left-purple"; typeLabel = "Feature Update"; }
+    
+    let statusClass = "badge-green";
+    if (ann.status === "archived") statusClass = "badge-slate";
+    
+    card.className = `announcement-card ${leftBorderClass}`;
+    card.innerHTML = `
+      <div class="ann-header">
+        <div>
+          <div class="ann-title">${ann.title}</div>
+          <div class="ann-meta">
+            <span class="badge ${getBadgeClass(ann.type)}">${typeLabel}</span>
+            <span>${ann.audience}</span>
+            <span>${ann.date}</span>
+          </div>
+        </div>
+        <span class="badge ${statusClass}">${ann.status}</span>
+      </div>
+      <div class="ann-body">${ann.body}</div>
+      <div class="ann-footer">
+        <div class="ann-stats">
+          <span class="ann-stat"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>${ann.views.toLocaleString()} views</span>
+          <span class="ann-stat"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>${ann.responses} responses</span>
+        </div>
+        <div class="ann-actions">
+          <button class="action-btn" onclick="duplicateAnnouncement(${index})">Duplicate</button>
+          ${ann.status === 'sent' ? `<button class="action-btn danger" onclick="archiveAnnouncement(${index})">Archive</button>` : ''}
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+  
+  document.getElementById("history-total").textContent = `${visibleCount} total sent`;
+  renderDrafts();
+  updateReach();
+}
+
+function getBadgeClass(type) {
+  if (type === 'feature') return 'badge-purple';
+  if (type === 'maintenance') return 'badge-amber';
+  if (type === 'warning') return 'badge-red';
+  return 'badge-blue';
+}
+
+function renderDrafts() {
+  const container = document.getElementById("draftsContainer");
+  container.innerHTML = "";
+  
+  if (drafts.length === 0) {
+    container.innerHTML = `<div style="font-size:12px;color:#94a3b8;font-style:italic;padding:10px 0;">No drafts saved.</div>`;
+    return;
+  }
+  
+  drafts.forEach((draft, index) => {
+    const div = document.createElement("div");
+    div.style.padding = "10px 0";
+    div.style.borderBottom = "1px solid #f1f5f9";
+    div.style.cursor = "pointer";
+    div.innerHTML = `
+      <div style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:3px;" onclick="loadDraft(${index})">${draft.title}</div>
+      <div style="font-size:11px;color:#94a3b8;display:flex;justify-content:space-between;align-items:center;">
+        <span>${draft.date}</span>
+        <span style="color:var(--primary)" onclick="deleteDraft(${index}, event)">Delete</span>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function updateReach() {
+  const totalSent = announcements.filter(a => a.status === 'sent').length;
+  document.getElementById("reach-month").textContent = totalSent;
+}
+
+function syncAndFilter(val) {
+  renderAnnouncements();
+}
+
+function loadDraft(index) {
+  const draft = drafts[index];
+  document.getElementById("annTitle").value = draft.title;
+  document.getElementById("annBody").value = draft.body;
+  document.getElementById("annAudience").value = draft.audience;
+  
+  // Set type pill
+  const pillBtn = Array.from(document.querySelectorAll('.type-pill')).find(btn => btn.textContent.toLowerCase().includes(draft.type));
+  if (pillBtn) selectType(pillBtn, draft.type);
+  
+  updatePreview();
+  showToast("Draft loaded into composer.");
+}
+
+function deleteDraft(index, event) {
+  event.stopPropagation();
+  const draft = drafts[index];
+  drafts.splice(index, 1);
+  showToast(`Draft "${draft.title}" deleted.`, "error");
+  renderDrafts();
+}
+
+function saveDraft() {
+  const title = document.getElementById("annTitle").value.trim();
+  const body = document.getElementById("annBody").value.trim();
+  const audience = document.getElementById("annAudience").value;
+  
+  if (!title) {
+    showToast("Please enter a title to save draft.", "error");
+    return;
+  }
+  
+  drafts.push({
+    id: drafts.length + 1,
+    title, body, audience,
+    type: selectedType,
+    date: `Saved just now · Not sent`
+  });
+  
+  showToast("Draft saved successfully.");
+  // Clear inputs
+  document.getElementById("annTitle").value = "";
+  document.getElementById("annBody").value = "";
+  updatePreview();
+  renderDrafts();
+}
+
+function sendAnnouncement() {
+  const title = document.getElementById("annTitle").value.trim();
+  const body = document.getElementById("annBody").value.trim();
+  const audience = document.getElementById("annAudience").value;
+  
+  if (!title || !body) {
+    showToast("Both title and message body are required.", "error");
+    return;
+  }
+  
+  const newAnn = {
+    id: announcements.length + 1,
+    title, body, audience,
+    type: selectedType,
+    date: new Date().toLocaleString('default', { month: 'short', day: 'numeric', year: 'numeric' }) + " · Just now",
+    status: "sent",
+    views: 0,
+    responses: 0
+  };
+  
+  announcements.unshift(newAnn);
+  showToast(`Announcement sent successfully to ${audience}!`);
+  
+  // Clear inputs
+  document.getElementById("annTitle").value = "";
+  document.getElementById("annBody").value = "";
+  updatePreview();
+  renderAnnouncements();
+}
+
+function duplicateAnnouncement(index) {
+  const ann = announcements[index];
+  document.getElementById("annTitle").value = ann.title;
+  document.getElementById("annBody").value = ann.body;
+  document.getElementById("annAudience").value = ann.audience;
+  
+  const pillBtn = Array.from(document.querySelectorAll('.type-pill')).find(btn => btn.textContent.toLowerCase().includes(ann.type));
+  if (pillBtn) selectType(pillBtn, ann.type);
+  
+  updatePreview();
+  showToast("Announcement duplicated to composer.");
+}
+
+function archiveAnnouncement(index) {
+  const ann = announcements[index];
+  ann.status = "archived";
+  showToast(`Announcement "${ann.title}" archived.`, "error");
+  renderAnnouncements();
+}
+
+// Initial Render
+renderAnnouncements();
+</script>
+</body>
+</html>

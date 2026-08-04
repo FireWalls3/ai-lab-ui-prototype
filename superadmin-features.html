@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Feature Flags · Super Admin · ZEAI</title>
+<style>
+:root {
+  --background:#ffffff; --foreground:#0f172a;
+  --primary:#2b4ed6; --secondary:#f1f5f9; --muted:#f8fafc; --muted-foreground:#64748b;
+  --destructive:#ef4444; --border:#e2e8f0;
+  --radius-md:6px; --font-family-body:"Inter", system-ui, -apple-system, sans-serif;
+}
+* { box-sizing:border-box; }
+html,body { margin:0; padding:0; height:100%; }
+body { font-family:var(--font-family-body); background:var(--muted); color:var(--foreground); -webkit-font-smoothing:antialiased; }
+::-webkit-scrollbar { width:8px; } ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:999px; }
+a { text-decoration:none; color:inherit; }
+button { font-family:var(--font-family-body); cursor:pointer; }
+input, select, textarea { font-family:var(--font-family-body); }
+
+.shell { display:flex; height:100vh; overflow:hidden; }
+.sidebar { width:260px; background:white; border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; height:100vh; }
+.sidebar-logo { height:60px; padding:0 24px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border); }
+.sidebar-logo .box { width:24px; height:24px; border-radius:6px; background:var(--primary); display:flex; align-items:center; justify-content:center; }
+.sidebar-logo .name { font-size:18px; font-weight:700; color:var(--primary); }
+.sidebar-nav { flex:1; overflow-y:auto; padding:16px 12px; display:flex; flex-direction:column; gap:4px; }
+.nav-label { font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted-foreground); font-weight:600; padding:16px 12px 8px; }
+.nav-label:first-child { padding-top:4px; }
+.nav-link { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:var(--radius-md); font-size:14px; font-weight:500; color:var(--foreground); transition:all 0.2s; }
+.nav-link svg { width:16px; height:16px; flex-shrink:0; stroke:currentColor; }
+.nav-link:hover { background:var(--secondary); }
+.nav-link.active { color:var(--primary); background:var(--secondary); }
+.sidebar-footer { padding:16px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:10px; }
+.sidebar-footer .user-row { display:flex; align-items:center; gap:10px; }
+.sidebar-footer .uname { font-size:13px; font-weight:500; } .sidebar-footer .urole { font-size:11px; color:var(--muted-foreground); }
+.logout-btn { width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-md); background:white; font-size:13px; transition:all 0.2s; }
+.logout-btn:hover { background:#fef2f2; color:#dc2626; border-color:#fecaca; }
+.main-col { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.navbar { height:60px; background:white; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 24px; flex-shrink:0; }
+.navbar-search { position:relative; width:320px; }
+.navbar-search svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); width:16px; height:16px; stroke:#94a3b8; pointer-events:none; }
+.navbar-search input { width:100%; height:36px; padding-left:36px; padding-right:12px; border:1px solid var(--border); border-radius:var(--radius-md); font-size:13px; background:var(--muted); outline:none; }
+.navbar-actions { display:flex; align-items:center; gap:16px; }
+.icon-btn { position:relative; background:none; border:none; padding:6px; border-radius:var(--radius-md); display:flex; color:var(--muted-foreground); cursor:pointer; }
+.notif-dot { position:absolute; top:2px; right:2px; width:8px; height:8px; background:var(--destructive); border-radius:50%; border:2px solid white; }
+.inst-switch { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:500; padding:6px 10px; border:1px solid var(--border); border-radius:var(--radius-md); }
+main.content { flex:1; overflow-y:auto; }
+.page-wrap-admin { padding:24px 32px; max-width:1400px; margin:0 auto; }
+.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; gap:16px; flex-wrap:wrap; }
+.page-header h1 { font-size:26px; font-weight:700; margin:0 0 8px 0; color:#1e293b; }
+.page-header p { font-size:14px; color:#64748b; margin:0; }
+.header-actions { display:flex; align-items:center; gap:12px; }
+.btn { display:flex; align-items:center; gap:8px; padding:10px 18px; border-radius:8px; font-size:13px; font-weight:600; border:none; transition:all 0.2s; cursor:pointer; }
+.btn svg { width:16px; height:16px; stroke:currentColor; }
+.btn-primary { background:var(--primary); color:white; }
+.btn-secondary { background:white; color:#334155; border:1px solid var(--border); }
+.btn-secondary:hover { background:#f8fafc; }
+.card { background:white; border-radius:12px; padding:20px; border:1px solid #e2e8f0; box-shadow:0 1px 2px rgba(0,0,0,0.03); margin-bottom:20px; }
+.card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.card-header h3 { font-size:15px; font-weight:600; color:#1e293b; margin:0; display:flex; align-items:center; gap:8px; }
+.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:20px; }
+.stat-card { display:flex; align-items:flex-start; gap:14px; }
+.stat-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.stat-label { font-size:12px; color:#64748b; font-weight:500; margin-bottom:4px; }
+.stat-value { font-size:24px; font-weight:700; color:#1e293b; margin-bottom:2px; letter-spacing:-0.5px; }
+.stat-sub { font-size:12px; color:#94a3b8; }
+.badge { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; text-transform:capitalize; }
+.badge-green { background:#dcfce7; color:#15803d; }
+.badge-amber { background:#fef3c7; color:#b45309; }
+.badge-red { background:#fef2f2; color:#dc2626; }
+.badge-blue { background:#dbeafe; color:#1d4ed8; }
+.badge-slate { background:#f1f5f9; color:#475569; }
+
+/* Toolbar */
+.toolbar { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+.search-box { position:relative; flex:1; max-width:300px; }
+.search-box svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); width:15px; height:15px; stroke:#94a3b8; pointer-events:none; }
+.search-box input { width:100%; height:36px; padding-left:34px; padding-right:12px; border:1px solid var(--border); border-radius:var(--radius-md); font-size:13px; background:white; outline:none; }
+.filter-select { height:36px; padding:0 12px; border:1px solid var(--border); border-radius:var(--radius-md); font-size:13px; background:white; outline:none; cursor:pointer; }
+
+/* Toggle Switch */
+.toggle-switch { position:relative; display:inline-block; width:40px; height:22px; flex-shrink:0; }
+.toggle-switch input { opacity:0; width:0; height:0; }
+.toggle-slider { position:absolute; cursor:pointer; inset:0; background:#e2e8f0; border-radius:22px; transition:0.3s; }
+.toggle-slider:before { position:absolute; content:""; height:16px; width:16px; left:3px; bottom:3px; background:white; border-radius:50%; transition:0.3s; }
+.toggle-switch input:checked + .toggle-slider { background:#2b4ed6; }
+.toggle-switch input:checked + .toggle-slider:before { transform:translateX(18px); }
+.toggle-switch.on input:checked + .toggle-slider { background:#16a34a; }
+
+/* Flag row */
+.flag-row { display:flex; align-items:flex-start; justify-content:space-between; padding:18px 0; border-bottom:1px solid #f1f5f9; gap:16px; }
+.flag-row:last-child { border-bottom:none; padding-bottom:0; }
+.flag-info { flex:1; }
+.flag-name { font-size:14px; font-weight:600; color:#1e293b; margin-bottom:3px; display:flex; align-items:center; gap:8px; }
+.flag-key { font-family:monospace; font-size:11px; color:#94a3b8; background:#f8fafc; padding:2px 8px; border-radius:4px; border:1px solid #e2e8f0; }
+.flag-desc { font-size:12px; color:#64748b; margin-bottom:8px; }
+.flag-meta { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.flag-scope { font-size:11px; color:#64748b; }
+.flag-controls { display:flex; align-items:center; gap:12px; flex-shrink:0; }
+
+/* Category section */
+.section-divider { display:flex; align-items:center; gap:12px; margin:24px 0 16px; }
+.section-divider span { font-size:13px; font-weight:600; color:#1e293b; }
+.section-divider::before, .section-divider::after { content:''; flex:1; height:1px; background:#e2e8f0; }
+
+/* Modal */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.5); z-index:100; align-items:center; justify-content:center; backdrop-filter:blur(2px); }
+.modal-overlay.open { display:flex; }
+.modal { background:white; border-radius:16px; padding:28px; width:100%; max-width:480px; box-shadow:0 20px 60px rgba(0,0,0,0.15); animation: modalEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes modalEnter { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.modal h2 { font-size:18px; font-weight:700; color:#1e293b; margin:0 0 20px; }
+.form-group { margin-bottom:16px; }
+.form-group label { display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.3px; }
+.form-group input, .form-group select, .form-group textarea { width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-md); font-size:13px; color:#0f172a; outline:none; }
+.form-group textarea { height:80px; resize:vertical; }
+.modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:24px; }
+
+/* Toast Notifications */
+.toast-container { position:fixed; bottom:24px; right:24px; display:flex; flex-direction:column; gap:10px; z-index:999; }
+.toast { background:white; border:1px solid var(--border); border-left:4px solid var(--primary); padding:16px 20px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.08); font-size:13px; font-weight:500; color:var(--foreground); display:flex; align-items:center; gap:10px; animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); min-width:300px; justify-content:space-between; }
+@keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.toast-close { border:none; background:none; font-size:16px; color:var(--muted-foreground); font-weight:700; }
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<div class="sidebar-logo"><div class="box"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5a2 2 0 0 1-.4 1.2L5 17.5A2 2 0 0 0 6.6 21h10.8a2 2 0 0 0 1.6-3.5l-4.6-6.8A2 2 0 0 1 14 9.5V3"/></svg></div><div class="name">ZEAI</div></div>
+<nav class="sidebar-nav">
+<div class="nav-label">PLATFORM</div>
+<a class="nav-link" href="superadmin-dashboard.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>
+<a class="nav-link" href="superadmin-organizations.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M9 6h1M14 6h1M9 10h1M14 10h1M9 14h1M14 14h1"/></svg><span>Organizations</span></a>
+<a class="nav-link" href="superadmin-billing.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Billing &amp; Revenue</span></a>
+<a class="nav-link" href="superadmin-analytics.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg><span>Analytics</span></a>
+<a class="nav-link" href="superadmin-ai-models.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg><span>AI Models</span></a>
+<a class="nav-link" href="superadmin-infrastructure.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="7" rx="1"/><rect x="2" y="14" width="20" height="7" rx="1"/><path d="M6 6.5h.01M6 17.5h.01"/></svg><span>Infrastructure</span></a>
+<a class="nav-link" href="superadmin-support.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="m4.9 4.9 4.2 4.2M14.9 14.9l4.2 4.2M14.9 9.1l4.2-4.2M4.9 19.1l4.2-4.2"/></svg><span>Support Tickets</span></a>
+<a class="nav-link active" href="superadmin-features.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.3.2a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.4a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.3.2a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.3-.2a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.4a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.3-.2a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span>Feature Flags</span></a>
+<div class="nav-label">SUPPORT</div>
+<a class="nav-link" href="superadmin-audit-logs.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8"/></svg><span>Audit Logs</span></a>
+<a class="nav-link" href="superadmin-announcements.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg><span>Announcements</span></a>
+</nav>
+<div class="sidebar-footer">
+  <div class="user-row"><img style="width:32px;height:32px;border-radius:50%" src="https://api.dicebear.com/9.x/thumbs/svg?seed=Aditya&backgroundColor=b6e3f4" /><div><div class="uname">Aditya Verma</div><div class="urole">Super Admin</div></div></div>
+  <button class="logout-btn"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg> Log Out</button>
+</div>
+</aside>
+<div class="main-col">
+<header class="navbar">
+  <div class="inst-switch"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.3.2a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.4a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.3.2a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.3-.2a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.4a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.3-.2a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span>Feature Flag Control</span></div>
+  <div class="navbar-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search flags..." id="topSearch" oninput="syncAndFilter(this.value)" /></div>
+  <div class="navbar-actions">
+    <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="notif-dot"></span></button>
+  </div>
+</header>
+<main class="content">
+<div class="page-wrap-admin">
+  <div class="page-header">
+    <div><h1>Feature Flags</h1><p>Control experimental features and rollouts across the platform</p></div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" onclick="exportData()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg> Audit Log</button>
+      <button class="btn btn-primary" onclick="openAddModal()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> New Flag</button>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="grid-3">
+    <div class="card stat-card"><div class="stat-icon" style="background:#dcfce7"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg></div><div style="flex:1"><div class="stat-label">Enabled Flags</div><div class="stat-value" id="stat-enabled">18</div><div class="stat-sub">Platform-wide active</div></div></div>
+    <div class="card stat-card"><div class="stat-icon" style="background:#fef3c7"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg></div><div style="flex:1"><div class="stat-label">Beta Rollout</div><div class="stat-value" id="stat-beta">5</div><div class="stat-sub">Org-limited features</div></div></div>
+    <div class="card stat-card"><div class="stat-icon" style="background:#f1f5f9"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></div><div style="flex:1"><div class="stat-label">Disabled Flags</div><div class="stat-value" id="stat-disabled">9</div><div class="stat-sub">Deprecated / inactive</div></div></div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search flags by name or key..." id="flagSearch" oninput="filterFlags()" /></div>
+    <select class="filter-select" id="categoryFilter" onchange="filterFlags()">
+      <option value="">All Categories</option>
+      <option value="ai/ml">AI/ML</option>
+      <option value="labs">Labs</option>
+      <option value="security">Security</option>
+      <option value="ui">UI</option>
+      <option value="billing">Billing</option>
+    </select>
+    <select class="filter-select" id="statusFilter" onchange="filterFlags()">
+      <option value="">All Statuses</option>
+      <option value="enabled">Enabled</option>
+      <option value="beta">Beta</option>
+      <option value="disabled">Disabled</option>
+    </select>
+  </div>
+
+  <!-- Flag Categorized Cards -->
+  <div id="flagsContainer">
+    <!-- Rendered dynamically by script -->
+  </div>
+
+</div>
+</main>
+</div>
+</div>
+
+<!-- New/Edit Flag Modal -->
+<div class="modal-overlay" id="newFlagModal">
+  <div class="modal">
+    <h2 id="modalTitle">Create Feature Flag</h2>
+    <input type="hidden" id="editIndex" value="" />
+    <div class="form-group"><label>Flag Name</label><input type="text" id="flagName" placeholder="e.g. AI Lab Tutor v3" required /></div>
+    <div class="form-group"><label>Flag Key</label><input type="text" id="flagKey" placeholder="e.g. ai_lab_tutor_v3" required /></div>
+    <div class="form-group"><label>Description</label><textarea id="flagDesc" placeholder="Describe what this flag controls..."></textarea></div>
+    <div class="form-group"><label>Category</label><select id="flagCategory"><option value="ai/ml">AI/ML</option><option value="labs">Labs</option><option value="security">Security</option><option value="ui">UI</option><option value="billing">Billing</option></select></div>
+    <div class="form-group"><label>Scope</label><select id="flagScope"><option value="all">All Organizations</option><option value="enterprise">Enterprise Only</option><option value="pro">Pro Only</option><option value="selected">Selected Organizations</option><option value="none">None</option></select></div>
+    <div class="form-group"><label>Initial Status</label><select id="flagStatus"><option value="enabled">Enabled</option><option value="beta">Beta</option><option value="disabled">Disabled</option></select></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveFlag()" id="saveBtn">Create Flag</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// Mock Database for Feature Flags
+let featureFlags = [
+  { name: "AI Lab Tutor", key: "ai_lab_tutor_v2", desc: "Context-aware AI tutor embedded in virtual lab workspace. Provides step-by-step guidance and concept explanations.", category: "ai/ml", status: "enabled", scope: "All Organizations", modifier: "Aditya V.", date: "Jul 12" },
+  { name: "Auto-Grade Submissions", key: "auto_grade_v1", desc: "Uses AI to auto-grade lab report submissions. Currently in beta for selected Enterprise organizations.", category: "ai/ml", status: "beta", scope: "12 Organizations (Beta)", modifier: "Aditya V.", date: "Jul 8" },
+  { name: "AI Experiment Recommender", key: "ai_experiment_rec", desc: "Recommends follow-up experiments based on student performance patterns. Pending model evaluation.", category: "ai/ml", status: "disabled", scope: "None", modifier: "Rajan K.", date: "Jun 20" },
+  { name: "3D Molecular Viewer", key: "lab_3d_molecule_viewer", desc: "Interactive 3D molecular structure viewer using WebGL for Chemistry labs.", category: "labs", status: "enabled", scope: "All Organizations", modifier: "Aditya V.", date: "Jul 1" },
+  { name: "Collaborative Lab Mode", key: "collab_lab_mode", desc: "Allows multiple students to work in the same virtual lab session simultaneously. Real-time sync via WebSockets.", category: "labs", status: "beta", scope: "5 Organizations (Beta)", modifier: "Priya M.", date: "Jun 28" },
+  { name: "VR Lab Preview", key: "vr_lab_preview", desc: "WebXR-powered VR experience for compatible headsets. Development in progress.", category: "labs", status: "disabled", scope: "None", modifier: "Not yet released", date: "" },
+  { name: "SSO with OAuth 2.0", key: "sso_oauth2", desc: "Allows organizations to configure SSO via Google Workspace, Microsoft AD, or custom SAML providers.", category: "security", status: "enabled", scope: "Enterprise Plan", modifier: "Aditya V.", date: "May 15" },
+  { name: "Two-Factor Auth Enforcement", key: "enforce_2fa_admins", desc: "Forces Super Admins and College Admins to enable 2FA on their accounts.", category: "security", status: "enabled", scope: "All Admin Accounts", modifier: "Aditya V.", date: "Jun 1" }
+];
+
+function showToast(message, type = "success") {
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  if (type === "error") toast.style.borderLeftColor = "var(--destructive)";
+  
+  toast.innerHTML = `
+    <span>${message}</span>
+    <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+function renderFlags() {
+  const container = document.getElementById("flagsContainer");
+  container.innerHTML = "";
+  
+  const searchVal = document.getElementById("flagSearch").value.toLowerCase();
+  const catVal = document.getElementById("categoryFilter").value;
+  const statusVal = document.getElementById("statusFilter").value;
+  
+  // Group by categories
+  const categories = {
+    "ai/ml": { title: "🤖 AI & Machine Learning", list: [] },
+    "labs": { title: "🧪 Virtual Labs", list: [] },
+    "security": { title: "🔒 Security & Access", list: [] },
+    "ui": { title: "🎨 User Interface Design", list: [] },
+    "billing": { title: "💳 Billing & Subscriptions", list: [] }
+  };
+  
+  featureFlags.forEach((flag, index) => {
+    const matchesSearch = flag.name.toLowerCase().includes(searchVal) || flag.key.toLowerCase().includes(searchVal);
+    const matchesCategory = !catVal || flag.category === catVal;
+    const matchesStatus = !statusVal || flag.status === statusVal;
+    
+    if (matchesSearch && matchesCategory && matchesStatus) {
+      if (categories[flag.category]) {
+        categories[flag.category].list.push({ flag, index });
+      }
+    }
+  });
+  
+  Object.keys(categories).forEach(catKey => {
+    const cat = categories[catKey];
+    if (cat.list.length > 0) {
+      const card = document.createElement("div");
+      card.className = "card";
+      
+      let headerText = `<h3>${cat.title}</h3>`;
+      card.innerHTML = `<div class="card-header">${headerText}</div>`;
+      
+      cat.list.forEach(item => {
+        const flag = item.flag;
+        const index = item.index;
+        
+        let statusBadge = "badge-slate";
+        if (flag.status === "enabled") statusBadge = "badge-green";
+        else if (flag.status === "beta") statusBadge = "badge-amber";
+        else if (flag.status === "disabled") statusBadge = "badge-red";
+        
+        const row = document.createElement("div");
+        row.className = "flag-row";
+        row.innerHTML = `
+          <div class="flag-info">
+            <div class="flag-name">
+              ${flag.name} <span class="flag-key">${flag.key}</span>
+              <span class="badge ${statusBadge}">${flag.status}</span>
+            </div>
+            <div class="flag-desc">${flag.desc}</div>
+            <div class="flag-meta">
+              <span class="flag-scope">📌 Scope: ${flag.scope}</span>
+              <span class="badge badge-blue" style="text-transform: uppercase;">${flag.category}</span>
+              <span style="font-size:11px;color:#94a3b8">${flag.date ? 'Modified ' + flag.date + ' by ' + flag.modifier : 'Not modified yet'}</span>
+            </div>
+          </div>
+          <div class="flag-controls">
+            <label class="toggle-switch ${flag.status !== 'disabled' ? 'on' : ''}">
+              <input type="checkbox" ${flag.status !== 'disabled' ? 'checked' : ''} onchange="toggleFlagStatus(this, ${index})">
+              <div class="toggle-slider"></div>
+            </label>
+            <button style="background:none;border:none;color:#64748b;cursor:pointer;font-size:12px" onclick="editFlag(${index})">Edit</button>
+          </div>
+        `;
+        card.appendChild(row);
+      });
+      container.appendChild(card);
+    }
+  });
+  
+  updateStats();
+}
+
+function toggleFlagStatus(checkbox, index) {
+  const flag = featureFlags[index];
+  if (checkbox.checked) {
+    flag.status = "enabled";
+    showToast(`Feature flag "${flag.name}" has been enabled.`);
+  } else {
+    flag.status = "disabled";
+    showToast(`Feature flag "${flag.name}" has been disabled.`, "error");
+  }
+  renderFlags();
+}
+
+function updateStats() {
+  const enabled = featureFlags.filter(f => f.status === "enabled").length;
+  const beta = featureFlags.filter(f => f.status === "beta").length;
+  const disabled = featureFlags.filter(f => f.status === "disabled").length;
+  
+  document.getElementById("stat-enabled").textContent = enabled;
+  document.getElementById("stat-beta").textContent = beta;
+  document.getElementById("stat-disabled").textContent = disabled;
+}
+
+function syncAndFilter(val) {
+  document.getElementById("flagSearch").value = val;
+  renderFlags();
+}
+
+function filterFlags() {
+  renderFlags();
+}
+
+function openAddModal() {
+  document.getElementById("modalTitle").textContent = "Create Feature Flag";
+  document.getElementById("editIndex").value = "";
+  document.getElementById("flagName").value = "";
+  document.getElementById("flagKey").value = "";
+  document.getElementById("flagDesc").value = "";
+  document.getElementById("flagCategory").value = "ai/ml";
+  document.getElementById("flagScope").value = "all";
+  document.getElementById("flagStatus").value = "enabled";
+  document.getElementById("saveBtn").textContent = "Create Flag";
+  document.getElementById("newFlagModal").classList.add("open");
+}
+
+function closeModal() {
+  document.getElementById("newFlagModal").classList.remove("open");
+}
+
+function editFlag(index) {
+  const flag = featureFlags[index];
+  document.getElementById("modalTitle").textContent = "Edit Feature Flag";
+  document.getElementById("editIndex").value = index;
+  document.getElementById("flagName").value = flag.name;
+  document.getElementById("flagKey").value = flag.key;
+  document.getElementById("flagDesc").value = flag.desc;
+  document.getElementById("flagCategory").value = flag.category;
+  
+  let scopeVal = "all";
+  if (flag.scope.includes("Enterprise")) scopeVal = "enterprise";
+  else if (flag.scope.includes("Pro")) scopeVal = "pro";
+  else if (flag.scope.includes("Beta") || flag.scope.includes("Org")) scopeVal = "selected";
+  else if (flag.scope.includes("None")) scopeVal = "none";
+  
+  document.getElementById("flagScope").value = scopeVal;
+  document.getElementById("flagStatus").value = flag.status;
+  document.getElementById("saveBtn").textContent = "Save Changes";
+  document.getElementById("newFlagModal").classList.add("open");
+}
+
+function saveFlag() {
+  const index = document.getElementById("editIndex").value;
+  const name = document.getElementById("flagName").value.trim();
+  const key = document.getElementById("flagKey").value.trim();
+  const desc = document.getElementById("flagDesc").value.trim();
+  const category = document.getElementById("flagCategory").value;
+  const scopeType = document.getElementById("flagScope").value;
+  const status = document.getElementById("flagStatus").value;
+  
+  if (!name || !key) {
+    showToast("Flag Name and Key are required.", "error");
+    return;
+  }
+  
+  let scope = "All Organizations";
+  if (scopeType === "enterprise") scope = "Enterprise Only";
+  else if (scopeType === "pro") scope = "Pro Only";
+  else if (scopeType === "selected") scope = "10 Organizations (Beta)";
+  else if (scopeType === "none") scope = "None";
+  
+  if (index === "") {
+    // Add Flag
+    featureFlags.push({
+      name, key, desc, category, status, scope,
+      modifier: "Aditya V.",
+      date: new Date().toLocaleString('default', { month: 'short', day: 'numeric' })
+    });
+    showToast(`Feature flag "${name}" created successfully!`);
+  } else {
+    // Edit Flag
+    featureFlags[index].name = name;
+    featureFlags[index].key = key;
+    featureFlags[index].desc = desc;
+    featureFlags[index].category = category;
+    featureFlags[index].status = status;
+    featureFlags[index].scope = scope;
+    featureFlags[index].modifier = "Aditya V.";
+    featureFlags[index].date = new Date().toLocaleString('default', { month: 'short', day: 'numeric' });
+    showToast(`Feature flag "${name}" updated.`);
+  }
+  
+  closeModal();
+  renderFlags();
+}
+
+function exportData() {
+  showToast("Feature flags audit trail exported successfully.");
+}
+
+// Initial Render
+renderFlags();
+
+document.getElementById('newFlagModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+</script>
+</body>
+</html>

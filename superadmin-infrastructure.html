@@ -1,0 +1,233 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Infrastructure · Super Admin · ZEAI</title>
+<style>
+:root {
+  --background:#ffffff; --foreground:#0f172a;
+  --primary:#2b4ed6; --secondary:#f1f5f9; --muted:#f8fafc; --muted-foreground:#64748b;
+  --destructive:#ef4444; --border:#e2e8f0;
+  --radius-md:6px; --font-family-body:"Inter", system-ui, -apple-system, sans-serif;
+}
+* { box-sizing:border-box; }
+html,body { margin:0; padding:0; height:100%; }
+body { font-family:var(--font-family-body); background:var(--muted); color:var(--foreground); -webkit-font-smoothing:antialiased; }
+::-webkit-scrollbar { width:8px; } ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:999px; }
+a { text-decoration:none; color:inherit; }
+button { font-family:var(--font-family-body); cursor:pointer; }
+.shell { display:flex; height:100vh; overflow:hidden; }
+.sidebar { width:260px; background:white; border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; height:100vh; }
+.sidebar-logo { height:60px; padding:0 24px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border); }
+.sidebar-logo .box { width:24px; height:24px; border-radius:6px; background:var(--primary); display:flex; align-items:center; justify-content:center; }
+.sidebar-logo .name { font-size:18px; font-weight:700; color:var(--primary); }
+.sidebar-nav { flex:1; overflow-y:auto; padding:16px 12px; display:flex; flex-direction:column; gap:4px; }
+.nav-label { font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted-foreground); font-weight:600; padding:16px 12px 8px; }
+.nav-label:first-child { padding-top:4px; }
+.nav-link { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:var(--radius-md); font-size:14px; font-weight:500; color:var(--foreground); transition:all 0.2s; }
+.nav-link svg { width:16px; height:16px; flex-shrink:0; stroke:currentColor; }
+.nav-link:hover { background:var(--secondary); }
+.nav-link.active { color:var(--primary); background:var(--secondary); }
+.sidebar-footer { padding:16px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:10px; }
+.sidebar-footer .user-row { display:flex; align-items:center; gap:10px; }
+.sidebar-footer .uname { font-size:13px; font-weight:500; } .sidebar-footer .urole { font-size:11px; color:var(--muted-foreground); }
+.logout-btn { width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-md); background:white; font-size:13px; transition:all 0.2s; }
+.logout-btn:hover { background:#fef2f2; color:#dc2626; border-color:#fecaca; }
+.main-col { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.navbar { height:60px; background:white; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 24px; flex-shrink:0; }
+.navbar-search { position:relative; width:320px; }
+.navbar-search svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); width:16px; height:16px; stroke:#94a3b8; pointer-events:none; }
+.navbar-search input { width:100%; height:36px; padding-left:36px; padding-right:12px; border:1px solid var(--border); border-radius:var(--radius-md); font-size:13px; background:var(--muted); outline:none; }
+.navbar-actions { display:flex; align-items:center; gap:16px; }
+.icon-btn { position:relative; background:none; border:none; padding:6px; border-radius:var(--radius-md); display:flex; color:var(--muted-foreground); cursor:pointer; }
+.notif-dot { position:absolute; top:2px; right:2px; width:8px; height:8px; background:var(--destructive); border-radius:50%; border:2px solid white; }
+.inst-switch { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:500; padding:6px 10px; border:1px solid var(--border); border-radius:var(--radius-md); }
+main.content { flex:1; overflow-y:auto; }
+.page-wrap-admin { padding:24px 32px; max-width:1400px; margin:0 auto; }
+.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; gap:16px; flex-wrap:wrap; }
+.page-header h1 { font-size:26px; font-weight:700; margin:0 0 8px 0; color:#1e293b; }
+.page-header p { font-size:14px; color:#64748b; margin:0; }
+.header-actions { display:flex; align-items:center; gap:12px; }
+.btn { display:flex; align-items:center; gap:8px; padding:10px 18px; border-radius:8px; font-size:13px; font-weight:600; border:none; transition:all 0.2s; cursor:pointer; }
+.btn svg { width:16px; height:16px; stroke:currentColor; }
+.btn-primary { background:var(--primary); color:white; }
+.btn-secondary { background:white; color:#334155; border:1px solid var(--border); }
+.btn-secondary:hover { background:#f8fafc; }
+.card { background:white; border-radius:12px; padding:20px; border:1px solid #e2e8f0; box-shadow:0 1px 2px rgba(0,0,0,0.03); }
+.card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.card-header h3 { font-size:15px; font-weight:600; color:#1e293b; margin:0; display:flex; align-items:center; gap:8px; }
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px; }
+.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:20px; }
+.grid-2 { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-bottom:20px; }
+.stat-card { display:flex; align-items:flex-start; gap:14px; }
+.stat-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.stat-label { font-size:12px; color:#64748b; font-weight:500; margin-bottom:4px; }
+.stat-value { font-size:24px; font-weight:700; color:#1e293b; margin-bottom:2px; letter-spacing:-0.5px; }
+.stat-sub { font-size:12px; color:#94a3b8; }
+.badge { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; }
+.badge-green { background:#dcfce7; color:#15803d; }
+.badge-amber { background:#fef3c7; color:#b45309; }
+.badge-red { background:#fef2f2; color:#dc2626; }
+.badge-blue { background:#dbeafe; color:#1d4ed8; }
+
+/* Server/Node cards */
+.server-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+.server-card { background:white; border:1px solid var(--border); border-radius:12px; padding:18px; }
+.server-card.healthy { border-left:3px solid #16a34a; }
+.server-card.warning { border-left:3px solid #d97706; }
+.server-card.critical { border-left:3px solid #dc2626; }
+.server-name { font-size:14px; font-weight:600; color:#1e293b; margin-bottom:4px; }
+.server-type { font-size:11px; color:#94a3b8; margin-bottom:14px; }
+.metric-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.metric-label { font-size:12px; color:#64748b; }
+.metric-val { font-size:12px; font-weight:600; color:#1e293b; }
+.progress-track { height:5px; background:#f1f5f9; border-radius:3px; overflow:hidden; margin-bottom:2px; }
+.progress-fill { height:100%; border-radius:3px; }
+.server-footer { display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:12px; border-top:1px solid #f8fafc; }
+.uptime-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px; }
+
+/* Activity log */
+table.data-table { width:100%; border-collapse:collapse; }
+table.data-table th { text-align:left; padding:10px 14px; font-weight:600; font-size:12px; color:#64748b; border-bottom:1px solid #e2e8f0; text-transform:uppercase; letter-spacing:0.3px; }
+table.data-table td { padding:12px 14px; border-bottom:1px solid #f1f5f9; font-size:13px; color:#1e293b; vertical-align:middle; }
+table.data-table tr:last-child td { border-bottom:none; }
+table.data-table tr:hover td { background:#f8fafc; }
+
+/* Gauge ring */
+.gauge-wrap { display:flex; align-items:center; justify-content:center; margin:12px 0 8px; }
+.gauge-ring { position:relative; width:80px; height:80px; }
+.gauge-ring svg { transform:rotate(-90deg); }
+.gauge-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; color:#1e293b; }
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<div class="sidebar-logo"><div class="box"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5a2 2 0 0 1-.4 1.2L5 17.5A2 2 0 0 0 6.6 21h10.8a2 2 0 0 0 1.6-3.5l-4.6-6.8A2 2 0 0 1 14 9.5V3"/></svg></div><div class="name">ZEAI</div></div>
+<nav class="sidebar-nav">
+<div class="nav-label">PLATFORM</div>
+<a class="nav-link" href="superadmin-dashboard.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>
+<a class="nav-link" href="superadmin-organizations.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M9 6h1M14 6h1M9 10h1M14 10h1M9 14h1M14 14h1"/></svg><span>Organizations</span></a>
+<a class="nav-link" href="superadmin-billing.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Billing &amp; Revenue</span></a>
+<a class="nav-link" href="superadmin-analytics.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg><span>Analytics</span></a>
+<a class="nav-link" href="superadmin-ai-models.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg><span>AI Models</span></a>
+<a class="nav-link active" href="superadmin-infrastructure.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="7" rx="1"/><rect x="2" y="14" width="20" height="7" rx="1"/><path d="M6 6.5h.01M6 17.5h.01"/></svg><span>Infrastructure</span></a>
+<a class="nav-link" href="superadmin-support.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="m4.9 4.9 4.2 4.2M14.9 14.9l4.2 4.2M14.9 9.1l4.2-4.2M4.9 19.1l4.2-4.2"/></svg><span>Support Tickets</span></a>
+<a class="nav-link" href="superadmin-features.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.3.2a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.4a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.3.2a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.3-.2a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.4a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.3-.2a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span>Feature Flags</span></a>
+<div class="nav-label">SUPPORT</div>
+<a class="nav-link" href="superadmin-audit-logs.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8"/></svg><span>Audit Logs</span></a>
+<a class="nav-link" href="superadmin-announcements.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg><span>Announcements</span></a>
+</nav>
+<div class="sidebar-footer">
+  <div class="user-row"><img style="width:32px;height:32px;border-radius:50%" src="https://api.dicebear.com/9.x/thumbs/svg?seed=Aditya&backgroundColor=b6e3f4" /><div><div class="uname">Aditya Verma</div><div class="urole">Super Admin</div></div></div>
+  <button class="logout-btn"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg> Log Out</button>
+</div>
+</aside>
+<div class="main-col">
+<header class="navbar">
+  <div class="inst-switch"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="7" rx="1"/><rect x="2" y="14" width="20" height="7" rx="1"/><path d="M6 6.5h.01M6 17.5h.01"/></svg><span>Infrastructure Monitor</span><span style="margin-left:6px;display:inline-block;width:8px;height:8px;background:#16a34a;border-radius:50%" id="statusDot"></span></div>
+  <div class="navbar-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search nodes, services..." /></div>
+  <div class="navbar-actions">
+    <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="notif-dot"></span></button>
+  </div>
+</header>
+<main class="content">
+<div class="page-wrap-admin">
+  <div class="page-header">
+    <div><h1>Infrastructure</h1><p>Server health, GPU cluster, storage and AI cost monitoring</p></div>
+    <div class="header-actions">
+      <span class="badge badge-green"><span style="display:inline-block;width:7px;height:7px;background:#16a34a;border-radius:50%;margin-right:4px"></span>All Systems Operational</span>
+      <button class="btn btn-secondary"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg> Refresh</button>
+    </div>
+  </div>
+
+  <!-- Resource Overview -->
+  <div class="grid-4">
+    <div class="card stat-card"><div class="stat-icon" style="background:#ecfeff"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0891b2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="7" rx="1"/><rect x="2" y="14" width="20" height="7" rx="1"/><path d="M6 6.5h.01M6 17.5h.01"/></svg></div><div style="flex:1"><div class="stat-label">Total Storage</div><div class="stat-value">4.2 TB</div><div class="stat-sub">of 10 TB provisioned (42%)</div></div></div>
+    <div class="card stat-card"><div class="stat-icon" style="background:#fef3c7"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg></div><div style="flex:1"><div class="stat-label">GPU Utilization</div><div class="stat-value">68%</div><div class="stat-sub">Peak: 94% at 2 PM today</div></div></div>
+    <div class="card stat-card"><div class="stat-icon" style="background:#eff6ff"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1e3a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 17.5c0 2.485-3.582 4.5-8 4.5s-8-2.015-8-4.5V12c0-2.485 3.582-4.5 8-4.5s8 2.015 8 4.5z"/><path d="M20 12c0 2.485-3.582 4.5-8 4.5s-8-2.015-8-4.5V6.5c0-2.485 3.582-4.5 8-4.5s8 2.015 8 4.5z"/></svg></div><div style="flex:1"><div class="stat-label">Database Load</div><div class="stat-value">34%</div><div class="stat-sub">12 active connections</div></div></div>
+    <div class="card stat-card"><div class="stat-icon" style="background:#eef2ff"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg></div><div style="flex:1"><div class="stat-label">AI Cost / Month</div><div class="stat-value">₹6.8L</div><div class="stat-sub">Within ₹8L budget</div></div></div>
+  </div>
+
+  <!-- Server Nodes -->
+  <h3 style="font-size:15px;font-weight:600;color:#1e293b;margin:0 0 14px">Server Nodes</h3>
+  <div class="server-grid">
+    <div class="server-card healthy">
+      <div class="server-name">app-prod-01</div>
+      <div class="server-type">Application Server · Mumbai</div>
+      <div class="metric-row"><span class="metric-label">CPU</span><span class="metric-val">42%</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:42%;background:#2b4ed6"></div></div>
+      <div class="metric-row" style="margin-top:8px"><span class="metric-label">RAM</span><span class="metric-val">61% · 14.6 GB</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:61%;background:#7c3aed"></div></div>
+      <div class="server-footer"><span style="font-size:12px;color:#64748b"><span class="uptime-dot" style="background:#16a34a"></span>Uptime 99.98%</span><span class="badge badge-green">Healthy</span></div>
+    </div>
+    <div class="server-card healthy">
+      <div class="server-name">app-prod-02</div>
+      <div class="server-type">Application Server · Mumbai</div>
+      <div class="metric-row"><span class="metric-label">CPU</span><span class="metric-val">38%</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:38%;background:#2b4ed6"></div></div>
+      <div class="metric-row" style="margin-top:8px"><span class="metric-label">RAM</span><span class="metric-val">54% · 13.0 GB</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:54%;background:#7c3aed"></div></div>
+      <div class="server-footer"><span style="font-size:12px;color:#64748b"><span class="uptime-dot" style="background:#16a34a"></span>Uptime 99.95%</span><span class="badge badge-green">Healthy</span></div>
+    </div>
+    <div class="server-card warning">
+      <div class="server-name">gpu-cluster-01</div>
+      <div class="server-type">GPU Node · 8× A100 · Mumbai</div>
+      <div class="metric-row"><span class="metric-label">GPU Load</span><span class="metric-val">82%</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:82%;background:#d97706"></div></div>
+      <div class="metric-row" style="margin-top:8px"><span class="metric-label">VRAM</span><span class="metric-val">74% · 296 GB</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:74%;background:#d97706"></div></div>
+      <div class="server-footer"><span style="font-size:12px;color:#64748b"><span class="uptime-dot" style="background:#d97706"></span>High Load</span><span class="badge badge-amber">Warning</span></div>
+    </div>
+    <div class="server-card healthy">
+      <div class="server-name">db-primary</div>
+      <div class="server-type">PostgreSQL Primary · Mumbai</div>
+      <div class="metric-row"><span class="metric-label">CPU</span><span class="metric-val">22%</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:22%;background:#2b4ed6"></div></div>
+      <div class="metric-row" style="margin-top:8px"><span class="metric-label">Disk</span><span class="metric-val">48% · 4.8 TB</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:48%;background:#0891b2"></div></div>
+      <div class="server-footer"><span style="font-size:12px;color:#64748b"><span class="uptime-dot" style="background:#16a34a"></span>Uptime 99.99%</span><span class="badge badge-green">Healthy</span></div>
+    </div>
+    <div class="server-card healthy">
+      <div class="server-name">cdn-edge-01</div>
+      <div class="server-type">CDN Edge · Chennai + Delhi</div>
+      <div class="metric-row"><span class="metric-label">Bandwidth</span><span class="metric-val">1.2 Gbps</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:30%;background:#16a34a"></div></div>
+      <div class="metric-row" style="margin-top:8px"><span class="metric-label">Cache Hit Rate</span><span class="metric-val">94%</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:94%;background:#16a34a"></div></div>
+      <div class="server-footer"><span style="font-size:12px;color:#64748b"><span class="uptime-dot" style="background:#16a34a"></span>Uptime 100%</span><span class="badge badge-green">Healthy</span></div>
+    </div>
+    <div class="server-card critical">
+      <div class="server-name">worker-queue-03</div>
+      <div class="server-type">Job Queue · Redis · Mumbai</div>
+      <div class="metric-row"><span class="metric-label">CPU</span><span class="metric-val">91%</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:91%;background:#dc2626"></div></div>
+      <div class="metric-row" style="margin-top:8px"><span class="metric-label">Queue Depth</span><span class="metric-val">3,842 jobs</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:88%;background:#dc2626"></div></div>
+      <div class="server-footer"><span style="font-size:12px;color:#dc2626;font-weight:500"><span class="uptime-dot" style="background:#dc2626"></span>Degraded</span><span class="badge badge-red">Critical</span></div>
+    </div>
+  </div>
+
+  <!-- Recent Incidents -->
+  <div class="card">
+    <div class="card-header">
+      <h3><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg> Recent Incidents &amp; Alerts</h3>
+      <span style="font-size:12px;color:#2b4ed6;cursor:pointer">View All →</span>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>Time</th><th>Severity</th><th>Service</th><th>Description</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td style="color:#94a3b8;font-size:12px">Today 14:02</td><td><span class="badge badge-red">Critical</span></td><td style="font-weight:600">worker-queue-03</td><td>CPU spiked to 94% — simulation jobs piling</td><td><span class="badge badge-amber">Investigating</span></td></tr>
+        <tr><td style="color:#94a3b8;font-size:12px">Today 11:45</td><td><span class="badge badge-amber">Warning</span></td><td style="font-weight:600">gpu-cluster-01</td><td>GPU memory at 82% during peak session load</td><td><span class="badge badge-amber">Monitoring</span></td></tr>
+        <tr><td style="color:#94a3b8;font-size:12px">Yesterday 22:10</td><td><span class="badge badge-amber">Warning</span></td><td style="font-weight:600">app-prod-01</td><td>Response latency above 800ms for 6 minutes</td><td><span class="badge badge-green">Resolved</span></td></tr>
+        <tr><td style="color:#94a3b8;font-size:12px">Jul 13 09:15</td><td><span class="badge" style="background:#fef2f2;color:#dc2626">High</span></td><td style="font-weight:600">db-primary</td><td>Disk I/O anomaly — query timeouts reported</td><td><span class="badge badge-green">Resolved</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</main>
+</div>
+</div>
+</body>
+</html>

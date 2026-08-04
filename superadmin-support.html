@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Support Tickets · Super Admin · ZEAI</title>
+<style>
+:root {
+  --background:#ffffff; --foreground:#0f172a;
+  --primary:#2b4ed6; --secondary:#f1f5f9; --muted:#f8fafc; --muted-foreground:#64748b;
+  --destructive:#ef4444; --border:#e2e8f0;
+  --radius-md:6px; --font-family-body:"Inter", system-ui, -apple-system, sans-serif;
+}
+* { box-sizing:border-box; }
+html,body { margin:0; padding:0; height:100%; }
+body { font-family:var(--font-family-body); background:var(--muted); color:var(--foreground); -webkit-font-smoothing:antialiased; }
+::-webkit-scrollbar { width:8px; } ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:999px; }
+a { text-decoration:none; color:inherit; }
+button { font-family:var(--font-family-body); cursor:pointer; }
+input, select, textarea { font-family:var(--font-family-body); }
+
+.shell { display:flex; height:100vh; overflow:hidden; }
+.sidebar { width:260px; background:white; border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; height:100vh; }
+.sidebar-logo { height:60px; padding:0 24px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border); }
+.sidebar-logo .box { width:24px; height:24px; border-radius:6px; background:var(--primary); display:flex; align-items:center; justify-content:center; }
+.sidebar-logo .name { font-size:18px; font-weight:700; color:var(--primary); }
+.sidebar-nav { flex:1; overflow-y:auto; padding:16px 12px; display:flex; flex-direction:column; gap:4px; }
+.nav-label { font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted-foreground); font-weight:600; padding:16px 12px 8px; }
+.nav-label:first-child { padding-top:4px; }
+.nav-link { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:var(--radius-md); font-size:14px; font-weight:500; color:var(--foreground); transition:all 0.2s; }
+.nav-link svg { width:16px; height:16px; flex-shrink:0; stroke:currentColor; }
+.nav-link:hover { background:var(--secondary); }
+.nav-link.active { color:var(--primary); background:var(--secondary); }
+.sidebar-footer { padding:16px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:10px; }
+.sidebar-footer .user-row { display:flex; align-items:center; gap:10px; }
+.sidebar-footer .uname { font-size:13px; font-weight:500; } .sidebar-footer .urole { font-size:11px; color:var(--muted-foreground); }
+.logout-btn { width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-md); background:white; font-size:13px; transition:all 0.2s; }
+.logout-btn:hover { background:#fef2f2; color:#dc2626; border-color:#fecaca; }
+.main-col { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.navbar { height:60px; background:white; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 24px; flex-shrink:0; }
+.navbar-search { position:relative; width:320px; }
+.navbar-search svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); width:16px; height:16px; stroke:#94a3b8; pointer-events:none; }
+.navbar-search input { width:100%; height:36px; padding-left:36px; padding-right:12px; border:1px solid var(--border); border-radius:var(--radius-md); font-size:13px; background:var(--muted); outline:none; }
+.navbar-actions { display:flex; align-items:center; gap:16px; }
+.icon-btn { position:relative; background:none; border:none; padding:6px; border-radius:var(--radius-md); display:flex; color:var(--muted-foreground); cursor:pointer; }
+.notif-dot { position:absolute; top:2px; right:2px; width:8px; height:8px; background:var(--destructive); border-radius:50%; border:2px solid white; }
+.inst-switch { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:500; padding:6px 10px; border:1px solid var(--border); border-radius:var(--radius-md); }
+main.content { flex:1; overflow-y:auto; }
+.page-wrap-admin { padding:24px 32px; max-width:1400px; margin:0 auto; }
+.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; gap:16px; flex-wrap:wrap; }
+.page-header h1 { font-size:26px; font-weight:700; margin:0 0 8px 0; color:#1e293b; }
+.page-header p { font-size:14px; color:#64748b; margin:0; }
+.header-actions { display:flex; align-items:center; gap:12px; }
+.btn { display:flex; align-items:center; gap:8px; padding:10px 18px; border-radius:8px; font-size:13px; font-weight:600; border:none; transition:all 0.2s; cursor:pointer; }
+.btn svg { width:16px; height:16px; stroke:currentColor; }
+.btn-primary { background:var(--primary); color:white; }
+.btn-secondary { background:white; color:#334155; border:1px solid var(--border); }
+.btn-secondary:hover { background:#f8fafc; }
+.card { background:white; border-radius:12px; padding:20px; border:1px solid #e2e8f0; box-shadow:0 1px 2px rgba(0,0,0,0.03); }
+.card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.card-header h3 { font-size:15px; font-weight:600; color:#1e293b; margin:0; display:flex; align-items:center; gap:8px; }
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px; }
+.stat-card { display:flex; align-items:flex-start; gap:14px; }
+.stat-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.stat-label { font-size:12px; color:#64748b; font-weight:500; margin-bottom:4px; }
+.stat-value { font-size:24px; font-weight:700; color:#1e293b; margin-bottom:2px; letter-spacing:-0.5px; }
+.stat-sub { font-size:12px; color:#94a3b8; }
+.badge { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; text-transform:capitalize; }
+.badge-green { background:#dcfce7; color:#15803d; }
+.badge-amber { background:#fef3c7; color:#b45309; }
+.badge-red { background:#fef2f2; color:#dc2626; }
+.badge-blue { background:#dbeafe; color:#1d4ed8; }
+.badge-slate { background:#f1f5f9; color:#475569; }
+
+/* Tabs */
+.tabs { display:flex; gap:2px; background:#f1f5f9; border-radius:8px; padding:3px; margin-bottom:16px; width:fit-content; }
+.tab-btn { padding:7px 16px; border-radius:6px; border:none; background:none; font-size:13px; font-weight:500; color:#64748b; cursor:pointer; transition:all 0.2s; }
+.tab-btn.active { background:white; color:#1e293b; font-weight:600; box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+
+/* Toolbar */
+.toolbar { display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+.search-box { position:relative; flex:1; min-width:200px; max-width:320px; }
+.search-box svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); width:15px; height:15px; stroke:#94a3b8; pointer-events:none; }
+.search-box input { width:100%; height:36px; padding-left:34px; padding-right:12px; border:1px solid var(--border); border-radius:var(--radius-md); font-size:13px; background:white; outline:none; }
+.filter-select { height:36px; padding:0 12px; border:1px solid var(--border); border-radius:var(--radius-md); font-size:13px; background:white; outline:none; cursor:pointer; }
+
+table.data-table { width:100%; border-collapse:collapse; }
+table.data-table th { text-align:left; padding:10px 14px; font-weight:600; font-size:12px; color:#64748b; border-bottom:1px solid #e2e8f0; text-transform:uppercase; letter-spacing:0.3px; white-space:nowrap; }
+table.data-table td { padding:13px 14px; border-bottom:1px solid #f1f5f9; font-size:13px; color:#1e293b; vertical-align:middle; }
+table.data-table tr:last-child td { border-bottom:none; }
+table.data-table tr:hover td { background:#f8fafc; }
+.action-btn { background:none; border:1px solid var(--border); border-radius:6px; padding:5px 10px; font-size:12px; color:#475569; cursor:pointer; transition:all 0.15s; }
+.action-btn:hover { background:#f1f5f9; }
+
+.ticket-id { font-family:monospace; font-size:12px; color:#64748b; }
+.assignee-cell { display:flex; align-items:center; gap:6px; }
+
+/* Priority dot */
+.p-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; }
+
+/* Modal & Slide Panel details */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.5); z-index:100; align-items:center; justify-content:center; backdrop-filter:blur(2px); }
+.modal-overlay.open { display:flex; }
+.modal { background:white; border-radius:16px; padding:28px; width:100%; max-width:540px; box-shadow:0 20px 60px rgba(0,0,0,0.15); animation: modalEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes modalEnter { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.modal h2 { font-size:18px; font-weight:700; color:#1e293b; margin:0 0 20px; }
+.form-group { margin-bottom:16px; }
+.form-group label { display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.3px; }
+.form-group input, .form-group select, .form-group textarea { width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-md); font-size:13px; color:#0f172a; outline:none; }
+.form-group textarea { height:100px; resize:vertical; }
+.modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:24px; }
+
+/* Message Thread section inside Ticket View Modal */
+.message-thread { border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: var(--muted); max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.msg { padding: 8px 12px; border-radius: 8px; font-size: 12.5px; line-height: 1.4; max-width: 85%; }
+.msg.system { background: #f1f5f9; color: #475569; align-self: flex-start; }
+.msg.admin { background: #dbeafe; color: #1d4ed8; align-self: flex-end; }
+.msg.reporter { background: white; border: 1px solid var(--border); color: var(--foreground); align-self: flex-start; }
+
+/* Toast Notifications */
+.toast-container { position:fixed; bottom:24px; right:24px; display:flex; flex-direction:column; gap:10px; z-index:999; }
+.toast { background:white; border:1px solid var(--border); border-left:4px solid var(--primary); padding:16px 20px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.08); font-size:13px; font-weight:500; color:var(--foreground); display:flex; align-items:center; gap:10px; animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); min-width:300px; justify-content:space-between; }
+@keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.toast-close { border:none; background:none; font-size:16px; color:var(--muted-foreground); font-weight:700; }
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<div class="sidebar-logo"><div class="box"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5a2 2 0 0 1-.4 1.2L5 17.5A2 2 0 0 0 6.6 21h10.8a2 2 0 0 0 1.6-3.5l-4.6-6.8A2 2 0 0 1 14 9.5V3"/></svg></div><div class="name">ZEAI</div></div>
+<nav class="sidebar-nav">
+<div class="nav-label">PLATFORM</div>
+<a class="nav-link" href="superadmin-dashboard.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>
+<a class="nav-link" href="superadmin-organizations.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M9 6h1M14 6h1M9 10h1M14 10h1M9 14h1M14 14h1"/></svg><span>Organizations</span></a>
+<a class="nav-link" href="superadmin-billing.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Billing &amp; Revenue</span></a>
+<a class="nav-link" href="superadmin-analytics.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg><span>Analytics</span></a>
+<a class="nav-link" href="superadmin-ai-models.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg><span>AI Models</span></a>
+<a class="nav-link" href="superadmin-infrastructure.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="7" rx="1"/><rect x="2" y="14" width="20" height="7" rx="1"/><path d="M6 6.5h.01M6 17.5h.01"/></svg><span>Infrastructure</span></a>
+<a class="nav-link active" href="superadmin-support.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="m4.9 4.9 4.2 4.2M14.9 14.9l4.2 4.2M14.9 9.1l4.2-4.2M4.9 19.1l4.2-4.2"/></svg><span>Support Tickets</span></a>
+<a class="nav-link" href="superadmin-features.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.3.2a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.4a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.3.2a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.3-.2a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.4a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.3-.2a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span>Feature Flags</span></a>
+<div class="nav-label">SUPPORT</div>
+<a class="nav-link" href="superadmin-audit-logs.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8"/></svg><span>Audit Logs</span></a>
+<a class="nav-link" href="superadmin-announcements.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg><span>Announcements</span></a>
+</nav>
+<div class="sidebar-footer">
+  <div class="user-row"><img style="width:32px;height:32px;border-radius:50%" src="https://api.dicebear.com/9.x/thumbs/svg?seed=Aditya&backgroundColor=b6e3f4" /><div><div class="uname">Aditya Verma</div><div class="urole">Super Admin</div></div></div>
+  <button class="logout-btn"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg> Log Out</button>
+</div>
+</aside>
+<div class="main-col">
+<header class="navbar">
+  <div class="inst-switch"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="m4.9 4.9 4.2 4.2M14.9 14.9l4.2 4.2M14.9 9.1l4.2-4.2M4.9 19.1l4.2-4.2"/></svg><span>Support Ticket Management</span></div>
+  <div class="navbar-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search tickets, reporters..." id="topSearch" oninput="syncAndFilter(this.value)" /></div>
+  <div class="navbar-actions">
+    <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="notif-dot"></span></button>
+  </div>
+</header>
+<main class="content">
+<div class="page-wrap-admin">
+  <div class="page-header">
+    <div><h1>Support Tickets</h1><p>Manage and triage support requests from all tenant organizations</p></div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" onclick="exportData()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export</button>
+      <button class="btn btn-primary" onclick="openCreateModal()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> New Ticket</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid-4">
+    <div class="card stat-card"><div class="stat-icon" style="background:#fef2f2"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="m4.9 4.9 4.2 4.2M14.9 14.9l4.2 4.2M14.9 9.1l4.2-4.2M4.9 19.1l4.2-4.2"/></svg></div><div style="flex:1"><div class="stat-label">Open Tickets</div><div class="stat-value" id="stat-open">23</div><div class="stat-sub" id="stat-high-priority">5 high priority</div></div></div>
+    <div class="card stat-card"><div class="stat-icon" style="background:#fef3c7"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div style="flex:1"><div class="stat-label">Avg Response</div><div class="stat-value">4.2h</div><div class="stat-sub">SLA target: 6h</div></div></div>
+    <div class="card stat-card"><div class="stat-icon" style="background:#dcfce7"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg></div><div style="flex:1"><div class="stat-label">Resolved (30d)</div><div class="stat-value" id="stat-resolved">147</div><div class="stat-sub">98.6% satisfaction</div></div></div>
+    <div class="card stat-card"><div class="stat-icon" style="background:#dbeafe"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1d4ed8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div style="flex:1"><div class="stat-label">Agents Online</div><div class="stat-value">6</div><div class="stat-sub">of 8 available</div></div></div>
+  </div>
+
+  <!-- Ticket Table -->
+  <div class="card">
+    <div class="card-header"><h3><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="m4.9 4.9 4.2 4.2M14.9 14.9l4.2 4.2M14.9 9.1l4.2-4.2M4.9 19.1l4.2-4.2"/></svg> All Tickets</h3></div>
+    <div class="toolbar">
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-all" onclick="filterByTab('all', this)">All (23)</button>
+        <button class="tab-btn" id="tab-open" onclick="filterByTab('open', this)">Open</button>
+        <button class="tab-btn" id="tab-in-progress" onclick="filterByTab('in progress', this)">In Progress</button>
+        <button class="tab-btn" id="tab-resolved" onclick="filterByTab('resolved', this)">Resolved</button>
+      </div>
+      <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search tickets..." id="ticketSearch" oninput="filterTickets()" /></div>
+      <select class="filter-select" id="priorityFilter" onchange="filterTickets()"><option value="">All Priorities</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select>
+      <select class="filter-select" id="categoryFilter" onchange="filterTickets()"><option value="">All Categories</option><option value="bug">Bug</option><option value="feature">Feature</option><option value="access">Access</option><option value="billing">Billing</option></select>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>ID</th><th>Issue</th><th>Organization</th><th>Category</th><th>Priority</th><th>Assignee</th><th>Opened</th><th>Status</th><th></th></tr></thead>
+      <tbody id="ticketTableBody">
+        <!-- Rendered Dynamically -->
+      </tbody>
+    </table>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:16px;border-top:1px solid #f1f5f9">
+      <span style="font-size:13px;color:#64748b" id="pagination-text">Showing 7 of 23 tickets</span>
+      <div style="display:flex;gap:6px">
+        <button class="action-btn">← Prev</button>
+        <button class="action-btn" style="background:#eff6ff;color:#2b4ed6;border-color:#bfdbfe">1</button>
+        <button class="action-btn">2</button>
+        <button class="action-btn">3</button>
+        <button class="action-btn">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+</div>
+</div>
+
+<!-- View/Reply Ticket Modal -->
+<div class="modal-overlay" id="viewTicketModal">
+  <div class="modal" style="max-width: 580px;">
+    <h2>Ticket Details</h2>
+    <div id="modalTicketDetails"></div>
+    <div class="form-group" style="margin-top:16px;">
+      <label>Send a Reply</label>
+      <textarea id="replyText" placeholder="Type your response to the college admin..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeViewModal()">Close</button>
+      <button class="btn btn-primary" onclick="sendReply()">Send Reply</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Ticket Modal -->
+<div class="modal-overlay" id="createTicketModal">
+  <div class="modal">
+    <h2>New Ticket</h2>
+    <div class="form-group"><label>Issue Title</label><input type="text" id="newTitle" placeholder="Brief summary of the issue" required /></div>
+    <div class="form-group"><label>Organization</label><select id="newOrg"><option value="SRM Institute">SRM Institute</option><option value="VIT Chennai">VIT Chennai</option><option value="Anna University">Anna University</option><option value="PSG College">PSG College</option></select></div>
+    <div class="form-row">
+      <div class="form-group"><label>Category</label><select id="newCategory"><option value="bug">Bug</option><option value="feature">Feature</option><option value="access">Access</option><option value="billing">Billing</option></select></div>
+      <div class="form-group"><label>Priority</label><select id="newPriority"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></div>
+    </div>
+    <div class="form-group"><label>Assignee</label><select id="newAssignee"><option value="Rajan K.">Rajan K.</option><option value="Priya M.">Priya M.</option><option value="Suresh V.">Suresh V.</option><option value="Kumar A.">Kumar A.</option><option value="Lakshmi R.">Lakshmi R.</option></select></div>
+    <div class="form-group"><label>Description</label><textarea id="newDesc" placeholder="Full details of the support request..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="createTicket()">Create Ticket</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// Mock Database
+let tickets = [
+  { id: "#4821", title: "Login OAuth failing for staff SSO integration", org: "SRM Institute", category: "bug", priority: "high", assignee: "Rajan K.", assigneeImg: "Rajan", time: "2h ago", status: "in progress", desc: "Our staff cannot authenticate using their custom Google OAuth integration. They get a 403 authorization error on redirect.", replies: [{ sender: "reporter", text: "We need this fixed by tomorrow morning for exam schedules." }] },
+  { id: "#4820", title: "Students cannot upload lab reports over 50MB", org: "VIT Chennai", category: "bug", priority: "high", assignee: "Priya M.", assigneeImg: "Priya", time: "3h ago", status: "open", desc: "For physics datasets, students need to upload large ZIP archives. Currently failing at 50MB upload limit.", replies: [] },
+  { id: "#4819", title: "Analytics page extremely slow to load (>15s)", org: "Anna University", category: "performance", priority: "medium", assignee: "Suresh V.", assigneeImg: "Suresh", time: "6h ago", status: "in progress", desc: "Loading the faculty analytics reports takes over 15 seconds. Need indexes or optimization on DB query.", replies: [] },
+  { id: "#4818", title: "Request: bulk certificate export as ZIP", org: "PSG College", category: "feature", priority: "low", assignee: "Unassigned", assigneeImg: "", time: "1d ago", status: "open", desc: "We want a way to export student certificates in batch. Downloading them individually is very tedious.", replies: [] },
+  { id: "#4817", title: "GPU timeout on molecular dynamics simulation render", org: "SRM Institute", category: "bug", priority: "high", assignee: "Kumar A.", assigneeImg: "Kumar", time: "1d ago", status: "in progress", desc: "Chemistry lab simulations crash with dynamic memory allocation error during rendering of large protein molecules.", replies: [] },
+  { id: "#4816", title: "Billing invoice for June shows incorrect amount", org: "Bannari Amman", category: "billing", priority: "medium", assignee: "Lakshmi R.", assigneeImg: "Lakshmi", time: "2d ago", status: "resolved", desc: "The automatic invoice generated for June charged us for 100 extra students. Please audit.", replies: [{ sender: "admin", text: "Checked. The database records show those students were deleted on July 2nd. I have issued a refund of ₹4,000 to your card." }] },
+  { id: "#4815", title: "Cannot access faculty dashboard after password reset", org: "Sastra University", category: "access", priority: "high", assignee: "Rajan K.", assigneeImg: "Rajan", time: "2d ago", status: "resolved", desc: "Professor Suresh cannot log in. The password reset email link states 'expired' immediately on click.", replies: [{ sender: "admin", text: "Fixed the token expiry duration from 15 minutes to 2 hours. Link re-sent." }] }
+];
+
+let activeTab = 'all';
+let viewingTicketIndex = -1;
+
+function showToast(message, type = "success") {
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  if (type === "error") toast.style.borderLeftColor = "var(--destructive)";
+  
+  toast.innerHTML = `
+    <span>${message}</span>
+    <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+function renderTickets() {
+  const body = document.getElementById("ticketTableBody");
+  body.innerHTML = "";
+  
+  const searchVal = document.getElementById("ticketSearch").value.toLowerCase();
+  const priorityVal = document.getElementById("priorityFilter").value;
+  const categoryVal = document.getElementById("categoryFilter").value;
+  
+  let visibleCount = 0;
+  
+  tickets.forEach((ticket, index) => {
+    const matchesSearch = ticket.title.toLowerCase().includes(searchVal) || ticket.org.toLowerCase().includes(searchVal) || ticket.id.includes(searchVal);
+    const matchesPriority = !priorityVal || ticket.priority === priorityVal;
+    const matchesCategory = !categoryVal || ticket.category === categoryVal;
+    const matchesTab = activeTab === 'all' || ticket.status === activeTab;
+    
+    if (matchesSearch && matchesPriority && matchesCategory && matchesTab) {
+      visibleCount++;
+      const tr = document.createElement("tr");
+      
+      let catBadge = "badge-slate";
+      if (ticket.category === "bug") catBadge = "badge-red";
+      else if (ticket.category === "feature") catBadge = "badge-slate";
+      else if (ticket.category === "access") catBadge = "badge-amber";
+      else if (ticket.category === "billing") catBadge = "badge-green";
+      else if (ticket.category === "performance") catBadge = "badge-blue";
+      
+      let prioColor = "#64748b";
+      if (ticket.priority === "high") prioColor = "#dc2626";
+      else if (ticket.priority === "medium") prioColor = "#d97706";
+      
+      let statusBadge = "badge-slate";
+      if (ticket.status === "resolved") statusBadge = "badge-green";
+      else if (ticket.status === "in progress") statusBadge = "badge-amber";
+      else if (ticket.status === "open") statusBadge = "badge-red";
+      
+      let assigneeHTML = `<span style="font-size:12px;color:#94a3b8">Unassigned</span>`;
+      if (ticket.assignee !== "Unassigned") {
+        assigneeHTML = `
+          <div class="assignee-cell">
+            <img src="https://api.dicebear.com/9.x/thumbs/svg?seed=${ticket.assigneeImg}&backgroundColor=dbeafe" style="width:24px;height:24px;border-radius:50%" />
+            <span style="font-size:12px">${ticket.assignee}</span>
+          </div>
+        `;
+      }
+      
+      tr.innerHTML = `
+        <td class="ticket-id">${ticket.id}</td>
+        <td style="font-weight:600;max-width:220px">${ticket.title}</td>
+        <td style="color:#64748b;font-size:12px">${ticket.org}</td>
+        <td><span class="badge ${catBadge}">${ticket.category}</span></td>
+        <td><span style="color:${prioColor};font-weight:600;font-size:12px"><span class="p-dot" style="background:${prioColor}"></span>${ticket.priority}</span></td>
+        <td>${assigneeHTML}</td>
+        <td style="color:#94a3b8;font-size:12px">${ticket.time}</td>
+        <td><span class="badge ${statusBadge}">${ticket.status}</span></td>
+        <td><button class="action-btn" onclick="viewTicket(${index})">View</button></td>
+      `;
+      body.appendChild(tr);
+    }
+  });
+  
+  document.getElementById("pagination-text").textContent = `Showing ${visibleCount} of ${tickets.length} tickets`;
+  
+  // Update Tab Header counts
+  document.getElementById("tab-all").textContent = `All (${tickets.length})`;
+  document.getElementById("tab-open").textContent = `Open (${tickets.filter(t => t.status === 'open').length})`;
+  document.getElementById("tab-in-progress").textContent = `In Progress (${tickets.filter(t => t.status === 'in progress').length})`;
+  document.getElementById("tab-resolved").textContent = `Resolved (${tickets.filter(t => t.status === 'resolved').length})`;
+  
+  updateStats();
+}
+
+function updateStats() {
+  const openCount = tickets.filter(t => t.status === 'open').length;
+  const highCount = tickets.filter(t => t.priority === 'high' && t.status !== 'resolved').length;
+  const resolvedCount = tickets.filter(t => t.status === 'resolved').length;
+  
+  document.getElementById("stat-open").textContent = openCount;
+  document.getElementById("stat-high-priority").textContent = `${highCount} high priority`;
+  document.getElementById("stat-resolved").textContent = resolvedCount;
+}
+
+function filterByTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeTab = tab;
+  renderTickets();
+}
+
+function filterTickets() {
+  renderTickets();
+}
+
+function syncAndFilter(val) {
+  document.getElementById("ticketSearch").value = val;
+  renderTickets();
+}
+
+function viewTicket(index) {
+  viewingTicketIndex = index;
+  const ticket = tickets[index];
+  const details = document.getElementById("modalTicketDetails");
+  
+  let threadHTML = "";
+  ticket.replies.forEach(rep => {
+    const isSystem = rep.sender === "system";
+    const isAdmin = rep.sender === "admin";
+    let senderClass = "msg reporter";
+    if (isAdmin) senderClass = "msg admin";
+    else if (isSystem) senderClass = "msg system";
+    
+    threadHTML += `<div class="${senderClass}">${rep.text}</div>`;
+  });
+  
+  details.innerHTML = `
+    <div style="font-size:13px;margin-bottom:12px;">
+      <strong>ID:</strong> <span class="ticket-id">${ticket.id}</span> | 
+      <strong>Category:</strong> <span class="badge badge-blue">${ticket.category}</span> | 
+      <strong>Priority:</strong> <span style="font-weight:700;">${ticket.priority}</span>
+    </div>
+    <h3 style="font-size:15px;margin-bottom:8px;color:#1e293b;">${ticket.title}</h3>
+    <p style="font-size:13px;color:#475569;background:#f8fafc;padding:12px;border-radius:8px;border:1px solid var(--border);">${ticket.desc}</p>
+    <h4 style="font-size:12px;text-transform:uppercase;color:#64748b;margin:16px 0 6px;">Message History</h4>
+    <div class="message-thread" id="messageThread">
+      ${threadHTML || '<div style="font-size:12px;color:#94a3b8;font-style:italic;padding:8px;">No replies yet.</div>'}
+    </div>
+  `;
+  
+  document.getElementById("replyText").value = "";
+  document.getElementById("viewTicketModal").classList.add("open");
+}
+
+function closeViewModal() {
+  document.getElementById("viewTicketModal").classList.remove("open");
+}
+
+function sendReply() {
+  const replyText = document.getElementById("replyText").value.trim();
+  if (!replyText) {
+    showToast("Please enter a reply message.", "error");
+    return;
+  }
+  
+  const ticket = tickets[viewingTicketIndex];
+  ticket.replies.push({ sender: "admin", text: replyText });
+  ticket.status = "in progress"; // Auto transition to in progress
+  
+  showToast("Reply sent to institution admin!");
+  closeViewModal();
+  renderTickets();
+}
+
+function openCreateModal() {
+  document.getElementById("newTitle").value = "";
+  document.getElementById("newDesc").value = "";
+  document.getElementById("createTicketModal").classList.add("open");
+}
+
+function closeCreateModal() {
+  document.getElementById("createTicketModal").classList.remove("open");
+}
+
+function createTicket() {
+  const title = document.getElementById("newTitle").value.trim();
+  const org = document.getElementById("newOrg").value;
+  const category = document.getElementById("newCategory").value;
+  const priority = document.getElementById("newPriority").value;
+  const assignee = document.getElementById("newAssignee").value;
+  const desc = document.getElementById("newDesc").value.trim();
+  
+  if (!title) {
+    showToast("Please enter an issue title.", "error");
+    return;
+  }
+  
+  const idNum = Math.floor(Math.random() * 100) + 4822;
+  const newTicket = {
+    id: "#" + idNum,
+    title, org, category, priority, assignee,
+    assigneeImg: assignee.split(" ")[0],
+    time: "Just now",
+    status: "open",
+    desc,
+    replies: []
+  };
+  
+  tickets.unshift(newTicket);
+  showToast(`Ticket ${newTicket.id} created successfully.`);
+  closeCreateModal();
+  renderTickets();
+}
+
+function exportData() {
+  showToast("Support tickets index exported successfully.");
+}
+
+// Initial Render
+renderTickets();
+
+document.getElementById('viewTicketModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+document.getElementById('createTicketModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+</script>
+</body>
+</html>
